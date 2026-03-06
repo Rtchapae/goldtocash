@@ -1,0 +1,16 @@
+{
+    "name": "Gold to Cash Admin",
+    "short_name": "G2C Admin",
+    "description": "Gold to Cash Administration Panel",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "16x16 32x32",
+            "type": "image/x-icon"
+        }
+    ],
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "start_url": "/"
+}

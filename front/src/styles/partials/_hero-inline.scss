@@ -1,0 +1,60 @@
+/**
+ * Extracted from html/main.html (around L517)
+ * Hero helpers, bullet points, phone verify input
+ */
+#video-shortcut {
+	display: inline-block;
+	color: white;
+	margin: -10px -10px 30px -10px;
+	padding: 10px 30px 10px 10px;
+	cursor: pointer;
+	border-radius: 3em;
+}
+#video-shortcut:hover {
+	background: rgba(0,0,0,0.15);
+	text-decoration: none;
+}
+
+#hero-bullet-points li {
+	margin-bottom: 15px;
+}
+#hero-bullet-points .bullet {
+	border-radius: 100%;
+	border: solid 2px var(--primary);
+	text-align: center;
+	height: 27px;
+	width: 27px;
+	display: inline-block;
+	vertical-align: middle;
+}
+#hero-bullet-points .bullet-text {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+	margin-top: -2px;
+	margin-right: -2px;
+}
+
+#verification-code-container {
+	display: flex;
+	gap: 10px;
+	margin: 0 auto;
+	width: fit-content;
+}
+#verification-code-container input {
+	background-color: #f2f2f2;
+}
+.code-input {
+	width: 40px;
+	text-align: center;
+}
+
+input[type='number'] {
+	-moz-appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+}
+
+

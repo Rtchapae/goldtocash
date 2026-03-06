@@ -1,0 +1,26 @@
+/* 404 page – match legacy 20250612 resources/views/user/pages/404.blade.php */
+
+.page-404 .navbar {
+	background: var(--black);
+	top: 0;
+}
+
+.page-404 .navbar.navbar--with-banner-offset {
+	top: 0 !important;
+}
+
+.section-404 {
+	padding: 150px 0;
+	text-align: center;
+}
+
+.section-404 h1 {
+	font-size: 72px;
+	line-height: 80px;
+}
+
+.section-404 h1 small {
+	font-size: 24px;
+	line-height: 32px;
+	display: block;
+}

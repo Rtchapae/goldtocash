@@ -1,0 +1,50 @@
+// Modal styles
+
+.modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1040;
+	width: 100vw;
+	height: 100vh;
+	background-color: #000;
+	opacity: 0.5;
+}
+
+.modal.show {
+	display: block;
+}
+
+.modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem;
+	border-bottom: 1px solid var(--input-form-light, #e9ecef);
+}
+
+.modal-header .close {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1;
+	color: #000;
+	opacity: 0.5;
+	cursor: pointer;
+	padding: 0;
+	margin-left: auto;
+	margin-right: 0;
+	width: auto;
+	height: auto;
+}
+
+.modal-header .close:hover {
+	opacity: 0.75;
+}
+
+.modal-header .close span {
+	display: inline-block;
+}
+
+

@@ -1,0 +1,31 @@
+{
+  "name": "front-ssr-vue3",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "vite build && vite build --ssr src/entry-server.js --outDir dist/server",
+    "preview": "cross-env NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/server-renderer": "^3.5.12",
+    "axios": "^1.6.2",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "compression": "^1.7.4",
+    "cross-env": "^7.0.3",
+    "express": "^4.21.1",
+    "imask": "^7.6.1",
+    "pinia": "^2.1.7",
+    "sass": "^1.80.4",
+    "sirv": "^2.0.4",
+    "swiper": "^12.0.3",
+    "vite": "^5.4.9",
+    "vue": "^3.5.12",
+    "vue-router": "^4.3.3"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

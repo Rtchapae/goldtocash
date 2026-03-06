@@ -1,0 +1,73 @@
+ /* Swiper CSS imports removed to avoid @charset ordering issues in SSR */
+//  @import '@/assets/css/app.css';
+
+// Bootstrap 5 CSS
+@import 'bootstrap/scss/bootstrap';
+
+// Bootstrap Icons - import CSS directly
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+@import '@/assets/css/shared.css';
+@import '@/assets/css/custom.css';
+@import '@/assets/css/form.min.css';
+
+ /* Extracted inline styles from mockup */
+ @import '@/styles/partials/nav-dropdown';
+ @import '@/styles/partials/hero-inline';
+ @import '@/styles/partials/testimonials-inline';
+ @import '@/styles/partials/main_page';
+ @import '@/styles/partials/messages';
+ @import '@/styles/partials/trustpilot';
+ @import '@/styles/partials/404';
+
+:root {
+    --breakpoint-xs: 0;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+ 
+$brand: #42b883;
+
+html, body, #app {
+	height: 100%;
+}
+
+body {
+    background-color: #fff;
+    color: var(--black, #212529);
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, Liberation Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+    font-size: 1rem; /* 1rem = 14px now that html has font-size: 14px */
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0;
+    text-align: left;
+    overflow-x: hidden;
+}
+
+/* Specific font-size for common elements that need 14px */
+p, span, div {
+    font-size: inherit; /* Let components control their own font-size */
+}
+
+a {
+	color: $brand;
+	text-decoration: none;
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+button {
+	background: $brand;
+	color: #0e1116;
+	border: 0;
+	padding: .5rem .75rem;
+	border-radius: .375rem;
+	cursor: pointer;
+}
+
+

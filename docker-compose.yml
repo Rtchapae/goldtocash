@@ -1,0 +1,139 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: goldtocash_mysql
+    env_file:
+      - docker.env
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - goldtocash_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    expose:
+      - "3306"
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: goldtocash_redis
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - goldtocash_network
+    command: redis-server --appendonly yes
+
+  # Laravel Backend API
+  backend:
+    build:
+      context: ./back
+      dockerfile: ./Dockerfile
+      target: production
+    container_name: goldtocash_backend
+    env_file:
+      - docker.env
+    volumes:
+      - ./back:/var/www/html
+      - ./back/storage:/var/www/html/storage
+      - ./back/vendor:/var/www/html/vendor
+      - ./back/node_modules:/var/www/html/node_modules
+      - ./back/docker/php/fpm-www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+    expose:
+      - "9000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - goldtocash_network
+    command: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Frontend Vue.js SSR App
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      target: production
+    container_name: goldtocash_front
+    env_file:
+      - docker.env
+    expose:
+      - "5175"
+    networks:
+      - goldtocash_network
+    command: node server.js
+
+  # Admin Frontend Vue.js App
+  front_admin:
+    build:
+      context: ./front_admin
+      dockerfile: Dockerfile
+      target: development
+    container_name: goldtocash_admin
+    env_file:
+      - docker.env
+    volumes:
+      - ./front_admin:/app
+      - /app/node_modules
+    expose:
+      - "5173"
+    networks:
+      - goldtocash_network
+    command: npm run dev
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: goldtocash_nginx
+    ports:
+      - "80:80"
+      #- "8082:8082"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./back/public:/var/www/html/public:ro
+      - ./back/storage:/var/www/html/storage:ro
+      - ./front/dist:/var/www/html/front:ro
+      - ./front_admin/dist:/var/www/html/admin:ro
+    depends_on:
+      backend:
+        condition: service_started
+      front:
+        condition: service_started
+      front_admin:
+        condition: service_started
+    networks:
+      - goldtocash_network
+
+  # Adminer Database Manager
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    ports:
+      - "8081:8080"
+    networks:
+      - goldtocash_network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  goldtocash_network:
+    driver: bridge

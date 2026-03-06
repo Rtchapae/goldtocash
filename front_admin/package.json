@@ -1,0 +1,28 @@
+{
+  "name": "bootstrap5dashboard-vue",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5173"
+  },
+  "dependencies": {
+    "@tinymce/tinymce-vue": "^6.3.0",
+    "apexcharts": "^5.3.6",
+    "imask": "^7.6.1",
+    "pinia": "^2.1.7",
+    "swiper": "^12.0.3",
+    "vue": "^3.4.29",
+    "vue-router": "^4.4.0",
+    "vue3-apexcharts": "^1.10.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.2",
+    "sass": "^1.77.0",
+    "sass-embedded": "^1.97.1",
+    "vite": "^5.4.6"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

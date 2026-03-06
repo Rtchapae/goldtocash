@@ -1,0 +1,34 @@
+/**
+ * Extracted from html/main.html (around L1413)
+ * Testimonials block inline styles
+ */
+.testimonial {
+	margin: 10px;
+	padding: 10px;
+	border: solid 1px rgba(255,255,255,0.25);
+	border-radius: .8em;
+	color: white;
+}
+.testimonial .visual-container img,
+.testimonial .visual-container iframe {
+	border-radius: 4px;
+}
+.testimonial .visual-container .image-container {
+	display: block;
+}
+.testimonial .visual-container.show-embed .image-container {
+	display: none;
+}
+.testimonial-thumbnail {
+	width: 100%;
+	aspect-ratio: 1 / 1.7;
+}
+.testimonial .image-container {
+	position: relative;
+}
+.testimonial .image-container:hover {
+	opacity: 0.85;
+	cursor: pointer;
+}
+
+

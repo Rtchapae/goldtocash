@@ -1,0 +1,44 @@
+// SMS Index Page Styles
+
+#SmsNavigateSearchManager {
+	.search-filter {
+		min-width: 200px;
+		margin-bottom: 13px;
+
+		label {
+			color: #989898;
+			margin-bottom: 0.25rem;
+			display: block;
+
+			&.invisible {
+				visibility: hidden;
+			}
+		}
+
+		input {
+			font-family: monospace, sans-serif;
+		}
+	}
+
+	#query-details {
+		color: #989898;
+		font-family: monospace, sans-serif;
+		margin-top: 30px;
+		text-align: center;
+	}
+}
+
+#SmsNavigateTableManager {
+	table thead th {
+		border-top: none;
+		border-bottom: none;
+	}
+
+	.dt-paging-button {
+		min-width: 32px;
+		max-width: 60px;
+		padding: 0.375rem 0.5rem;
+		white-space: nowrap;
+		text-align: center;
+	}
+}

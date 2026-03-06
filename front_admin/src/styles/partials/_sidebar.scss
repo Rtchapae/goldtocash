@@ -1,0 +1,24 @@
+// Sidebar styles
+.sidebar {
+	z-index: 1000;
+	&-menu {
+		li a {
+			position: relative;
+
+			.badge {
+				position: absolute;
+				right: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 0.75rem;
+				padding: 0.25rem 0.5rem;
+				border-radius: 0.5rem;
+				font-weight: 600;
+				min-width: 1.5rem;
+				text-align: center;
+				line-height: 1.2;
+			}
+		}
+	}
+}
+

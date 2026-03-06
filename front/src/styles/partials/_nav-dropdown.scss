@@ -1,0 +1,63 @@
+/**
+ * Extracted from html/main.html (around L305)
+ * Navigation dropdown desktop and mobile behaviors
+ */
+.nav-dropdown-menu.desktop {
+	border: none;
+	border-radius: .3em;
+	box-shadow: 0 0 7px rgba(0,0,0,0.2);
+	height: 0;
+	padding: 0;
+	position: absolute;
+	left: 30px;
+	top: 21px;
+	background: white;
+	width: 250px;
+	list-style: none;
+	opacity: 0;
+	transition: left ease-out .1s, opacity ease-out .1s;
+}
+.nav-dropdown-menu.desktop.open {
+	left: 0;
+	height: fit-content;
+	padding: .5em;
+	opacity: 1;
+}
+.nav-dropdown-menu.desktop:not(.open) a {
+	display: none;
+}
+.nav-dropdown-menu.desktop a {
+	color: black;
+	padding: .6em;
+	display: block;
+	border-radius: .3em;
+	margin: 0;
+	letter-spacing: 1px;
+}
+.nav-dropdown-menu.desktop a::after {
+	content: "\f105";
+	font-family: "Font Awesome 5 Free", sans-serif;
+	font-weight: 900;
+	position: absolute;
+	right: 1.3em;
+	color: black;
+}
+.nav-dropdown-menu.desktop a:hover {
+	background-color: rgba(219,175,62,.1);
+	color: var(--primary);
+	text-decoration: none;
+}
+.nav-dropdown-menu.desktop a:hover::after {
+	color: var(--primary);
+}
+
+.nav-dropdown-menu.mobile {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height .5s;
+}
+.nav-dropdown-menu.mobile.open {
+	max-height: 200px;
+}
+
+
