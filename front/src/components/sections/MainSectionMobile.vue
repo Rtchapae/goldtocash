@@ -22,9 +22,14 @@
             <MobileSellReasons />
         </div>
         <div id="mobile-testimonial">
+            <h2 class="mobile-testimonial-heading">
+                Customers like<br>
+                you talk about<br>
+                <span class="mobile-testimonial-heading-accent">Gold to Cash</span>
+            </h2>
             <TestimonialsSection />
             <div class="p-3">
-                <button type="button" class="btn btn-green btn-kit w-100 mt-3">
+                <button type="button" class="btn btn-green btn-kit w-100 mt-3" @click="scrollToTop">
                     Get My Free Kit
                 </button>
             </div>
@@ -38,6 +43,10 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+function scrollToTop() {
+	window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 import MobileSophisticatedForm from '@/components/MobileSophisticatedForm.vue'
 import AsSeenIn from '@/components/AsSeenIn.vue'
 import TestimonialsSection from '@/components/TestimonialsSection.vue'

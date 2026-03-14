@@ -54,7 +54,12 @@ export const apiRequest = async (endpoint, options = {}, skipAuth = false) => {
 		return response
 	} catch (error) {
 		if (import.meta.env.DEV) {
-		console.error(`API request failed: ${endpoint}`, error)
+			const isNetworkError = error?.name === 'TypeError' && error?.message === 'Failed to fetch'
+			if (isNetworkError) {
+				console.warn(`API request failed: ${endpoint} (backend unreachable or CORS)`, error)
+			} else {
+				console.error(`API request failed: ${endpoint}`, error)
+			}
 		}
 		throw error
 	}

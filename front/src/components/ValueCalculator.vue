@@ -5,7 +5,7 @@
 				<div class="col-md-4 p-0" data-element="calculator-image"></div>
 				<div class="col-md-8 py-4 px-5">
 					<h1 class="text-center">
-						What is your gold worth?
+						{{ heading }}
 					</h1>
 					<p class="text-center color-gold font-weight- mb-0" style="letter-spacing:2px;">
 						CURRENT GOLD MARKET PRICE <span data-element="current-price">
@@ -75,16 +75,25 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject, watch } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import { GOLD_UNITS, GOLD_PURITY } from '@/constants/goldCalculator'
 import { getCurrentGoldPrice } from '@/api/calculator'
 
 const props = defineProps({
+	heading: {
+		type: String,
+		default: 'What is your gold worth?'
+	},
 	currentPrice: {
 		type: String,
 		default: null
 	},
 	useLegacyHandler: {
+		type: Boolean,
+		default: false
+	},
+	/** When true, "Sell My Gold Now" scrolls to top (e.g. mobile home). When false, opens kit modal (e.g. gold-calculator page). */
+	scrollToTopOnSell: {
 		type: Boolean,
 		default: false
 	}
@@ -194,6 +203,8 @@ const handleSellClick = () => {
 		} else if (window.self !== window.top && window.parent && window.parent.showGetStartedModal) {
 			window.parent.showGetStartedModal()
 		}
+	} else if (props.scrollToTopOnSell) {
+		window.scrollTo({ top: 0, behavior: 'smooth' })
 	} else {
 		if (typeof openKitModal === 'function') {
 			openKitModal()

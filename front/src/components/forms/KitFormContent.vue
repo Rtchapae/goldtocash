@@ -54,6 +54,7 @@
 		</div>
 		<div class="control-group form-group">
 			<input 
+				ref="addressInputRef"
 				type="text" 
 				class="form-control pac-target-input" 
 				:id="fieldId('address')" 
@@ -118,27 +119,30 @@
 				required>
 			<label :for="fieldId('city')" :class="{ hasValue: selectedCity && selectedCity !== '__other__' }">City</label>
 		</div>
-		<div class="control-group form-group">
-			<select 
-				v-model="selectedCountry" 
-				name="country" 
-				:id="fieldId('country')" 
-				class="form-control"
-				@change="onCountryChange">
-				<option value="">Select country</option>
-				<option v-for="country in countries" :key="country.code" :value="country.code">{{ country.name }}</option>
-				<option value="__other__">Other (enter manually)</option>
-			</select>
-			<input
-				v-if="selectedCountry === '__other__'"
-				v-model="countryOther"
-				type="text"
-				class="form-control mt-2"
-				name="country_other"
-				placeholder="Enter country name"
-				maxlength="100">
-			<label :for="fieldId('country')" :class="{ hasValue: selectedCountry && selectedCountry !== '__other__' }">Country</label>
-		</div>
+		<template v-if="!isMobile">
+			<div class="control-group form-group">
+				<select 
+					v-model="selectedCountry" 
+					name="country" 
+					:id="fieldId('country')" 
+					class="form-control"
+					@change="onCountryChange">
+					<option value="">Select country</option>
+					<option v-for="country in countries" :key="country.code" :value="country.code">{{ country.name }}</option>
+					<option value="__other__">Other (enter manually)</option>
+				</select>
+				<input
+					v-if="selectedCountry === '__other__'"
+					v-model="countryOther"
+					type="text"
+					class="form-control mt-2"
+					name="country_other"
+					placeholder="Enter country name"
+					maxlength="100">
+				<label :for="fieldId('country')" :class="{ hasValue: selectedCountry && selectedCountry !== '__other__' }">Country</label>
+			</div>
+		</template>
+		<input v-else type="hidden" name="country" :value="KIT_FORM_TEXTS.DEFAULT_COUNTRY">
 		<div class="row">
 			<div class="col-6">
 				<div class="control-group form-group">
@@ -243,10 +247,12 @@
 <script setup>
 import { ref, onMounted, watch, nextTick, computed } from 'vue'
 import { US_STATES } from '@/constants/states'
+import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 import { getStatesAndCities, getCitiesByState } from '@/api/statesCities'
 import { getCountries } from '@/api/countries'
 import { usePhoneMask } from '@/composables/usePhoneMask'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useGooglePlacesAddress } from '@/composables/useGooglePlacesAddress'
 
 const props = defineProps({
 	isMobile: {
@@ -283,6 +289,24 @@ const address2 = ref('')
 const zip = ref('')
 
 const { phoneValue, phoneInputRef, setupMask } = usePhoneMask()
+const addressInputRef = ref(null)
+
+const { init: initPlacesAddress } = useGooglePlacesAddress({
+	inputRef: addressInputRef,
+	onPlaceSelect: async (place, addr) => {
+		address.value = addr.street || addr.fullAddress
+		zip.value = addr.zip || ''
+		if (addr.state) {
+			selectedState.value = addr.state
+			await onStateChange()
+			selectedCity.value = cities.value.includes(addr.city) ? addr.city : '__other__'
+			cityOther.value = cities.value.includes(addr.city) ? '' : (addr.city || '')
+		} else {
+			selectedCity.value = addr.city ? '__other__' : ''
+			cityOther.value = addr.city || ''
+		}
+	}
+})
 const isResendDisabled = computed(() => props.resendCountdown > 0)
 const resendCountdown = computed(() => props.resendCountdown)
 
@@ -389,6 +413,16 @@ onMounted(async () => {
 		}
 	}
 	trySetupMask()
+	let placesAttempts = 0
+	const tryInitPlaces = () => {
+		if (addressInputRef.value) {
+			initPlacesAddress()
+		} else if (placesAttempts < 10) {
+			placesAttempts++
+			setTimeout(tryInitPlaces, 100)
+		}
+	}
+	tryInitPlaces()
 })
 
 watch([selectedCity, cityOther], () => {
@@ -413,6 +447,7 @@ watch([selectedCity, cityOther], () => {
 })
 
 watch([selectedCountry, countryOther], () => {
+	if (props.isMobile) return
 	const countryInput = document.getElementById(fieldId('country'))
 	if (countryInput) {
 		if (selectedCountry.value === '__other__') {

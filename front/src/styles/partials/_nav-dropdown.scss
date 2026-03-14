@@ -35,11 +35,16 @@
 	letter-spacing: 1px;
 }
 .nav-dropdown-menu.desktop a::after {
-	content: "\f105";
-	font-family: "Font Awesome 5 Free", sans-serif;
-	font-weight: 900;
+	content: "";
 	position: absolute;
 	right: 1.3em;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-left: 5px solid currentColor;
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
 	color: black;
 }
 .nav-dropdown-menu.desktop a:hover {

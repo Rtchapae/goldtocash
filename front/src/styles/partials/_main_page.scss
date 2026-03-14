@@ -35,11 +35,16 @@
 }
 
 .nav-dropdown-menu.desktop a::after {
-    content: "\f105";
-    font-family: "Font Awesome 5 Free", sans-serif;
-    font-weight: 900;
+    content: "";
     position: absolute;
     right: 1.3em;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
     color: black;
 }
 
@@ -150,6 +155,28 @@ input::-webkit-inner-spin-button {
 .btn-green {
     background: #219653;
     color: white;
+}
+
+/* Main CTAs (includes mobile \"Get My Free Kit\" buttons) — match register-submit-btn */
+.btn-green.btn-kit {
+    background: #11BA69;
+    color: #fff;
+    font-family: Montserrat, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 16px 0;
+    border: none;
+    border-radius: 4px;
+    min-height: 50px;
+    box-shadow: none;
+    transition: background 0.2s, opacity 0.2s;
+}
+.btn-green.btn-kit:hover:not(:disabled) {
+    background: #0fa85e;
+}
+.btn-green.btn-kit:disabled {
+    opacity: 0.7;
 }
 
 @media(max-width: 767px) {
@@ -555,12 +582,16 @@ div#business-tri img {
 }
 
 .section-testimonials .testimonial-swiper-pagination .swiper-pagination-bullet {
-    background: white;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #999;
     margin: 0 10px;
+    opacity: 1;
 }
 
 .section-testimonials .testimonial-swiper-pagination .swiper-pagination-bullet-active {
-    background: var(--primary);
+    background: #11BA69;
 }
 
 .section-testimonials span.swiper-nav {
@@ -1037,6 +1068,150 @@ select option[value]:checked {
 .sophisticated-form .alert-warning {
     background: #f2e7c7;
     margin-top: 30px;
+}
+
+/* Mobile home — full width (no side padding): nav, image, form */
+.app-shell.page-home main {
+    padding-top: 0;
+}
+.app-shell.page-home main > div > div {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+.app-shell.page-home #main-navbar {
+    max-width: none;
+    width: 100%;
+    left: 0;
+    right: 0;
+}
+/* Mobile kit form block — style per Figma 2704-1198 */
+.sophisticated-form.mobile-kit-form {
+    padding: 2rem 0;
+    background-color: #F5F1E7;
+    border-radius: 0;
+    margin-top: 0;
+    width: 100%;
+}
+.sophisticated-form.mobile-kit-form form {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+/* Form title — Figma 2704-1199/2704-1200: Merriweather 44px, accent #C39E3D */
+.sophisticated-form.mobile-kit-form .mobile-form-title {
+    text-align: left;
+    font-family: Merriweather, serif;
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1.09;
+    color: #000;
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+.sophisticated-form.mobile-kit-form .mobile-form-bonus {
+    display: block;
+    margin-top: 0;
+    color: #C39E3D;
+}
+/* Subtitle "Get the highest payout in 24 hours!" — Figma 2704-1199 */
+.sophisticated-form.mobile-kit-form .mobile-form-subtitle {
+    text-align: left;
+    font-family: Montserrat, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.56;
+    color: rgba(0, 0, 0, 0.5);
+    margin: 0 0 1.25rem 0;
+}
+/* Form labels — Figma 2704-1212: Montserrat 500 */
+.sophisticated-form.mobile-kit-form .control-group label,
+.sophisticated-form.mobile-kit-form .form-group label {
+    font-weight: 500;
+}
+/* Mobile kit form — inputs: taller, underline style, no browser validation icons */
+.sophisticated-form.mobile-kit-form .form-group .form-control,
+.sophisticated-form.mobile-kit-form .control-group .form-control,
+.sophisticated-form.mobile-kit-form .form-group select,
+.sophisticated-form.mobile-kit-form .control-group select {
+    background-color: transparent;
+    border: none;
+    border-bottom: solid 1px rgba(0, 0, 0, 0.15);
+    border-radius: 0;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    min-height: 52px;
+    width: 100%;
+    transition: border-color ease-out 0.1s, border-width ease-out 0.1s;
+    font-size: 16px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.sophisticated-form.mobile-kit-form .form-group .form-control:focus,
+.sophisticated-form.mobile-kit-form .control-group .form-control:focus,
+.sophisticated-form.mobile-kit-form .form-group select:focus,
+.sophisticated-form.mobile-kit-form .control-group select:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom-width: 2px;
+    border-bottom-color: #000;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+/* Hide browser validation icons (gray circle with !) and avoid inset shadow from form.min.css */
+.sophisticated-form.mobile-kit-form .form-control:invalid,
+.sophisticated-form.mobile-kit-form .form-control:-moz-ui-invalid {
+    box-shadow: none !important;
+}
+.sophisticated-form.mobile-kit-form .form-control {
+    box-shadow: none !important;
+}
+.sophisticated-form.mobile-kit-form .form-control:focus {
+    box-shadow: none !important;
+}
+/* Контейнер адреса — без лишнего z-index, чтобы не блокировать подсказки Google */
+.sophisticated-form.mobile-kit-form .address-input-wrap {
+    position: relative;
+}
+/* Submit button — Figma 2704-1221 (Frame 55) */
+.sophisticated-form.mobile-kit-form .register-submit-btn {
+    background: #11BA69;
+    color: #fff;
+    font-family: Montserrat, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 16px 0;
+    border: none;
+    border-radius: 4px;
+    min-height: 50px;
+    box-shadow: none;
+    transition: background 0.2s, opacity 0.2s;
+}
+.sophisticated-form.mobile-kit-form .register-submit-btn:hover:not(:disabled) {
+    background: #0fa85e;
+    box-shadow: none;
+}
+.sophisticated-form.mobile-kit-form .register-submit-btn:disabled {
+    opacity: 0.7;
+}
+/* Trustpilot block — Figma 2704-1226 (Trust Pilot Micro Star) */
+.sophisticated-form.mobile-kit-form .trustpilot-block {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    text-align: center;
+}
+.sophisticated-form.mobile-kit-form .trustpilot-block img {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+.sophisticated-form.mobile-kit-form .trustpilot-micro img.trustpilot-micro-stars {
+    max-width: 107px;
+    width: 107px;
 }
 
 .rotate-text {
@@ -2136,7 +2311,35 @@ select option[value]:checked {
 }
 
 #mobile-testimonial .section-testimonials .testimonial-controls {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center;
+    padding: 16px 0;
+    width: 100%;
+}
+#mobile-testimonial .section-testimonials .swiper-prev-btn,
+#mobile-testimonial .section-testimonials .swiper-next-btn {
     display: none !important;
+}
+#mobile-testimonial .section-testimonials .testimonial-swiper-pagination {
+    position: static;
+    display: flex !important;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    max-width: none;
+}
+#mobile-testimonial .section-testimonials .testimonial-swiper-pagination .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #999;
+    opacity: 1;
+}
+#mobile-testimonial .section-testimonials .testimonial-swiper-pagination .swiper-pagination-bullet-active {
+    background: #11BA69;
 }
 
 /* SECTION CONTACT */
@@ -2241,6 +2444,51 @@ select option[value]:checked {
 
 .recent-payout-swiper-pagination .swiper-pagination-bullet-active {
     background: black;
+}
+
+/* Mobile What We Pay carousel */
+.mobile-payout-swiper {
+    width: 100%;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+.mobile-payout-swiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+.mobile-payout-swiper .recent-payout {
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+.mobile-payout-swiper .recent-payout-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 320px;
+    margin: 0 auto;
+    object-fit: cover;
+}
+.mobile-payout-swiper .swiper-pagination {
+    position: static;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    min-height: 8px;
+}
+.mobile-payout-swiper .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #999;
+    opacity: 1;
+    margin: 0 !important;
+}
+.mobile-payout-swiper .swiper-pagination-bullet-active {
+    background: #11BA69;
 }
 
 #mobile-pane {
@@ -2365,6 +2613,168 @@ select option[value]:checked {
 a.dark {
     color: black;
     text-decoration: underline;
+}
+
+/* Penny badge block — Figma 2679-1927 */
+.penny-badge-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin: 2rem 0;
+}
+.penny-badge-img {
+    width: 103px;
+    height: 84px;
+    object-fit: contain;
+}
+.penny-badge-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.43;
+    text-align: center;
+    color: #000;
+    margin: 0;
+}
+
+/* Reviews block — Figma 2680-1981 */
+.reviews-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    padding: 48px 16px;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+}
+.reviews-block-icon {
+    flex-shrink: 0;
+}
+.reviews-block-heading {
+    font-family: Merriweather, serif;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1.09;
+    text-align: center;
+    color: #000;
+    margin: 0;
+}
+.reviews-block-heading-accent {
+    color: #11BA69;
+    font-family: Merriweather, serif;
+    font-size: 44px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 48px;
+}
+.reviews-swiper {
+    width: 100%;
+    overflow: hidden;
+}
+.reviews-swiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+.reviews-block-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: #E7F6EB;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 375px;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+}
+.reviews-swiper .swiper-pagination {
+    position: static;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    min-height: 8px;
+}
+.reviews-swiper .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #999;
+    opacity: 1;
+    margin: 0 !important;
+}
+.reviews-swiper .swiper-pagination-bullet-active {
+    background: #11BA69;
+}
+.reviews-card-stars {
+    width: 107px;
+    height: 20px;
+    object-fit: contain;
+}
+.reviews-card-title {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.33;
+    text-align: center;
+    color: #000;
+    margin: 0;
+}
+.reviews-card-text {
+    font-family: Montserrat, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.43;
+    text-align: center;
+    color: #000;
+    margin: 0;
+}
+.reviews-card-line {
+    width: 24px;
+    height: 1px;
+    background: #11BA69;
+}
+.reviews-card-username {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.43;
+    text-align: center;
+    color: #000;
+    margin: 0;
+}
+/* Sell reasons heading — Figma 2680-2203 */
+.sell-reasons-heading {
+    font-family: Merriweather, serif;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1.09;
+    text-align: center;
+    color: #000;
+    margin: 40px 0 8px;
+}
+
+/* Mobile testimonial heading — Figma 2680-2263 */
+.mobile-testimonial-heading {
+    font-family: Merriweather, serif;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 48px; /* 109.091% */
+    text-align: center;
+    color: #000;
+    align-self: stretch;
+    margin: 48px 16px 24px;
+}
+.mobile-testimonial-heading-accent {
+    color: #C39E3D;
 }
 
 .sell-reason-item {
@@ -2541,6 +2951,64 @@ a.dark {
     position: relative;
     padding-top: 0.5em;
     padding-left: 1.5em;
+}
+
+/* Mobile: image before calculator — Figma 2680-2322 */
+.mobile-calculator-banner {
+	width: 100%;
+	height: 160px;
+	overflow: hidden;
+	margin-bottom: 0;
+}
+.mobile-calculator-banner-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* Mobile home: calculator block after reviews */
+.mobile-calculator-section [data-element="value-calculator"] {
+    padding: 1rem 0;
+}
+.mobile-calculator-section [data-element="value-calculator"] h1 {
+    color: #000;
+    text-align: center;
+    font-family: Merriweather, serif;
+    font-size: 44px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 48px;
+}
+.mobile-calculator-section [data-element="value-calculator"] .container {
+    max-width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+.mobile-calculator-section [data-element="value-calculator"] [data-element="calculator-image"] {
+    display: none;
+}
+.mobile-calculator-section [data-element="value-calculator"] .col-md-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.mobile-calculator-section [data-element="value-calculator"] .col-md-8 .row .col-12 {
+    text-align: left;
+}
+.mobile-calculator-section [data-element="value-calculator"] [data-element="value-display"] {
+    text-align: right;
+    padding: 0.5em 0.75em 0.5em 1em;
+    min-height: 2.5em;
+    display: block;
+    box-sizing: border-box;
+}
+.mobile-calculator-section [data-element="value-calculator"] [data-element="value-display"]::after {
+    top: -4px;
+    left: 0;
+    right: 0;
+    bottom: -4px;
 }
 
 [data-element="value-calculator"] [data-element="value-display"]::after {

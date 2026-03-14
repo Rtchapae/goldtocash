@@ -33,7 +33,7 @@
 							@mouseleave="openDesktop[menu.key] = false">
 							<a :href="menu.href">
 								{{ menu.label }}
-								<i data-element="nav-dropdown-caret" class="fas ml-1" :class="openDesktop[menu.key] ? 'fa-angle-up' : 'fa-angle-down'"></i>
+								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openDesktop[menu.key] }" aria-hidden="true"></span>
 							</a>
 							<ul :id="`${menu.key}-dropdown-desktop`" class="nav-dropdown-menu desktop" :class="{ open: openDesktop[menu.key] }">
 								<li v-for="item in menu.desktopItems" :key="item.href">
@@ -44,7 +44,7 @@
 						<li class="nav-item d-lg-none">
 							<a @click.prevent="openMobile[menu.key] = !openMobile[menu.key]">
 								{{ menu.label }}
-								<i data-element="nav-dropdown-caret" class="fas ml-1" :class="openMobile[menu.key] ? 'fa-angle-up' : 'fa-angle-down'"></i>
+								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openMobile[menu.key] }" aria-hidden="true"></span>
 							</a>
 							<ul :id="`${menu.key}-dropdown-mobile`" class="nav-dropdown-menu mobile" :class="{ open: openMobile[menu.key] }">
 								<li v-for="item in menu.mobileItems" :key="item.href">
@@ -143,9 +143,18 @@ const openKitModal = inject('openKitModal', null)
 .nav-item-dropdown {
 	position: relative;
 }
-
-.nav-dropdown-menu.mobile {
-	list-style-type: disc;
+.nav-caret {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid currentColor;
+	vertical-align: middle;
+	transition: transform 0.2s;
+}
+.nav-caret--up {
+	transform: rotate(-180deg);
 }
 </style>
 

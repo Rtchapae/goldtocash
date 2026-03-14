@@ -7,7 +7,7 @@
 					<h2>
 						Have a Question?
 						<br>
-						We're Always Happy to Help!
+						<span class="footer-heading-accent">We're Always Happy to Help!</span>
 					</h2>
 				</div>
 				<div class="col-12 col-md-auto">
@@ -136,3 +136,15 @@ onMounted(async () => {
 	}
 })
 </script>
+
+<style scoped>
+.footer-heading-accent {
+	color: #fff;
+	text-align: center;
+	font-family: Montserrat, sans-serif;
+	font-size: 18px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 24px;
+}
+</style>
