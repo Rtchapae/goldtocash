@@ -30,6 +30,7 @@ const routes = [
 	{ path: '/privacy-policy', name: 'privacy-policy', component: () => import('@/pages/PrivacyPolicy.vue') },
 	{ path: '/sell-gold/gold-to-cash-reviews', name: 'gold-to-cash-reviews', component: () => import('@/pages/GoldToCashReviews.vue') },
 	{ path: '/sell-gold/cash-for-gold-insights-for-the-highest-roi', name: 'cash-for-gold-insights', component: () => import('@/pages/CashForGoldInsights.vue') },
+	{ path: '/free-gold-appraisal-insured-shipping', name: 'free-gold-appraisal-insured-shipping', component: () => import('@/pages/FreeGoldAppraisalInsuredShipping.vue') },
 	{ path: '/gold-info/:slug', name: 'gold-info-post', component: () => import('@/pages/BlogPost.vue') },
 	{ path: '/sell/:slug', name: 'sell-article', component: () => import('@/pages/BlogPost.vue') },
 	{ path: '/sell-gold/:slug', name: 'sell-gold-post', component: () => import('@/pages/BlogPost.vue') },

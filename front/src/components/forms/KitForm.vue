@@ -100,6 +100,7 @@
 import { computed, onUnmounted, ref } from 'vue'
 import FormContent from './KitFormContent.vue'
 import { useKitForm } from '@/composables/useKitForm'
+import { buildKitPayload } from '@/api/kitRegistration'
 import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 
 const props = defineProps({
@@ -215,7 +216,7 @@ const handleResendCode = async () => {
 		const cityValue = formData.get('city_other') || formData.get('city') || ''
 		const countryValue = formData.get('country_other') || formData.get('country') || KIT_FORM_TEXTS.DEFAULT_COUNTRY
 		
-		const data = {
+		const data = buildKitPayload({
 			first_name: formData.get('first_name'),
 			last_name: formData.get('last_name'),
 			email: formData.get('email'),
@@ -226,7 +227,9 @@ const handleResendCode = async () => {
 			state: formData.get('state'),
 			zip: formData.get('zip'),
 			country: countryValue,
-		}
+			street: formData.get('street'),
+			fullAddress: formData.get('fullAddress'),
+		})
 
 		const response = await submitForm(data)
 		
@@ -285,17 +288,13 @@ const handleSubmit = async (event) => {
 				allow_unverified: true,
 			}
 		} else {
-			const code1 = (formData.get('code1') || '').toString().trim()
-			const code2 = (formData.get('code2') || '').toString().trim()
-			const code3 = (formData.get('code3') || '').toString().trim()
-			const code4 = (formData.get('code4') || '').toString().trim()
+			const enteredCode = (formData.get('verification_code') || '').toString().trim()
 
-			if (!code1 || !code2 || !code3 || !code4) {
+			if (!enteredCode || enteredCode.length !== 4) {
 				verificationMessage.value = KIT_FORM_TEXTS.VERIFICATION_FILL_ALL
 				return
 			}
 
-			const enteredCode = `${code1}${code2}${code3}${code4}`
 			data = {
 				...baseData,
 				verification_code: enteredCode,
@@ -305,7 +304,8 @@ const handleSubmit = async (event) => {
 		isVerificationLoading.value = true
 
 		try {
-			const response = await submitForm(data)
+			console.log('[KitForm modal] submit data:', { ...data })
+			const response = await submitForm(buildKitPayload(data))
 			
 		if (response?.requires_verification) {
 			verificationMessage.value = response?.message || KIT_FORM_TEXTS.VERIFICATION_INVALID_CODE
@@ -337,7 +337,7 @@ const handleSubmit = async (event) => {
 		const cityValue = formData.get('city_other') || formData.get('city') || ''
 		const countryValue = formData.get('country_other') || formData.get('country') || KIT_FORM_TEXTS.DEFAULT_COUNTRY
 		
-		const data = {
+		const data = buildKitPayload({
 			first_name: formData.get('first_name'),
 			last_name: formData.get('last_name'),
 			email: formData.get('email'),
@@ -348,8 +348,11 @@ const handleSubmit = async (event) => {
 			state: formData.get('state'),
 			zip: formData.get('zip'),
 			country: countryValue,
-		}
+			street: formData.get('street'),
+			fullAddress: formData.get('fullAddress'),
+		})
 
+		console.log('[KitForm modal] submit data:', { ...data })
 		const response = await submitForm(data)
 
 		if (response?.requires_verification) {

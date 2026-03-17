@@ -22,6 +22,6 @@ import KitForm from '@/components/forms/KitForm.vue'
 .kit-modal-root { position: fixed; inset: 0; z-index: 11000; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 1vh 16px; }
 .kit-modal-overlay { position: fixed; inset: 0; z-index: 0; background: rgba(0,0,0,.6); }
 .kit-modal-dialog { position: relative; z-index: 1; max-width: 640px; width: 100%; margin: 0 auto; flex-shrink: 0; }
-.kit-modal-content { background: #fff; border-radius: 8px; overflow-y: auto; max-height: min(calc(98vh - 8px), 1400px); }
+.kit-modal-content { background: #fff; border-radius: 8px; overflow-y: auto; max-height: min(calc(98vh - 8px), 1400px); padding-top: 24px; }
 .close { position: absolute; right: 8px; top: 8px; background: transparent; z-index: 1; }
 </style>

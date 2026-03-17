@@ -8,12 +8,8 @@
 			novalidate
 			@submit.prevent="handleSubmit"
 		>
-			<h2 class="mobile-form-title">
-				Sell Gold Jewelry Online for Cash
-				<br />
-				<span class="mobile-form-bonus">Best Price Guaranteed!</span>
-			</h2>
-			<p class="mobile-form-subtitle">Get the highest payout in 24 hours!</p>
+			<h2 class="mobile-form-title">Sell Gold Jewelry Online for Cash</h2>
+			<p class="mobile-form-subtitle">Best Price Guaranteed!</p>
 
 			<div class="control-group form-group">
 				<input
@@ -71,24 +67,24 @@
 			<div class="control-group form-group address-input-wrap">
 				<input
 					ref="addressInputRef"
-					v-model="address"
+					v-model="fullAddress"
 					type="text"
 					class="form-control pac-target-input"
 					id="mobile-address"
-					name="address"
 					required
 					data-validation-required-message="Please enter your address."
 					placeholder=" "
 					autocomplete="address-line1"
 				/>
-				<label for="mobile-address" :class="{ hasValue: !!address }">Address</label>
+				<label for="mobile-address" :class="{ hasValue: !!fullAddress }">Address</label>
 			</div>
 
 			<!-- Hidden: populated by Google Places, sent to backend -->
-			<input type="hidden" v-model="address2" name="address2" />
-			<input type="hidden" v-model="city" name="city" />
-			<input type="hidden" v-model="state" name="state" />
-			<input type="hidden" v-model="zip" name="zip" />
+			<input type="hidden" name="address" :value="address || fullAddress" />
+			<input type="hidden" name="address2" :value="address2" />
+			<input type="hidden" name="city" :value="city" />
+			<input type="hidden" name="state" :value="state" />
+			<input type="hidden" name="zip" :value="zip" />
 			<input type="hidden" name="country" value="USA" />
 
 			<div v-if="showVerification" id="phone-verify" class="phone-verify-block">
@@ -98,17 +94,14 @@
 					</label>
 					<div class="verification-code-container d-flex">
 						<input
-							v-for="(_, i) in 4"
-							:key="i"
 							type="text"
-							:name="`code${i + 1}`"
-							class="form-control verification-code-input"
-							maxlength="1"
+							name="verification_code"
+							class="form-control verification-code-input verification-code-single"
+							maxlength="4"
 							autocomplete="off"
 							inputmode="numeric"
-							:ref="(el) => setCodeRef(el, i)"
-							@input="onCodeInput($event, i)"
-							@keydown.backspace="onCodeBackspace($event, i)"
+							placeholder="0000"
+							v-model="verificationCode"
 						/>
 						<button
 							id="mobile-resendCodeButton"
@@ -182,7 +175,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 import { useKitForm } from '@/composables/useKitForm'
 import { usePhoneMask } from '@/composables/usePhoneMask'
@@ -197,22 +190,32 @@ const { init: initPlacesAddress } = useGooglePlacesAddress({
 	inputRef: addressInputRef,
 	inputId: 'mobile-address',
 	onPlaceSelect: (place, addr) => {
-		address.value = addr.street || addr.fullAddress
+		fullAddress.value = addr.fullAddress || addr.street || ''
+		address.value = addr.street || addr.fullAddress || ''
 		address2.value = addr.address2 || ''
 		city.value = addr.city || ''
 		state.value = addr.state || ''
-		zip.value = addr.zip || ''
+		const parsedZip = addr.zip || addr.fullAddress?.match(/\b(\d{5})(?:-\d{4})?/)?.[1] || ''
+		zip.value = parsedZip
 	}
 })
 
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const fullAddress = ref('')
 const address = ref('')
 const address2 = ref('')
 const city = ref('')
 const state = ref('')
 const zip = ref('')
+
+watch(fullAddress, (val) => {
+	if (!zip.value && val) {
+		const m = val.match(/\b(\d{5})(?:-\d{4})?/)
+		if (m) zip.value = m[1]
+	}
+})
 
 const showVerification = ref(false)
 const resendCountdown = ref(0)
@@ -234,25 +237,7 @@ const submitButtonLabel = computed(() => {
 		: KIT_FORM_TEXTS.BUTTON_REQUEST_KIT_MOBILE
 })
 
-const codeInputRefs = ref([])
-const setCodeRef = (el, index) => {
-	if (el) codeInputRefs.value[index] = el
-}
-
-const onCodeInput = (e, index) => {
-	const input = e.target
-	const value = input.value.replace(/\D/g, '').slice(0, 1)
-	input.value = value
-	if (value && index < 3 && codeInputRefs.value[index + 1]) {
-		codeInputRefs.value[index + 1].focus()
-	}
-}
-
-const onCodeBackspace = (e, index) => {
-	if (e.key === 'Backspace' && !e.target.value && index > 0 && codeInputRefs.value[index - 1]) {
-		codeInputRefs.value[index - 1].focus()
-	}
-}
+const verificationCode = ref('')
 
 function getFormData() {
 	const form = formRef.value
@@ -341,19 +326,17 @@ async function handleSubmit() {
 
 	const data = getFormData()
 	if (!data) return
+	console.log('[MobileSophisticatedForm main] submit data:', { ...data })
 
 	if (showVerification.value) {
-		const code1 = (form.querySelector('[name="code1"]')?.value || '').trim()
-		const code2 = (form.querySelector('[name="code2"]')?.value || '').trim()
-		const code3 = (form.querySelector('[name="code3"]')?.value || '').trim()
-		const code4 = (form.querySelector('[name="code4"]')?.value || '').trim()
+		const code = (verificationCode.value || form.querySelector('[name="verification_code"]')?.value || '').trim()
 
 		if (!isCreateAccountMode.value) {
-			if (!code1 || !code2 || !code3 || !code4) {
+			if (!code || code.length !== 4) {
 				verificationMessage.value = KIT_FORM_TEXTS.VERIFICATION_FILL_ALL
 				return
 			}
-			data.verification_code = `${code1}${code2}${code3}${code4}`
+			data.verification_code = code
 		} else {
 			data.allow_unverified = true
 		}
@@ -556,6 +539,11 @@ onUnmounted(() => {
 	flex-wrap: wrap;
 	margin-top: 8px;
 	margin-bottom: 8px;
+}
+
+.verification-code-single {
+	width: 120px;
+	min-width: 120px;
 }
 
 .verification-code-input {

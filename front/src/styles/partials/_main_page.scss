@@ -2906,7 +2906,7 @@ a.dark {
 }
 
 .pac-container {
-    z-index: 1051;
+    z-index: 12000 !important; /* above modal 11000 */
 }
 
 [data-element="value-calculator"] {
