@@ -415,20 +415,16 @@ onMounted(async () => {
 		}
 	}
 	tryMask()
-	// Один раз инициализируем Places с задержкой, чтобы DOM и инпут были готовы
 	let placesAttempts = 0
 	const tryInitPlaces = () => {
 		const input = addressInputRef.value || document.getElementById('mobile-address')
 		if (input && input.isConnected) {
-			console.log('[Places] tryInitPlaces: input found, attempt', placesAttempts + 1)
-			initPlacesAddress().catch((e) => console.warn('[Places] init error', e))
+			initPlacesAddress().catch(() => {})
 			return
 		}
 		if (placesAttempts < 25) {
 			placesAttempts++
 			setTimeout(tryInitPlaces, 200)
-		} else {
-			console.warn('[Places] tryInitPlaces: gave up after 25 attempts, input not found')
 		}
 	}
 	setTimeout(tryInitPlaces, 400)

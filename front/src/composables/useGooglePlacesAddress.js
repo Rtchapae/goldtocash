@@ -1,32 +1,23 @@
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY
-const DEBUG = true
-const log = (...args) => DEBUG && console.log('[Places]', ...args)
-const warn = (...args) => console.warn('[Places]', ...args)
-const err = (...args) => console.error('[Places]', ...args)
 
 let loadPromise = null
 
 function loadGoogleMapsScript() {
 	if (typeof window === 'undefined') return Promise.resolve(null)
 	if (!API_KEY) {
-		warn('API key missing. Set VITE_GOOGLE_MAPS_API_KEY or VITE_GOOGLE_API_KEY in .env')
 		return Promise.resolve(null)
 	}
 	if (window.google?.maps?.places?.Autocomplete) {
-		log('Google Places API already loaded')
 		return Promise.resolve(window.google.maps.places.Autocomplete)
 	}
 	if (loadPromise) return loadPromise
 
 	const scriptUrl = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places`
-	log('Loading script:', scriptUrl.replace(API_KEY, 'KEY...'))
 	loadPromise = new Promise((resolve, reject) => {
 		const existing = document.querySelector('script[src*="maps.googleapis.com"]')
 		if (existing) {
-			log('Script tag already exists, waiting for API')
 			const poll = () => {
 				if (window.google?.maps?.places?.Autocomplete) {
-					log('API ready (existing script)')
 					resolve(window.google.maps.places.Autocomplete)
 				} else {
 					setTimeout(poll, 100)
@@ -41,10 +32,8 @@ function loadGoogleMapsScript() {
 		script.async = true
 		script.defer = true
 		script.onload = () => {
-			log('Script onload')
 			const poll = () => {
 				if (window.google?.maps?.places?.Autocomplete) {
-					log('API ready')
 					resolve(window.google.maps.places.Autocomplete)
 				} else {
 					setTimeout(poll, 50)
@@ -53,7 +42,6 @@ function loadGoogleMapsScript() {
 			poll()
 		}
 		script.onerror = () => {
-			err('Failed to load Google Maps API script')
 			reject(new Error('Failed to load Google Maps API'))
 		}
 		document.head.appendChild(script)
@@ -92,7 +80,6 @@ function getAddressComponents(place) {
 	const streetLine = [result.streetNumber, result.street].filter(Boolean).join(' ').trim() || result.fullAddress
 	result.street = streetLine
 
-	// Если subpremise не пришёл в components — пробуем вытащить из formatted_address (например "123 Main St, Apt 4, City, NY")
 	if (!result.address2 && result.fullAddress) {
 		const parts = result.fullAddress.split(',').map((p) => p.trim())
 		const subpremiseLike = /apt\.?|suite|unit|#|floor|fl\.?|ste\.?|bldg\.?|room|rm\.?|no\.?/i
@@ -127,39 +114,27 @@ export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, field
 
 	const init = async () => {
 		if (!API_KEY) {
-			warn('init skipped: no API key')
 			return
 		}
 
-		log('init: loading script...')
 		const Autocomplete = await loadGoogleMapsScript()
 		if (!Autocomplete) {
-			warn('init skipped: Autocomplete not available')
 			return
 		}
 
 		const input = getInput()
-		if (!input) {
-			warn('init skipped: input not found (id=', inputId, ', ref=', !!inputRef?.value, ')')
-			return
-		}
-		if (!input.isConnected) {
-			warn('init skipped: input not in DOM')
+		if (!input || !input.isConnected) {
 			return
 		}
 
 		if (autocompleteInstance && attachedInput === input) {
-			log('init skipped: already attached to this input')
 			return
 		}
 
 		if (autocompleteInstance) {
-			log('cleaning up previous instance')
 			try {
 				google?.maps?.event?.clearInstanceListeners?.(autocompleteInstance)
-			} catch (e) {
-				warn('cleanup error', e)
-			}
+			} catch (_) {}
 			autocompleteInstance = null
 			attachedInput = null
 		}
@@ -173,22 +148,17 @@ export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, field
 		try {
 			autocompleteInstance = new Autocomplete(input, options)
 			attachedInput = input
-			log('Autocomplete attached to input #' + (input.id || 'no-id'))
-		} catch (e) {
-			err('Autocomplete constructor error', e)
+		} catch (_) {
 			return
 		}
 
 		if (onPlaceSelect && typeof onPlaceSelect === 'function') {
 			autocompleteInstance.addListener('place_changed', () => {
 				const place = autocompleteInstance.getPlace()
-				log('place_changed', place)
 				if (!place || (!place.formatted_address && !place.address_components?.length)) {
-					log('place_changed ignored: empty place')
 					return
 				}
 				const addressData = getAddressComponents(place)
-				log('applying address', addressData)
 				onPlaceSelect(place, addressData)
 			})
 		}
