@@ -256,10 +256,65 @@ class SeoPagesSeeder extends Seeder
                 'meta_keywords' => ['my account', 'account management', 'orders', 'documents', 'profile'],
                 'is_active' => true,
             ],
+            // SEO landing pages (edit meta in admin)
+            [
+                'route_name' => 'free-gold-appraisal-insured-shipping',
+                'page_url' => '/free-gold-appraisal-insured-shipping',
+                'page_title' => 'Free Gold Appraisal & Insured Shipping',
+                'meta_title' => 'Free Gold Appraisal & Insured Shipping | Gold To Cash',
+                'meta_description' => 'Request a free appraisal kit with insured shipping. Sell gold and jewelry safely with Gold To Cash.',
+                'meta_keywords' => ['gold appraisal', 'insured shipping', 'sell gold', 'gold kit'],
+                'is_active' => true,
+            ],
+            [
+                'route_name' => 'online-gold-jewelry-buyer-usa',
+                'page_url' => '/online-gold-jewelry-buyer-usa',
+                'page_title' => 'Online Gold Jewelry Buyer USA',
+                'meta_title' => 'Online Gold Jewelry Buyer USA | Gold To Cash',
+                'meta_description' => 'Trusted online gold and jewelry buyer serving the USA. Competitive offers, secure process.',
+                'meta_keywords' => ['online gold buyer', 'sell jewelry', 'USA'],
+                'is_active' => true,
+            ],
+            [
+                'route_name' => 'scrap-gold-buyer-online',
+                'page_url' => '/scrap-gold-buyer-online',
+                'page_title' => 'Scrap Gold Buyer Online',
+                'meta_title' => 'Scrap Gold Buyer Online | Gold To Cash',
+                'meta_description' => 'Sell scrap gold online. Fair pricing for broken jewelry, dental gold, and scrap.',
+                'meta_keywords' => ['scrap gold', 'sell scrap gold', 'online gold buyer'],
+                'is_active' => true,
+            ],
+            [
+                'route_name' => 'best-place-sell-gold',
+                'page_url' => '/best-place-sell-gold',
+                'page_title' => 'Best Place to Sell Gold',
+                'meta_title' => 'Best Place to Sell Gold | Gold To Cash',
+                'meta_description' => 'Why Gold To Cash is a top choice to sell gold: transparent pricing, insured shipping, fast payment.',
+                'meta_keywords' => ['sell gold', 'best place to sell gold', 'gold buyer'],
+                'is_active' => true,
+            ],
+            [
+                'route_name' => 'gold-buyer-online',
+                'page_url' => '/gold-buyer-online',
+                'page_title' => 'Gold Buyer Online',
+                'meta_title' => 'Gold Buyer Online | Gold To Cash',
+                'meta_description' => 'Sell gold online with a trusted buyer. Free kit, appraisal, and secure payment.',
+                'meta_keywords' => ['gold buyer online', 'sell gold'],
+                'is_active' => true,
+            ],
+            [
+                'route_name' => 'how-sell-gold-jewelry-online-usa',
+                'page_url' => '/how-sell-gold-jewelry-online-usa',
+                'page_title' => 'How to Sell Gold Jewelry',
+                'meta_title' => 'How to Sell Gold Jewelry | Gold To Cash',
+                'meta_description' => 'Step-by-step guide to selling gold jewelry safely and for the best price.',
+                'meta_keywords' => ['how to sell gold jewelry', 'sell gold', 'gold jewelry'],
+                'is_active' => true,
+            ],
         ];
 
         foreach ($defaultPages as $pageData) {
-            \App\Models\SeoPage::create($pageData);
+            \App\Domain\Seo\Models\SeoPage::create($pageData);
         }
     }
 }

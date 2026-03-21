@@ -11,7 +11,10 @@
 			<svg class="reviews-block-icon" width="39" height="36" viewBox="0 0 39 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 				<path d="M19.0189 27.4528L27.283 25.3585L30.7359 36L19.0189 27.4528ZM38.0377 13.6981H23.4906L19.0189 0L14.5472 13.6981H0L11.7736 22.1887L7.30188 35.8868L19.0755 27.3962L26.3207 22.1887L38.0377 13.6981Z" fill="#11BA69"/>
 			</svg>
-			<h2 class="reviews-block-heading">60+ positive<br>reviews on <span class="reviews-block-heading-accent">Trustpilot</span></h2>
+			<h2 class="reviews-block-heading">
+				<span class="reviews-count">{{ trustpilotReviewsCountDisplay }}</span> positive<br>
+				reviews on <span class="reviews-block-heading-accent">Trustpilot</span>
+			</h2>
 			<Swiper
 				class="reviews-swiper"
 				:modules="reviewsSwiperModules"
@@ -110,7 +113,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { getTrustpilotReviews } from '@/api/reviews'
 
 function scrollToTop() {
 	window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -126,6 +130,25 @@ import 'swiper/css/pagination'
 const reviewsSwiperModules = [Pagination]
 const reviewsActiveIndex = ref(0)
 const reviewsSwiper = ref(null)
+
+// Total Trustpilot reviews count for the heading.
+// If fetch fails/not ready yet -> default to 100+.
+const trustpilotReviewsCount = ref(100)
+const trustpilotReviewsCountDisplay = computed(() => `${Math.floor(trustpilotReviewsCount.value)}+`)
+
+onMounted(async () => {
+	try {
+		const response = await getTrustpilotReviews()
+		const data = response?.data
+		const total =
+			typeof data?.total_count === 'number' && data.total_count > 0
+				? data.total_count
+				: (data?.reviews?.length || 0)
+		trustpilotReviewsCount.value = total > 0 ? total : 100
+	} catch (e) {
+		trustpilotReviewsCount.value = 100
+	}
+})
 
 const testimonials = [
 	{ title: 'Very easy to work with...', review: 'Great customer service. Sale was quick and I received th...', author: 'Amanda K' },

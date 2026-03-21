@@ -30,7 +30,7 @@ class FrontSeoController
 
         if ($seoPage) {
             return response()->json([
-                'title' => $seoPage->meta_title,
+                'title' => $seoPage->meta_title ?: $seoPage->page_title,
                 'description' => $seoPage->meta_description,
                 'keywords' => $seoPage->meta_keywords,
             ]);

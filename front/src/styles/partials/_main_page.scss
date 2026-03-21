@@ -610,7 +610,7 @@ div#business-tri img {
 
 .section-as-seen-in {
     background: #fff;
-    padding: 120px 0 120px 0;
+    padding: 60px 0 60px 0;
 }
 
 .section-as-seen-in__container {
@@ -1243,7 +1243,7 @@ select option[value]:checked {
 
 .section-as-seen-in {
     background: #fff;
-    padding: 120px 0 120px 0;
+    padding: 60px 0 60px 0;
 }
 
 .section-as-seen-in__container {
@@ -1426,6 +1426,14 @@ select option[value]:checked {
 .section-calculator-page {
     margin-top: 15rem;
     margin-bottom: 100px;
+}
+
+@media (max-width: 767px) {
+	[data-element="value-calculator"] input.form-control,
+	[data-element="value-calculator"] select.form-control,
+	[data-element="value-calculator"] textarea.form-control {
+		font-size: 16px !important;
+	}
 }
 
 /* BLOG POST PAGE */
