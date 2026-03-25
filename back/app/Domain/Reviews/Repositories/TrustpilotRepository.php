@@ -20,4 +20,16 @@ class TrustpilotRepository
     {
         return $this->getHighRatedReviews(20);
     }
+
+    public function countHighRatedReviews(): int
+    {
+        return Trustpilot::query()
+            ->where('rating', '>=', 4)
+            ->count();
+    }
+
+    public function countStoredReviews(): int
+    {
+        return Trustpilot::query()->count();
+    }
 }

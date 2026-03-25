@@ -10,7 +10,7 @@
 	<GoldToCashDifference />
 	<HowItWorksDesktop />
 	<WhatWeBuySection />
-	<WhatWePaySection />
+	<WhatWePaySection embedded />
 	<GoldCalculator />
 	<WhySellReasons />
 	<FastSafeSecureSection />

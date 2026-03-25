@@ -1415,7 +1415,7 @@ select option[value]:checked {
 .section-calculator {
 	margin-bottom: 100px;
 	padding: 50px 0;
-	margin-top: 20vw;
+	margin-top: clamp(1.5rem, 3vw, 3rem);
 }
 .section-calculator h1 {
     font-size: 48px;
@@ -1577,7 +1577,7 @@ select option[value]:checked {
 
 @media (min-width: 768px) and (max-width: 1199px) {
     .section-calculator {
-        margin-top: 10rem;
+        margin-top: clamp(1.5rem, 3vw, 3rem);
     }
 }
 

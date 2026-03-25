@@ -113,8 +113,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { getTrustpilotReviews } from '@/api/reviews'
+import { computed, ref } from 'vue'
 
 function scrollToTop() {
 	window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -131,24 +130,9 @@ const reviewsSwiperModules = [Pagination]
 const reviewsActiveIndex = ref(0)
 const reviewsSwiper = ref(null)
 
-// Total Trustpilot reviews count for the heading.
-// If fetch fails/not ready yet -> default to 100+.
-const trustpilotReviewsCount = ref(100)
-const trustpilotReviewsCountDisplay = computed(() => `${Math.floor(trustpilotReviewsCount.value)}+`)
-
-onMounted(async () => {
-	try {
-		const response = await getTrustpilotReviews()
-		const data = response?.data
-		const total =
-			typeof data?.total_count === 'number' && data.total_count > 0
-				? data.total_count
-				: (data?.reviews?.length || 0)
-		trustpilotReviewsCount.value = total > 0 ? total : 100
-	} catch (e) {
-		trustpilotReviewsCount.value = 100
-	}
-})
+// Public Trustpilot total (approx.); API count reflects only rows synced in DB — show fixed headline.
+const TRUSTPILOT_HEADLINE_REVIEW_TOTAL = 120
+const trustpilotReviewsCountDisplay = computed(() => `${TRUSTPILOT_HEADLINE_REVIEW_TOTAL}+`)
 
 const testimonials = [
 	{ title: 'Very easy to work with...', review: 'Great customer service. Sale was quick and I received th...', author: 'Amanda K' },
