@@ -32,6 +32,7 @@
 						type="text"
 						id="seo_description"
 						class="form-control"
+						maxlength="160"
 					/>
 				</div>
 			</div>

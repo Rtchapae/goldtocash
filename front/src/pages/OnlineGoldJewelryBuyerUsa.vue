@@ -94,34 +94,15 @@
 			<h2 class="faq-title">FAQs: Selling Gold Jewelry Online in the USA</h2>
 
 			<div class="faq-list">
-				<div class="faq-item">
-					<h3>How do I know if selling online is safe?</h3>
-					<p>You stay safest when you choose a reputable online gold buyer that uses tracking and clear evaluation steps. You should also package discreetly and keep your shipment details for your records.</p>
+				<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+					<h3>{{ faq.question }}</h3>
+					<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+					<p v-else>{{ faq.answer }}</p>
 				</div>
-				<div class="faq-item">
-					<h3>Can I sell broken jewelry, or do you only buy wearable items?</h3>
-					<p>You can absolutely sell broken gold jewelry. Buyers calculate value from purity and weight, so snapped chains and damaged rings still carry real worth.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Should I use a gold calculator before I send my jewelry?</h3>
-					<p>Yes. A gold calculator helps you set a realistic expectation and understand what drives your payout. It also makes offer comparisons much easier.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Do gemstones increase the value of my payout?</h3>
-					<p>Gold buyers primarily pay for gold content in scrap-based offers. Some stones may not add value unless the buyer specifically evaluates them, so you should ask before shipping if stone value matters to you.</p>
-				</div>
-				<div class="faq-item">
-					<h3>What items can I sell besides rings and chains?</h3>
-					<p>Many sellers sell gold bracelets and gold rings for cash, and also send single earrings, broken clasps, pendants, and mixed pieces. Some sellers also ask about higher-value items like watches and collectible pieces.</p>
-				</div>
-				<div class="faq-item">
-					<h3>How fast do I get paid after I accept an offer?</h3>
-					<p>A reputable buyer typically processes a quick payment after you accept the offer. The exact timing depends on verification and payout method, but online selling usually moves fast.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Can I sell gold jewelry from home anywhere in the USA?</h3>
-					<p>Yes. Mail-in services support nationwide selling, which helps if you don't have a trustworthy buyer nearby. That's why people search for "cash for gold USA" and "sell gold online" so often.</p>
-				</div>
+			</div>
+
+			<div class="seo-faq-schema" aria-hidden="true">
+				<FaqJsonLd :items="faqItems" />
 			</div>
 
 			<div class="get-started-block">
@@ -134,6 +115,45 @@
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How do I know if selling online is safe?',
+		answer:
+			'You stay safest when you choose a reputable online gold buyer that uses tracking and clear evaluation steps. You should also package discreetly and keep your shipment details for your records.',
+	},
+	{
+		question: 'Can I sell broken jewelry, or do you only buy wearable items?',
+		answer:
+			'You can absolutely sell broken gold jewelry. Buyers calculate value from purity and weight, so snapped chains and damaged rings still carry real worth.',
+	},
+	{
+		question: 'Should I use a gold calculator before I send my jewelry?',
+		answer:
+			'Yes. A gold calculator helps you set a realistic expectation and understand what drives your payout. It also makes offer comparisons much easier.',
+	},
+	{
+		question: 'Do gemstones increase the value of my payout?',
+		answer:
+			'Gold buyers primarily pay for gold content in scrap-based offers. Some stones may not add value unless the buyer specifically evaluates them, so you should ask before shipping if stone value matters to you.',
+	},
+	{
+		question: 'What items can I sell besides rings and chains?',
+		answer:
+			'Many sellers sell gold bracelets and gold rings for cash, and also send single earrings, broken clasps, pendants, and mixed pieces. Some sellers also ask about higher-value items like watches and collectible pieces.',
+	},
+	{
+		question: 'How fast do I get paid after I accept an offer?',
+		answer:
+			'A reputable buyer typically processes a quick payment after you accept the offer. The exact timing depends on verification and payout method, but online selling usually moves fast.',
+	},
+	{
+		question: 'Can I sell gold jewelry from home anywhere in the USA?',
+		answer:
+			'Yes. Mail-in services support nationwide selling, which helps if you don\'t have a trustworthy buyer nearby. That\'s why people search for "cash for gold USA" and "sell gold online" so often.',
+	},
+]
 </script>
 
 <style scoped>

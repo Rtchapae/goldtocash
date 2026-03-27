@@ -189,38 +189,15 @@ loading="lazy"
 
 <h2 class="faq-title">Frequently Asked Questions</h2>
 <div class="faq-list">
-<div class="faq-item">
-<h3>How long does the process take?</h3>
-<p>If you select the print or email option, payment can be completed within 24 hours of submitting your appraisal request. Mailed kits may extend the process up to five business days.</p>
+<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+<h3>{{ faq.question }}</h3>
+<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+<p v-else>{{ faq.answer }}</p>
 </div>
-<div class="faq-item">
-<h3>Is my gold insured during shipping?</h3>
-<p>Yes. FedEx shipments include automatic insurance coverage, with optional increases available upon request.</p>
 </div>
-<div class="faq-item">
-<h3>What if I do not accept the offer?</h3>
-<p>You have 72 hours to decline. Your items will be returned safely at no cost.</p>
-</div>
-<div class="faq-item">
-<h3>Do you have a storefront location?</h3>
-<p>No walk-in locations are available. All appraisals are completed at a designated secure facility.</p>
-</div>
-<div class="faq-item">
-<h3>How do I know my valuables are safe?</h3>
-<p>The business is licensed under Washington State Chapter 19.60 RCW. Items are stored in secured vaults and handled by trained personnel.</p>
-</div>
-<div class="faq-item">
-<h3>What payment methods are available?</h3>
-<p>ACH or wire transfer, company check, PayPal, and Cash App are available at no cost.</p>
-</div>
-<div class="faq-item">
-<h3>Can I change my payment method?</h3>
-<p>Yes. Payment preferences may be updated through your account before payment is initiated.</p>
-</div>
-<div class="faq-item">
-<h3>Do you accept broken or damaged jewelry?</h3>
-<p>Yes. Condition does not affect value. Gold is paid based on metal content, weight, and purity.</p>
-</div>
+
+<div class="seo-faq-schema" aria-hidden="true">
+<FaqJsonLd :items="faqItems" />
 </div>
 
 </div>
@@ -228,6 +205,48 @@ loading="lazy"
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How long does the process take?',
+		answer:
+			'If you select the print or email option, payment can be completed within 24 hours of submitting your appraisal request. Mailed kits may extend the process up to five business days.',
+	},
+	{
+		question: 'Is my gold insured during shipping?',
+		answer:
+			'Yes. FedEx shipments include automatic insurance coverage, with optional increases available upon request.',
+	},
+	{
+		question: 'What if I do not accept the offer?',
+		answer: 'You have 72 hours to decline. Your items will be returned safely at no cost.',
+	},
+	{
+		question: 'Do you have a storefront location?',
+		answer:
+			'No walk-in locations are available. All appraisals are completed at a designated secure facility.',
+	},
+	{
+		question: 'How do I know my valuables are safe?',
+		answer:
+			'The business is licensed under Washington State Chapter 19.60 RCW. Items are stored in secured vaults and handled by trained personnel.',
+	},
+	{
+		question: 'What payment methods are available?',
+		answer: 'ACH or wire transfer, company check, PayPal, and Cash App are available at no cost.',
+	},
+	{
+		question: 'Can I change my payment method?',
+		answer:
+			'Yes. Payment preferences may be updated through your account before payment is initiated.',
+	},
+	{
+		question: 'Do you accept broken or damaged jewelry?',
+		answer:
+			'Yes. Condition does not affect value. Gold is paid based on metal content, weight, and purity.',
+	},
+]
 </script>
 
 <style scoped>

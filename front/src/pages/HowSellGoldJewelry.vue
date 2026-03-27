@@ -174,44 +174,66 @@ loading="lazy"
 
 <h2 class="faq-title">Frequently Asked Questions</h2>
 <div class="faq-list">
-<div class="faq-item">
-<h3>How long does the process take?</h3>
-<p>If you choose the print or email option, payment can be completed within 24 hours from the moment the appraisal request is submitted. Mailed kits may extend the process up to five business days.</p>
-</div>
-<div class="faq-item">
-<h3>Is my gold insured during shipping?</h3>
-<p>Yes. Every prepaid FedEx shipping label provided includes automatic insurance coverage during transit. This protects your valuables in the unlikely event of loss or damage while shipping.</p>
-</div>
-<div class="faq-item">
-<h3>What if I do not accept the offer?</h3>
-<p>There is no obligation to sell your gold. After receiving your detailed offer report, you have up to 72 hours to review and decide whether to accept. If you choose not to move forward, your items will be returned to you safely and at no cost. There are no fees, penalties, or deductions for declining an offer.</p>
-</div>
-<div class="faq-item">
-<h3>Do you have a physical storefront?</h3>
-<p>No. For security reasons, walk-in locations are not available. All testing and appraisals are performed at a designated facility by trained professionals.</p>
-</div>
-<div class="faq-item">
-<h3>How do I know I will not be scammed?</h3>
-<p>The company is a licensed precious metals dealer under Washington State Chapter 19.60 RCW. All items are logged, tracked, and stored in a secure vault monitored by trained staff.</p>
-</div>
-<div class="faq-item">
-<h3>What payment methods are available?</h3>
-<p>Several fast and convenient payment options are offered, allowing you to choose what works best for you: wire transfer or ACH direct deposit, company check mailed within 24 hours, PayPal, or Cash App.</p>
-</div>
-<div class="faq-item">
-<h3>Can I change my payment method later?</h3>
-<p>Yes. You may update your preferred payment method at any time before payment is initiated. The easiest way to do this is by logging into your account and updating the information in the personal details section.</p>
-</div>
-<div class="faq-item">
-<h3>Do you accept broken or damaged jewelry?</h3>
-<p>Yes. Jewelry does not need to be wearable or in perfect condition. Broken chains, single earrings, missing stones, bent rings, and damaged pieces are all accepted. Gold value is determined by precious metal content, weight, and purity.</p>
+<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+<h3>{{ faq.question }}</h3>
+<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+<p v-else>{{ faq.answer }}</p>
 </div>
 </div>
+
+<div class="seo-faq-schema" aria-hidden="true">
+<FaqJsonLd :items="faqItems" />
+</div>
+
 </div>
 </section>
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How long does the process take?',
+		answer:
+			'If you choose the print or email option, payment can be completed within 24 hours from the moment the appraisal request is submitted. Mailed kits may extend the process up to five business days.',
+	},
+	{
+		question: 'Is my gold insured during shipping?',
+		answer:
+			'Yes. Every prepaid FedEx shipping label provided includes automatic insurance coverage during transit. This protects your valuables in the unlikely event of loss or damage while shipping.',
+	},
+	{
+		question: 'What if I do not accept the offer?',
+		answer:
+			'There is no obligation to sell your gold. After receiving your detailed offer report, you have up to 72 hours to review and decide whether to accept. If you choose not to move forward, your items will be returned to you safely and at no cost. There are no fees, penalties, or deductions for declining an offer.',
+	},
+	{
+		question: 'Do you have a physical storefront?',
+		answer:
+			'No. For security reasons, walk-in locations are not available. All testing and appraisals are performed at a designated facility by trained professionals.',
+	},
+	{
+		question: 'How do I know I will not be scammed?',
+		answer:
+			'The company is a licensed precious metals dealer under Washington State Chapter 19.60 RCW. All items are logged, tracked, and stored in a secure vault monitored by trained staff.',
+	},
+	{
+		question: 'What payment methods are available?',
+		answer:
+			'Several fast and convenient payment options are offered, allowing you to choose what works best for you: wire transfer or ACH direct deposit, company check mailed within 24 hours, PayPal, or Cash App.',
+	},
+	{
+		question: 'Can I change my payment method later?',
+		answer:
+			'Yes. You may update your preferred payment method at any time before payment is initiated. The easiest way to do this is by logging into your account and updating the information in the personal details section.',
+	},
+	{
+		question: 'Do you accept broken or damaged jewelry?',
+		answer:
+			'Yes. Jewelry does not need to be wearable or in perfect condition. Broken chains, single earrings, missing stones, bent rings, and damaged pieces are all accepted. Gold value is determined by precious metal content, weight, and purity.',
+	},
+]
 </script>
 
 <style scoped>

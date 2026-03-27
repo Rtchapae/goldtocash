@@ -93,26 +93,15 @@
 			<h2 class="faq-title">FAQs: Free Gold Appraisal and Insured Shipping</h2>
 
 			<div class="faq-list">
-				<div class="faq-item">
-					<h3>How does a free gold appraisal work when I sell gold online?</h3>
-					<p>You request your kit, send your items in, and the evaluation checks purity and weight to determine value. A free gold appraisal online gives you clarity before you accept any final offer.</p>
+				<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+					<h3>{{ faq.question }}</h3>
+					<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+					<p v-else>{{ faq.answer }}</p>
 				</div>
-				<div class="faq-item">
-					<h3>Is insured shipping actually important when I mail gold?</h3>
-					<p>Yes. Insured gold shipping support helps protect your package during transit and adds peace of mind, especially when you mail multiple items or higher-value gold jewelry.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Can I send broken or damaged jewelry for appraisal?</h3>
-					<p>Absolutely. You can sell broken gold jewelry and still receive value because the offer depends on gold content, not the item's condition. Broken chains and single earrings still count.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Do gold calculators give accurate prices?</h3>
-					<p>A gold calculator provides a strong estimate, especially when you know the karat and weight. Final offers can vary based on evaluation, but calculators help you understand realistic pricing.</p>
-				</div>
-				<div class="faq-item">
-					<h3>How fast do I get paid after the appraisal?</h3>
-					<p>Timing depends on processing and approval, but sellers often choose mail-in services because they want a smooth experience with quick payment, gold sale expectations, and clear communication.</p>
-				</div>
+			</div>
+
+			<div class="seo-faq-schema" aria-hidden="true">
+				<FaqJsonLd :items="faqItems" />
 			</div>
 
 			<div class="get-started-block">
@@ -125,6 +114,35 @@
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How does a free gold appraisal work when I sell gold online?',
+		answer:
+			'You request your kit, send your items in, and the evaluation checks purity and weight to determine value. A free gold appraisal online gives you clarity before you accept any final offer.',
+	},
+	{
+		question: 'Is insured shipping actually important when I mail gold?',
+		answer:
+			'Yes. Insured gold shipping support helps protect your package during transit and adds peace of mind, especially when you mail multiple items or higher-value gold jewelry.',
+	},
+	{
+		question: 'Can I send broken or damaged jewelry for appraisal?',
+		answer:
+			'Absolutely. You can sell broken gold jewelry and still receive value because the offer depends on gold content, not the item\'s condition. Broken chains and single earrings still count.',
+	},
+	{
+		question: 'Do gold calculators give accurate prices?',
+		answer:
+			'A gold calculator provides a strong estimate, especially when you know the karat and weight. Final offers can vary based on evaluation, but calculators help you understand realistic pricing.',
+	},
+	{
+		question: 'How fast do I get paid after the appraisal?',
+		answer:
+			'Timing depends on processing and approval, but sellers often choose mail-in services because they want a smooth experience with quick payment, gold sale expectations, and clear communication.',
+	},
+]
 </script>
 
 <style scoped>

@@ -97,26 +97,15 @@
 			<h2 class="faq-title">FAQs: Scrap Gold Buyer Online</h2>
 
 			<div class="faq-list">
-				<div class="faq-item">
-					<h3>How do I estimate scrap gold value before shipping?</h3>
-					<p>You can start with a <a href="/gold-calculator">gold calculator</a> and confirm your estimate with a scrap gold calculator. Your estimate depends on purity, weight, and the current gold price.</p>
+				<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+					<h3>{{ faq.question }}</h3>
+					<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+					<p v-else>{{ faq.answer }}</p>
 				</div>
-				<div class="faq-item">
-					<h3>Can I sell broken gold jewelry online?</h3>
-					<p>Yes. You can sell broken gold jewelry even if it doesn't clasp, doesn't match, or looks worn. Scrap value depends on gold content, not appearance.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Is it safe to ship gold through the mail?</h3>
-					<p>Yes, when you use tracking and insurance. A secure process supports safe transit, documentation, and confirmation of delivery.</p>
-				</div>
-				<div class="faq-item">
-					<h3>What happens after you receive my shipment?</h3>
-					<p>We test gold purity, weigh your items, and create an offer based on real market factors. You stay in control of accepting the offer.</p>
-				</div>
-				<div class="faq-item">
-					<h3>How fast do I get paid?</h3>
-					<p>After you accept, we process payment quickly so your transaction finishes smoothly.</p>
-				</div>
+			</div>
+
+			<div class="seo-faq-schema" aria-hidden="true">
+				<FaqJsonLd :items="faqItems" />
 			</div>
 
 			<div class="get-started-block">
@@ -129,6 +118,36 @@
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How do I estimate scrap gold value before shipping?',
+		answer:
+			'You can start with a gold calculator and confirm your estimate with a scrap gold calculator. Your estimate depends on purity, weight, and the current gold price.',
+		answerHtml:
+			'You can start with a <a href="/gold-calculator">gold calculator</a> and confirm your estimate with a scrap gold calculator. Your estimate depends on purity, weight, and the current gold price.',
+	},
+	{
+		question: 'Can I sell broken gold jewelry online?',
+		answer:
+			'Yes. You can sell broken gold jewelry even if it doesn\'t clasp, doesn\'t match, or looks worn. Scrap value depends on gold content, not appearance.',
+	},
+	{
+		question: 'Is it safe to ship gold through the mail?',
+		answer:
+			'Yes, when you use tracking and insurance. A secure process supports safe transit, documentation, and confirmation of delivery.',
+	},
+	{
+		question: 'What happens after you receive my shipment?',
+		answer:
+			'We test gold purity, weigh your items, and create an offer based on real market factors. You stay in control of accepting the offer.',
+	},
+	{
+		question: 'How fast do I get paid?',
+		answer: 'After you accept, we process payment quickly so your transaction finishes smoothly.',
+	},
+]
 </script>
 
 <style scoped>

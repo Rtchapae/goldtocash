@@ -130,34 +130,15 @@
 
 			<h2 class="faq-title">Frequently Asked Questions</h2>
 			<div class="faq-list">
-				<div class="faq-item">
-					<h3>How fast can I get paid?</h3>
-					<p>Once you accept your offer, payment is initiated within 24 hours. Most customers receive their funds quickly, depending on the payment method selected. There are no extended processing delays or holding periods.</p>
+				<div v-for="(faq, idx) in faqItems" :key="idx" class="faq-item">
+					<h3>{{ faq.question }}</h3>
+					<p v-if="faq.answerHtml" v-html="faq.answerHtml"></p>
+					<p v-else>{{ faq.answer }}</p>
 				</div>
-				<div class="faq-item">
-					<h3>Is the process really free?</h3>
-					<p>Yes. The entire process is completely free from start to finish. This includes the appraisal kit, prepaid FedEx shipping label, insurance coverage, professional evaluation, and free return shipping if you decline the offer. You never pay out of pocket at any stage.</p>
-				</div>
-				<div class="faq-item">
-					<h3>What if I do not accept the offer?</h3>
-					<p>If the offer does not meet your expectations, you have 72 hours to decline. Your items will be safely packaged and returned to you at no cost. There is no pressure to sell and no penalty for saying no.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Is my shipment insured?</h3>
-					<p>Yes. Every shipment is insured while in transit using the prepaid FedEx shipping label. Additional insurance coverage can be requested for higher-value packages. Your items remain protected from shipment through appraisal.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Do you have storefront locations?</h3>
-					<p>No walk-in locations are available. All testing and appraisals are completed at a designated secure facility. This approach allows for higher security standards and protects both customer valuables and personnel.</p>
-				</div>
-				<div class="faq-item">
-					<h3>Can I speak with a real person?</h3>
-					<p>Yes. Live customer support is available by phone and email. You can speak directly with a knowledgeable representative if you have questions about your shipment, offer, payment, or account at any time during the process.</p>
-				</div>
-				<div class="faq-item">
-					<h3>What makes Gold to Cash different?</h3>
-					<p>Gold to Cash combines transparent pricing with professional appraisal standards and competitive payouts. Customers receive detailed offer reports, free insured shipping, fast payment within 24 hours, and a price match guarantee. The entire process is built to be secure, straightforward, and completely obligation-free.</p>
-				</div>
+			</div>
+
+			<div class="seo-faq-schema" aria-hidden="true">
+				<FaqJsonLd :items="faqItems" />
 			</div>
 
 			<div class="get-started-block">
@@ -170,6 +151,45 @@
 </template>
 
 <script setup>
+import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
+
+const faqItems = [
+	{
+		question: 'How fast can I get paid?',
+		answer:
+			'Once you accept your offer, payment is initiated within 24 hours. Most customers receive their funds quickly, depending on the payment method selected. There are no extended processing delays or holding periods.',
+	},
+	{
+		question: 'Is the process really free?',
+		answer:
+			'Yes. The entire process is completely free from start to finish. This includes the appraisal kit, prepaid FedEx shipping label, insurance coverage, professional evaluation, and free return shipping if you decline the offer. You never pay out of pocket at any stage.',
+	},
+	{
+		question: 'What if I do not accept the offer?',
+		answer:
+			'If the offer does not meet your expectations, you have 72 hours to decline. Your items will be safely packaged and returned to you at no cost. There is no pressure to sell and no penalty for saying no.',
+	},
+	{
+		question: 'Is my shipment insured?',
+		answer:
+			'Yes. Every shipment is insured while in transit using the prepaid FedEx shipping label. Additional insurance coverage can be requested for higher-value packages. Your items remain protected from shipment through appraisal.',
+	},
+	{
+		question: 'Do you have storefront locations?',
+		answer:
+			'No walk-in locations are available. All testing and appraisals are completed at a designated secure facility. This approach allows for higher security standards and protects both customer valuables and personnel.',
+	},
+	{
+		question: 'Can I speak with a real person?',
+		answer:
+			'Yes. Live customer support is available by phone and email. You can speak directly with a knowledgeable representative if you have questions about your shipment, offer, payment, or account at any time during the process.',
+	},
+	{
+		question: 'What makes Gold to Cash different?',
+		answer:
+			'Gold to Cash combines transparent pricing with professional appraisal standards and competitive payouts. Customers receive detailed offer reports, free insured shipping, fast payment within 24 hours, and a price match guarantee. The entire process is built to be secure, straightforward, and completely obligation-free.',
+	},
+]
 </script>
 
 <style scoped>

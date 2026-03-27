@@ -16,7 +16,7 @@
 					v-for="item in menuItems" 
 					:key="item.route || item.title"
 					class="_dropdown" 
-					:class="{ 'active-page': route.name === item.route }"
+					:class="{ 'active-page': route?.name === item.route }"
 				>
 					<router-link v-if="item.type === 'link'" :to="{ name: item.route }">
 						<iconify-icon :icon="item.icon" class="menu-icon"></iconify-icon>
