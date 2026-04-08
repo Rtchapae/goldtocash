@@ -1,3 +1,5 @@
+import { BLOG_POST_ROUTE_NAMES, blogPathPrefixForRouteName } from '@/constants/blogPostRoutes.js'
+
 const DEFAULT_META = {
 	title: 'Gold To Cash - Buy Gold and Silver | Professional Precious Metals Dealer',
 	description:
@@ -38,9 +40,62 @@ function escapeMetaText(value) {
 		.trim()
 }
 
+function excerptFromHtml(html) {
+	const text = String(html ?? '')
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+	if (!text) return ''
+	return text.length > 160 ? `${text.slice(0, 157)}...` : text
+}
+
+/**
+ * @param {string} apiBase
+ * @param {string} slug
+ * @param {string | null} pathPrefix
+ * @param {{ title: string, description: string, keywords: string }} defaults
+ * @returns {Promise<{ title: string, description: string, keywords: string } | null>}
+ */
+async function fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults) {
+	const qs = new URLSearchParams()
+	if (pathPrefix != null && pathPrefix !== '') {
+		qs.append('path_prefix', pathPrefix)
+	}
+	const q = qs.toString()
+	const url = `${apiBase}/posts/${encodeURIComponent(slug)}${q ? `?${q}` : ''}`
+	try {
+		const controller = new AbortController()
+		const t = setTimeout(() => controller.abort(), 10000)
+		const res = await fetch(url, {
+			headers: { Accept: 'application/json' },
+			signal: controller.signal,
+		})
+		clearTimeout(t)
+		if (!res.ok) return null
+		const json = await res.json()
+		const post = json?.data
+		if (!post || typeof post !== 'object') return null
+
+		const title =
+			(post.seo_title && String(post.seo_title).trim()) || post.title || defaults.title
+		const description =
+			(post.seo_description && String(post.seo_description).trim()) ||
+			excerptFromHtml(post.body) ||
+			defaults.description
+
+		return {
+			title,
+			description,
+			keywords: defaults.keywords,
+		}
+	} catch {
+		return null
+	}
+}
+
 /**
  * Fetch SEO from the same API as the client (admin-configured pages).
- * @param {{ name?: string, path?: string }} route
+ * @param {{ name?: string, path?: string, params?: Record<string, string> }} route
  * @param {{ apiBaseUrl?: string }} [options] — absolute API root for server-side fetch (required in Docker if VITE_API_BASE_URL is relative)
  * @returns {Promise<string>} HTML fragment for <head> (title + meta tags)
  */
@@ -52,6 +107,15 @@ export async function buildSsrMetaTags(route, options = {}) {
 	}
 
 	const routeName = route?.name != null ? String(route.name) : ''
+	const slug = route?.params?.slug
+	if (slug && BLOG_POST_ROUTE_NAMES.includes(routeName)) {
+		const pathPrefix = blogPathPrefixForRouteName(routeName)
+		const postMeta = await fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults)
+		if (postMeta) {
+			return metaTagsHtml(postMeta)
+		}
+	}
+
 	const urlPath = route?.path || '/'
 	const qs = new URLSearchParams({
 		page_url: urlPath,

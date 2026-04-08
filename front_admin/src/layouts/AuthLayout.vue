@@ -7,7 +7,7 @@
 		</div>
 		<div class="auth-right py-32 px-24 d-flex flex-column justify-content-center">
 			<div class="max-w-464-px mx-auto w-100">
-				<slot />
+				<router-view :key="route?.fullPath ?? ''" />
 			</div>
 		</div>
 	</section>
@@ -15,7 +15,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const isDarkTheme = ref(false)
 
 const backgroundSrc = computed(() => {

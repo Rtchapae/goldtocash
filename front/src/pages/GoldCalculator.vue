@@ -1,42 +1,33 @@
 <template>
-	<div class="container section-calculator-page">
-		<h1 class="mb-5">Gold Calculator</h1>
+	<div class="gold-calculator-page">
+		<GoldCalculatorScrapIntroSection v-if="isScrapLikeLayout" :variant="scrapLikeVariant" />
 
-		<ClientOnly>
-			<ValueCalculator />
-		</ClientOnly>
+		<GoldCalculatorUseBlock v-if="!isScrapLikeLayout" variant="default" />
 
-		<TrustpilotReviews />
+		<TrustpilotReviews v-if="!isScrapLikeLayout" />
 
-		<GoldCalculatorContentIntro :price-per-t-o-z="pricePerTOz" />
-
-		<ClientOnly>
-			<ValueCalculator />
-		</ClientOnly>
-
-		<GoldCalculatorContentOutro />
+		<GoldCalculatorHowItWorks :faq-variant="faqVariant" />
 	</div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import TrustpilotReviews from '@/components/TrustpilotReviews.vue'
-import ValueCalculator from '@/components/ValueCalculator.vue'
-import ClientOnly from '@/components/ClientOnly.vue'
-import GoldCalculatorContentIntro from '@/components/GoldCalculatorContentIntro.vue'
-import GoldCalculatorContentOutro from '@/components/GoldCalculatorContentOutro.vue'
-import { getCurrentGoldPrice } from '@/api/calculator'
-import { ref, onMounted } from 'vue'
+import GoldCalculatorHowItWorks from '@/components/GoldCalculatorHowItWorks.vue'
+import GoldCalculatorUseBlock from '@/components/GoldCalculatorUseBlock.vue'
+import GoldCalculatorScrapIntroSection from '@/components/GoldCalculatorScrapIntroSection.vue'
 
-const pricePerTOz = ref(0)
+const route = useRoute()
+const faqVariant = computed(() => route.meta.faqVariant || 'calculator')
 
-onMounted(async () => {
-	try {
-		const priceData = await getCurrentGoldPrice()
-		pricePerTOz.value = priceData.numeric
-	} catch (error) {
-		console.error('Failed to load gold price for page:', error)
-	}
+/** Scrap/dental routes: inline embed + section stack; generic route uses top calculator block + reviews. */
+const isScrapLikeLayout = computed(() => {
+	const v = faqVariant.value
+	return v === 'scrap' || v === 'dental'
 })
+
+const scrapLikeVariant = computed(() => (faqVariant.value === 'dental' ? 'dental' : 'scrap'))
 </script>
 
 <style scoped>

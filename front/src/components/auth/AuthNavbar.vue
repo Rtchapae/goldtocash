@@ -53,9 +53,6 @@
 							</ul>
 						</li>
 					</template>
-					<li class="nav-item">
-						<a href="/gold-calculator">Gold Calculator</a>
-					</li>
 					<li class="nav-item d-none d-lg-inline-block">
 						<a href="/why-us">Why Us</a>
 					</li>
@@ -103,32 +100,47 @@ const menus = [
 			{ label: 'Cash for Gold', href: '/cash-for-gold' }
 		]
 	},
-	{
-		key: 'wwb',
-		label: 'What We Buy',
-		href: '/what-we-buy',
-		desktopItems: [
-			{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-			{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-			{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-			{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-			{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-			{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-		],
-		mobileItems: [
-			{ label: 'What We Buy', href: '/what-we-buy' },
-			{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-			{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-			{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-			{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-			{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-			{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-		]
-	}
+		{
+			key: 'wwb',
+			label: 'What We Buy',
+			href: '/what-we-buy',
+			desktopItems: [
+				{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
+				{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
+				{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
+				{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
+				{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
+				{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
+			],
+			mobileItems: [
+				{ label: 'What We Buy', href: '/what-we-buy' },
+				{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
+				{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
+				{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
+				{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
+				{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
+				{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
+			]
+		},
+		{
+			key: 'gcc',
+			label: 'Gold Calculator',
+			href: '/gold-calculator',
+			desktopItems: [
+				{ label: 'Gold Calculator', href: '/gold-calculator' },
+				{ label: 'Scrap Gold Calculator', href: '/scrap-gold-calculator' },
+				{ label: 'Dental Gold Calculator', href: '/dental-gold-calculator' }
+			],
+			mobileItems: [
+				{ label: 'Gold Calculator', href: '/gold-calculator' },
+				{ label: 'Scrap Gold Calculator', href: '/scrap-gold-calculator' },
+				{ label: 'Dental Gold Calculator', href: '/dental-gold-calculator' }
+			]
+		}
 ]
 
-const openDesktop = reactive({ wwp: false, wwb: false })
-const openMobile = reactive({ wwp: false, wwb: false })
+const openDesktop = reactive({ wwp: false, wwb: false, gcc: false })
+const openMobile = reactive({ wwp: false, wwb: false, gcc: false })
 
 const mobileLinks = [
 	{ label: 'Gold Info', href: '/gold-info' },

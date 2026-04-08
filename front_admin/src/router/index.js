@@ -149,7 +149,7 @@ router.beforeEach((to, from, next) => {
 		return
 	}
 
-	if (to.meta.requiresAuth) {
+	if (to?.meta?.requiresAuth) {
 		if (typeof window === 'undefined') {
 			next()
 			return

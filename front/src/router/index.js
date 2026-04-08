@@ -12,7 +12,24 @@ const routes = [
 	{ path: '/how-it-works', name: 'how-it-works', component: () => import('@/pages/HowItWorks.vue') },
 	{ path: '/what-we-pay', name: 'what-we-pay', component: () => import('@/pages/WhatWePay.vue') },
 	{ path: '/cash-for-gold', name: 'cash-for-gold', component: () => import('@/pages/CashForGold.vue') },
-	{ path: '/gold-calculator', name: 'gold-calculator', component: () => import('@/pages/GoldCalculator.vue') },
+	{
+		path: '/gold-calculator',
+		name: 'gold-calculator',
+		component: () => import('@/pages/GoldCalculator.vue'),
+		meta: { faqVariant: 'calculator' },
+	},
+	{
+		path: '/scrap-gold-calculator',
+		name: 'scrap-gold-calculator',
+		component: () => import('@/pages/GoldCalculator.vue'),
+		meta: { faqVariant: 'scrap' },
+	},
+	{
+		path: '/dental-gold-calculator',
+		name: 'dental-gold-calculator',
+		component: () => import('@/pages/GoldCalculator.vue'),
+		meta: { faqVariant: 'dental' },
+	},
 	{ path: '/what-we-buy', name: 'what-we-buy', component: () => import('@/pages/WhatWeBuy.vue') },
 	{ path: '/sell-luxury-watches', name: 'sell-luxury-watches', component: () => import('@/pages/SellLuxuryWatches.vue') },
 	{ path: '/sell-gold-jewelry', name: 'sell-gold-jewelry', component: () => import('@/pages/SellGoldJewelry.vue') },
@@ -57,7 +74,7 @@ export function createRouter(history) {
 	})
 
 	router.beforeEach((to, from, next) => {
-		if (to.meta.requiresAuth) {
+		if (to?.meta?.requiresAuth) {
 			if (typeof window === 'undefined') {
 				next()
 				return

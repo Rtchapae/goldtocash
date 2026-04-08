@@ -1,4 +1,5 @@
 import { getCurrentRouteSeoData } from '@/api/seo.js'
+import { BLOG_POST_ROUTE_NAMES } from '@/constants/blogPostRoutes.js'
 
 const GA_MEASUREMENT_ID = 'G-YCPB4K7QYZ'
 
@@ -67,6 +68,10 @@ class SeoService {
 	}
 
 	async loadSeoForRoute(route) {
+		if (route?.name && BLOG_POST_ROUTE_NAMES.includes(route.name)) {
+			this.sendGaPageView(route)
+			return
+		}
 		try {
 			const seoData = await getCurrentRouteSeoData(route)
 			if (seoData) {

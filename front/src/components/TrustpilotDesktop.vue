@@ -64,6 +64,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import { trustpilotTestimonials as testimonials } from '@/constants/trustpilotTestimonials'
 
 const modules = [Navigation, Pagination, Autoplay]
 
@@ -76,14 +77,6 @@ const pagination = {
     el: '.trustpilot-swiper-pagination',
     clickable: true
 }
-
-const testimonials = [
-    { title: 'Very easy to work with...', review: 'Great customer service. Sale was quick and I received th...', author: 'Amanda K' },
-    { title: 'I was looking online...', review: 'unlike a lot of other places like this.', author: 'Dan L' },
-    { title: 'I had a very good experience...', review: 'I had a very good experience selling my jewelry to Gold t...', author: 'Edward J' },
-    { title: 'Gold to Cash is the Best!...', review: 'but I didn\'t want to just give it away. So I sent in my ...', author: 'Lawson' },
-    { title: 'I recommend Gold to Cash...', review: 'I recommend Gold to Cash for selling jewelry. Good reputa...', author: 'Michael L' }
-]
 </script>
 
 
