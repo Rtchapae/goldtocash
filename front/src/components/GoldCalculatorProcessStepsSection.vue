@@ -15,10 +15,13 @@
 					<p class="gc-figma-346-371__num" aria-hidden="true">{{ step.num }}</p>
 					<div class="gc-figma-346-371__body">
 						<h3 class="gc-figma-346-371__step-title">
-							<template v-for="(line, li) in step.titleLines" :key="li">
-								<template v-if="li > 0"><br /></template>
-								{{ line }}
-							</template>
+							<span class="gc-figma-346-371__step-title-lines">
+								<template v-for="(line, li) in step.titleLines" :key="'d-' + li">
+									<template v-if="li > 0"><br /></template>
+									{{ line }}
+								</template>
+							</span>
+							<span class="gc-figma-346-371__step-title-one">{{ step.titleLines.join(' ') }}</span>
 						</h3>
 						<p class="gc-figma-346-371__step-text">{{ step.body }}</p>
 					</div>
@@ -188,6 +191,10 @@ const steps = computed(() => (props.pageVariant === 'dental' ? DENTAL_STEPS : SC
 	color: #fff;
 }
 
+.gc-figma-346-371__step-title-one {
+	display: none;
+}
+
 .gc-figma-346-371__step-text {
 	margin: 0;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -238,6 +245,26 @@ const steps = computed(() => (props.pageVariant === 'dental' ? DENTAL_STEPS : SC
 	.gc-figma-346-371__title {
 		font-size: 30px;
 		line-height: 1.13;
+	}
+
+	.gc-figma-346-371__step-title-lines {
+		display: none;
+	}
+
+	.gc-figma-346-371__step-title-one {
+		display: block;
+		white-space: nowrap;
+		font-size: clamp(13px, 3.6vw, 20px);
+		line-height: 1.2;
+	}
+
+	/* Dental: keep line breaks / wrapping — one-line mode overlaps in 2-up layout */
+	.gc-figma-346-371--dental .gc-figma-346-371__step-title-lines {
+		display: block;
+	}
+
+	.gc-figma-346-371--dental .gc-figma-346-371__step-title-one {
+		display: none;
 	}
 }
 </style>

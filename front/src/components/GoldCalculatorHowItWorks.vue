@@ -124,12 +124,12 @@ const calcWorksTitle = computed(() => {
 
 const calcWorksIntro = computed(() => {
 	if (props.faqVariant === 'scrap') {
-		return 'We combine live gold spot pricing with the purity and weight you enter to estimate melt value for scrap jewelry and mixed pieces. Simply:'
+		return 'We combine live gold spot pricing with the purity and weight you enter to estimate melt value for scrap jewelry and mixed pieces.'
 	}
 	if (props.faqVariant === 'dental') {
-		return 'We combine live gold spot pricing with the purity and weight you enter to estimate melt value for dental crowns, bridges, and alloys. Simply:'
+		return 'We combine live gold spot pricing with the purity and weight you enter to estimate melt value for dental crowns, bridges, and alloys.'
 	}
-	return 'Our calculator uses current market data and the spot price of gold per gram to estimate what your gold is worth. Simply:'
+	return 'Our calculator uses current market data and the spot price of gold per gram to estimate what your gold is worth.'
 })
 </script>
 
@@ -372,7 +372,7 @@ const calcWorksIntro = computed(() => {
 
 /* Step 3: pay strip — slightly larger, nudged up in canvas */
 .calc-works__mock--pay {
-	width: 122%;
+	width: 132%;
 	margin-left: 50%;
 	transform: translate(-50%, -10px);
 }
@@ -380,21 +380,21 @@ const calcWorksIntro = computed(() => {
 .calc-works__pay-box {
 	width: 100%;
 	min-width: 0;
-	padding: 20px 18px 18px;
-	border-radius: 15px;
+	padding: 22px 20px 20px;
+	border-radius: 16px;
 	background: #fff;
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: center;
-	gap: 10px;
+	gap: 12px;
 	box-sizing: border-box;
 }
 
 .calc-works__pay-label {
 	font-family: Montserrat, sans-serif;
 	font-weight: 600;
-	font-size: clamp(0.75rem, 2.35vw, 1.0625rem);
+	font-size: clamp(0.8125rem, 2.5vw, 1.125rem);
 	line-height: 1.3;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -406,10 +406,70 @@ const calcWorksIntro = computed(() => {
 .calc-works__pay-amount {
 	font-family: Montserrat, sans-serif;
 	font-weight: 700;
-	font-size: clamp(2rem, 5vw, 3.5rem);
+	font-size: clamp(2.35rem, 5.25vw, 4.25rem);
 	line-height: 1;
 	color: #000;
 	text-align: center;
+}
+
+@media (min-width: 992px) {
+	.calc-works__purity-row {
+		gap: 12px;
+		min-width: 380px;
+	}
+
+	.calc-works__pill {
+		min-height: 60px;
+		padding: 0 12px;
+		border-radius: 18px;
+	}
+
+	.calc-works__pill--chev {
+		width: 118px;
+		min-width: 118px;
+	}
+
+	.calc-works__pill--gold {
+		width: 228px;
+		min-width: 228px;
+		min-height: 60px;
+		padding: 0 18px;
+		font-size: 1.125rem;
+	}
+
+	.calc-works__chev,
+	.calc-works__mini-chev {
+		font-size: 14px;
+	}
+
+	.calc-works__input-fake {
+		min-height: 64px;
+		padding: 16px 20px;
+		border-radius: 16px;
+		font-size: 1.125rem;
+	}
+
+	.calc-works__mock--pay {
+		width: 142%;
+	}
+
+	.calc-works__pay-box {
+		padding: 30px 26px 26px;
+		gap: 14px;
+		border-radius: 18px;
+	}
+
+	.calc-works__pay-label {
+		font-size: 1.1875rem;
+	}
+
+	.calc-works__pay-amount {
+		font-size: clamp(3.25rem, 3.85vw, 5rem);
+	}
+
+	.calc-works__mock--weight {
+		max-width: 340px;
+	}
 }
 
 .calc-works__footnote {
@@ -485,7 +545,8 @@ const calcWorksIntro = computed(() => {
 	}
 
 	.calc-works__step-label {
-		font-size: clamp(0.8125rem, 3.2vw, 1rem);
+		font-size: 32px;
+		line-height: 1.1;
 	}
 
 	.calc-works__step-canvas {
@@ -504,32 +565,59 @@ const calcWorksIntro = computed(() => {
 		margin-top: 20px;
 	}
 
-	.calc-works__pill--gold {
-		font-size: clamp(0.9375rem, 3.4vw, 1.125rem);
-	}
-
-	.calc-works__input-fake {
-		min-height: 50px;
-		font-size: clamp(1rem, 3.6vw, 1.25rem);
-	}
-
 	.calc-works__mock--pay {
 		width: 100%;
 		transform: translate(0, -4px);
 		margin-left: 0;
 	}
 
-	.calc-works__pay-box {
-		padding: 16px 14px 14px;
+	.calc-works__pay-amount {
+		font-size: clamp(3.25rem, 13vw, 4.75rem);
 	}
 
-	.calc-works__pay-amount {
-		font-size: clamp(2.125rem, 9vw, 3rem);
+	.calc-works__pay-label {
+		font-size: clamp(0.875rem, 3.4vw, 1.125rem);
 	}
 
 	.calc-works__step-text {
-		font-size: clamp(1rem, 3.4vw, 1.125rem);
+		font-size: 1.5rem;
+		line-height: 1.33;
 		padding-top: 8px;
+	}
+
+	.calc-works__footnote {
+		font-size: 1.25rem;
+		line-height: 1.35;
+	}
+
+	.calc-works__pill--chev {
+		width: 110px;
+		min-width: 110px;
+		min-height: 58px;
+	}
+
+	.calc-works__pill--gold {
+		width: 216px;
+		min-width: 216px;
+		min-height: 64px;
+		padding: 0 18px;
+		font-size: clamp(1.125rem, 4.6vw, 1.375rem);
+	}
+
+	.calc-works__chev,
+	.calc-works__mini-chev {
+		font-size: 15px;
+	}
+
+	.calc-works__input-fake {
+		min-height: 62px;
+		font-size: clamp(1.1875rem, 4.6vw, 1.5rem);
+		padding: 18px 20px;
+	}
+
+	.calc-works__pay-box {
+		padding: 24px 18px 18px;
+		gap: 14px;
 	}
 }
 </style>

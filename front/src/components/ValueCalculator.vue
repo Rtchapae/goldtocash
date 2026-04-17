@@ -53,6 +53,8 @@
 						<input
 							:id="fieldId('unit-weight')"
 							type="text"
+							inputmode="decimal"
+							autocomplete="off"
 							data-element="unit-weight"
 							name="unit-weight"
 							class="vc-figma__input"
@@ -182,6 +184,10 @@ function escapeHtml(s) {
 
 const headingHtml = computed(() => {
 	const h = escapeHtml(props.heading || '')
+	// Tabbed headings: plain title (no gold accent); default layout keeps gold highlight
+	if (props.variant === 'tabbed') {
+		return h
+	}
 	return h.replace(/\b(gold)\b/gi, '<span class="vc-figma__title-accent">$1</span>')
 })
 
@@ -476,7 +482,7 @@ const handleSellClick = () => {
 }
 
 .vc-figma__title :deep(.vc-figma__title-accent) {
-	color: #dbaf3e;
+	color: inherit;
 	font: inherit;
 	line-height: inherit;
 }
@@ -747,10 +753,20 @@ const handleSellClick = () => {
 	}
 
 	.vc-figma__disclaimer {
-		font-size: clamp(0.6875rem, 2.2vw, 0.875rem);
+		font-size: 1.25rem;
 		line-height: 1.35;
 		padding-left: 0;
 		padding-right: 0;
+	}
+
+	.vc-figma__title {
+		font-size: 1.875rem;
+		line-height: 1.2;
+	}
+
+	.vc-figma__title--tabbed {
+		font-size: 1.875rem;
+		line-height: 1.2;
 	}
 }
 
@@ -760,6 +776,27 @@ const handleSellClick = () => {
 		min-height: 0;
 		width: 100%;
 		max-width: 100%;
+	}
+
+	.vc-figma__market-strip {
+		left: 8px;
+		right: 8px;
+		bottom: 24px;
+		gap: 12px;
+	}
+
+	.vc-figma__market-label {
+		font-size: clamp(1.125rem, 3.8vw, 1.375rem);
+		line-height: 1.2;
+	}
+
+	.vc-figma__market-price {
+		font-size: clamp(1.625rem, 6.8vw, 2.25rem);
+		line-height: 1.12;
+	}
+
+	.vc-figma__market-ozt {
+		font-size: 0.88em;
 	}
 }
 

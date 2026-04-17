@@ -43,7 +43,7 @@ const sectionAriaLabel = computed(() =>
 )
 
 const calcHeading = computed(() =>
-	props.variant === 'dental' ? 'Dental Gold Value Calculator' : 'Scrap Gold Value Calculator'
+	props.variant === 'dental' ? 'Dental Gold Calculator' : 'Scrap Gold Calculator'
 )
 
 const fieldIdPrefix = computed(() =>

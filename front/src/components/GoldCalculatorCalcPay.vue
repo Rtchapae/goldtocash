@@ -25,12 +25,12 @@
 					:class="card.shadow === 'gray' ? 'gc-calc-pay__card--shadow-gray' : 'gc-calc-pay__card--shadow-gold'"
 				>
 					<div class="gc-calc-pay__card-main">
+						<div class="gc-calc-pay__card-num-layer" aria-hidden="true">
+							<span class="gc-calc-pay__card-num">{{ card.num }}</span>
+						</div>
 						<div class="gc-calc-pay__card-copy">
 							<h3 class="gc-calc-pay__card-title">{{ card.title }}</h3>
 							<p class="gc-calc-pay__card-sub">{{ card.sub }}</p>
-						</div>
-						<div class="gc-calc-pay__card-num-cell">
-							<span class="gc-calc-pay__card-num" aria-hidden="true">{{ card.num }}</span>
 						</div>
 					</div>
 				</li>
@@ -166,21 +166,32 @@ const cards = [
 .gc-calc-pay__card-main {
 	position: relative;
 	z-index: 1;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 48%);
+	display: flex;
+	flex-direction: column;
 	align-items: stretch;
+	justify-content: center;
 	gap: 12px;
-	column-gap: 12px;
 	min-height: 400px;
-	padding: 28px 14px 28px 22px;
+	padding: 28px 22px;
 	box-sizing: border-box;
-	overflow: visible;
+	overflow: hidden;
+}
+
+.gc-calc-pay__card-num-layer {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 4%;
+	pointer-events: none;
+	overflow: hidden;
 }
 
 .gc-calc-pay__card-copy {
-	grid-column: 1;
 	min-width: 0;
-	align-self: center;
+	align-self: flex-start;
 	position: relative;
 	z-index: 1;
 	display: flex;
@@ -189,26 +200,6 @@ const cards = [
 	gap: 10px;
 	max-width: 100%;
 	text-align: left;
-}
-
-.gc-calc-pay__card-num-cell {
-	grid-column: 2;
-	align-self: stretch;
-	min-width: 0;
-	min-height: 0;
-	max-width: 100%;
-	box-sizing: border-box;
-	/* Narrow column: horizontal padding shrinks content-box; cqw is relative to that inner width. */
-	padding: 0 14px;
-	/* Digit size uses min(cqw, cqh) below; need both axes from the cell. */
-	container-type: size;
-	container-name: gc-pay-num;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	overflow: visible;
-	position: relative;
-	z-index: 0;
 }
 
 .gc-calc-pay__card-title {
@@ -235,18 +226,17 @@ const cards = [
 	min-width: 0;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 800;
-	/* Desktop/tablet: large digits from container query units; mobile overrides below. */
-	font-size: clamp(7rem, 26vw, 15rem);
-	font-size: clamp(7rem, min(122cqw, 152cqh), 36rem);
+	font-size: clamp(11rem, 42vw, 22rem);
 	line-height: 1;
 	letter-spacing: 0;
 	text-align: center;
 	display: block;
-	/* Large numeral with linear gradient fill (metallic look). */
-	background-image: linear-gradient(175deg, rgba(230, 230, 230, 0.55) 0%, rgba(100, 100, 100, 0.65) 100%);
+	transform: translateX(10px) scale(1.08);
+	opacity: 0.24;
+	background-image: linear-gradient(175deg, rgba(250, 250, 250, 0.55) 0%, rgba(160, 160, 160, 0.48) 100%);
 	-webkit-background-clip: text;
 	background-clip: text;
-	color: rgba(255, 255, 255, 0.32);
+	color: rgba(255, 255, 255, 0.18);
 	user-select: none;
 	pointer-events: none;
 }
@@ -315,31 +305,29 @@ const cards = [
 		flex: 1;
 		min-height: 0;
 		height: 100%;
-		padding: 14px 10px 14px 14px;
+		padding: 14px 12px 14px 10px;
 		gap: 10px;
 		align-items: stretch;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 58%);
+	}
+
+	.gc-calc-pay__card-num-layer {
+		padding-right: 2%;
 	}
 
 	.gc-calc-pay__card-title {
-		font-size: clamp(1rem, 3.6vw, 1.25rem);
-		line-height: 1.12;
+		font-size: 30px;
+		line-height: 1.15;
 	}
 
 	.gc-calc-pay__card-sub {
-		font-size: clamp(0.875rem, 3vw, 1.0625rem);
-		line-height: 1.22;
-	}
-
-	.gc-calc-pay__card-num-cell {
-		padding: 0 10px;
+		font-size: 20px;
+		line-height: 1.25;
 	}
 
 	.gc-calc-pay__card-num {
-		font-size: clamp(6.5rem, 30vw, 14rem);
-		font-size: clamp(3.5rem, min(72cqw, 104cqh), 15rem);
-		line-height: 1;
-		text-align: center;
+		font-size: clamp(9rem, 52vw, 16rem);
+		opacity: 0.2;
+		transform: translateX(12px) scale(1.12);
 	}
 }
 </style>

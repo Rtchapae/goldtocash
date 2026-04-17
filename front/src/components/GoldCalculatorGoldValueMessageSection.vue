@@ -206,6 +206,10 @@ const hero = computed(() =>
 }
 
 @media (max-width: 767.98px) {
+	.gc-figma-375-583__figure {
+		order: -1;
+	}
+
 	.gc-figma-375-583__title {
 		font-size: 30px;
 		line-height: 1.13;

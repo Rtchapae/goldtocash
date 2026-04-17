@@ -66,21 +66,21 @@ const tabs = [
 	{
 		id: 'dental',
 		label: ['DENTAL GOLD', 'VALUE CALCULATOR'],
-		heading: 'Dental Gold Value Calculator',
+		heading: 'Dental Gold Calculator',
 		intro:
 			'Estimate the worth of dental crowns, bridges, and other gold dental alloys. Even if it looks small, dental gold can have significant value.',
 	},
 	{
 		id: 'scrap',
 		label: ['SCRAP GOLD', 'CALCULATOR'],
-		heading: 'Scrap Gold Value Calculator',
+		heading: 'Scrap Gold Calculator',
 		intro:
 			'Turn your broken, outdated, or unused jewelry into cash. Find out how much your scrap gold is worth instantly.',
 	},
 	{
 		id: 'melt',
 		label: ['GOLD MELT', 'VALUE CALCULATOR'],
-		heading: 'Gold Melt Value Calculator',
+		heading: 'Gold Melt Calculator',
 		intro:
 			'Get precise value estimates for melted or refined gold. Perfect for jewelers, refiners, and serious collectors who want to calculate pure gold melt prices.',
 	},

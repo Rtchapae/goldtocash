@@ -17,14 +17,16 @@
 
 			<ul class="gc-gold-types__grid gc-gold-types__grid--desktop">
 				<li v-for="(card, i) in cards" :key="i" class="gc-gold-types__card">
-					<div
-						class="gc-gold-types__media"
-						:style="{ backgroundImage: `url(${card.image})` }"
-						aria-hidden="true"
-					/>
-					<div class="gc-gold-types__body">
+					<div class="gc-gold-types__card-visual">
+						<div
+							class="gc-gold-types__media"
+							:style="{ backgroundImage: `url(${card.image})` }"
+							aria-hidden="true"
+						/>
 						<h3 class="gc-gold-types__card-title">{{ card.title }}</h3>
-						<p class="gc-gold-types__card-text">{{ card.text }}</p>
+						<div class="gc-gold-types__body">
+							<p class="gc-gold-types__card-text">{{ card.text }}</p>
+						</div>
 					</div>
 				</li>
 			</ul>
@@ -40,14 +42,16 @@
 				>
 					<SwiperSlide v-for="(card, i) in cards" :key="'s-' + i">
 						<div class="gc-gold-types__card gc-gold-types__card--slide">
-							<div
-								class="gc-gold-types__media"
-								:style="{ backgroundImage: `url(${card.image})` }"
-								aria-hidden="true"
-							/>
-							<div class="gc-gold-types__body">
+							<div class="gc-gold-types__card-visual">
+								<div
+									class="gc-gold-types__media"
+									:style="{ backgroundImage: `url(${card.image})` }"
+									aria-hidden="true"
+								/>
 								<h3 class="gc-gold-types__card-title">{{ card.title }}</h3>
-								<p class="gc-gold-types__card-text">{{ card.text }}</p>
+								<div class="gc-gold-types__body">
+									<p class="gc-gold-types__card-text">{{ card.text }}</p>
+								</div>
 							</div>
 						</div>
 					</SwiperSlide>
@@ -73,27 +77,27 @@ const cards = [
 	{
 		title: 'Jewelry',
 		text: 'Rings, necklaces, bracelets, earrings, and pendants',
-		image: '/images/how-sell-gold-jewelry-1.png'
+		image: '/images/calc/gold-types/jewelry.png'
 	},
 	{
 		title: 'Coins & Bullion',
 		text: 'Investment-grade gold',
-		image: '/images/gold-buyer-online-1.png'
+		image: '/images/calc/gold-types/coins-bullion.png'
 	},
 	{
 		title: 'Scrap Gold',
 		text: 'Broken or mismatched pieces',
-		image: '/images/best-place-sell-gold-1.png'
+		image: '/images/calc/gold-types/scrap-gold.png'
 	},
 	{
 		title: 'Dental Gold',
 		text: 'Crowns, bridges, and fillings (even with porcelain or enamel attached)',
-		image: '/images/how-sell-gold-jewelry-2.png'
+		image: '/images/calc/gold-types/dental-gold.png'
 	},
 	{
 		title: 'Gold Nuggets or Bars',
 		text: 'Raw gold in bars, nuggets, or other bullion forms',
-		image: '/images/gold-buyer-online-2.png'
+		image: '/images/calc/gold-types/nuggets-bars.png'
 	}
 ]
 </script>
@@ -203,7 +207,7 @@ const cards = [
 	width: 100%;
 	max-width: 360px;
 	margin: 0 auto;
-	min-height: 320px;
+	min-height: 0;
 }
 
 .gc-gold-types__card {
@@ -213,10 +217,31 @@ const cards = [
 	width: 230px;
 	min-height: 300px;
 	border-radius: 12px;
-	background: #f5f4f1;
+	background: #1a1a1a;
 	overflow: hidden;
 	box-sizing: border-box;
 	box-shadow: 0 5px 24px rgba(0, 0, 0, 0.08);
+}
+
+.gc-gold-types__card-visual {
+	position: relative;
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	min-height: 300px;
+	overflow: hidden;
+}
+
+.gc-gold-types__card-visual::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 52%;
+	background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.12) 70%, transparent 100%);
+	z-index: 1;
+	pointer-events: none;
 }
 
 .gc-gold-types__media {
@@ -227,9 +252,22 @@ const cards = [
 	background-repeat: no-repeat;
 }
 
+.gc-gold-types__card-title {
+	position: relative;
+	z-index: 2;
+	margin: 0;
+	padding: 18px 18px 0;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: 600;
+	font-size: 26px;
+	line-height: 1.23;
+	color: #fff;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
 .gc-gold-types__body {
 	position: relative;
-	z-index: 1;
+	z-index: 2;
 	margin-top: auto;
 	min-height: 42%;
 	padding: 18px 18px 22px;
@@ -241,20 +279,11 @@ const cards = [
 	box-sizing: border-box;
 }
 
-.gc-gold-types__card-title {
-	margin: 0;
-	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	font-weight: 600;
-	font-size: clamp(1.125rem, 2.2vw, 1.625rem);
-	line-height: 1.23;
-	color: #fff;
-}
-
 .gc-gold-types__card-text {
 	margin: 0;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 400;
-	font-size: clamp(0.8125rem, 1.4vw, 1.125rem);
+	font-size: 20px;
 	line-height: 1.25;
 	color: #fff;
 }
@@ -329,6 +358,20 @@ const cards = [
 		aspect-ratio: 1;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	.gc-gold-types__card--slide .gc-gold-types__card-visual {
+		flex: 1;
+		min-height: 0;
+		width: 100%;
+	}
+
+	.gc-gold-types__card-title {
+		font-size: 22px;
+	}
+
+	.gc-gold-types__card-text {
+		font-size: 18px;
 	}
 }
 </style>
