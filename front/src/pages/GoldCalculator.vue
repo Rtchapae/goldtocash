@@ -2,7 +2,7 @@
 	<div class="gold-calculator-page">
 		<GoldCalculatorScrapIntroSection v-if="isScrapLikeLayout" :variant="scrapLikeVariant" />
 
-		<GoldCalculatorUseBlock v-if="!isScrapLikeLayout" variant="default" />
+		<GoldCalculatorSection v-if="!isScrapLikeLayout" :show-heading="false" />
 
 		<TrustpilotReviews v-if="!isScrapLikeLayout" />
 
@@ -15,7 +15,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import TrustpilotReviews from '@/components/TrustpilotReviews.vue'
 import GoldCalculatorHowItWorks from '@/components/GoldCalculatorHowItWorks.vue'
-import GoldCalculatorUseBlock from '@/components/GoldCalculatorUseBlock.vue'
+import GoldCalculatorSection from '@/components/GoldCalculator.vue'
 import GoldCalculatorScrapIntroSection from '@/components/GoldCalculatorScrapIntroSection.vue'
 
 const route = useRoute()

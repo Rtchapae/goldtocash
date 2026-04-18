@@ -1,6 +1,10 @@
 <template>
 	<section class="section-testimonials">
 		<div class="section-testimonials-container">
+			<!-- Desktop/tablet: calculator above testimonial heading -->
+			<div class="d-none d-md-block testimonial-section__calculator">
+				<GoldCalculator :show-heading="false" />
+			</div>
 			<h1 class="testimonial-header">Customers like you
 				<br>talk about
 				<span style="color:var(--primary)">Gold to Cash</span>
@@ -62,6 +66,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import GoldCalculator from '@/components/GoldCalculator.vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Pagination } from 'swiper/modules'
 import 'swiper/css'
@@ -148,4 +153,21 @@ function handleThumbnailClick(index) {
 }
 </script>
 
+<style scoped>
+.testimonial-section__calculator {
+	margin-bottom: 1.5rem;
+}
+.testimonial-section__calculator :deep(.section-calculator) {
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+@media (min-width: 768px) {
+	.testimonial-header {
+		margin-top: 1.25rem;
+	}
+}
+</style>
 

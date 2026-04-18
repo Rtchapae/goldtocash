@@ -581,10 +581,11 @@ const handleSellClick = () => {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-	gap: clamp(16px, 6vw, 214px);
-	flex-wrap: wrap;
+	gap: clamp(8px, 3vw, 32px);
+	flex-wrap: nowrap;
 	margin-top: 15px;
 	width: 100%;
+	min-width: 0;
 	box-sizing: border-box;
 }
 
@@ -594,6 +595,8 @@ const handleSellClick = () => {
 	align-items: flex-start;
 	justify-content: center;
 	gap: 10px;
+	flex: 0 1 auto;
+	min-width: 0;
 }
 
 .vc-figma__pay-label {
@@ -617,6 +620,8 @@ const handleSellClick = () => {
 	position: static !important;
 	margin-top: 0 !important;
 	padding: 0 !important;
+	min-width: 0;
+	max-width: 100%;
 }
 
 /* Disable legacy dotted frame on value-display from _main_page.scss */
@@ -626,21 +631,23 @@ const handleSellClick = () => {
 }
 
 .vc-figma__cta {
-	flex: 0 1 auto;
-	min-width: min(100%, 388px);
-	min-height: 80px;
-	padding: 24px 32px;
+	flex: 1 1 0;
+	min-width: 0;
+	max-width: 100%;
+	min-height: clamp(56px, 10vw, 80px);
+	padding: clamp(12px, 2.2vw, 24px) clamp(12px, 2.8vw, 32px);
 	border: none;
 	border-radius: 999px;
 	background: #c39e3d;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 600;
-	font-size: 1.125rem;
-	line-height: 1.11;
+	font-size: clamp(0.6875rem, calc(0.55rem + 1.35vw), 1.125rem);
+	line-height: 1.1;
 	text-align: center;
 	color: #fff;
 	cursor: pointer;
 	box-sizing: border-box;
+	white-space: nowrap;
 	transition: background 0.15s ease, transform 0.05s ease;
 }
 
