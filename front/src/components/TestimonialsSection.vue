@@ -164,9 +164,26 @@ function handleThumbnailClick(index) {
 	padding-bottom: 0;
 }
 
+/* Desktop/tablet: prevent margin-collapsing between calculator and heading by using padding on the header.
+   establishes a new block formatting context so inner margins stay contained. */
+.section-testimonials-container {
+	display: flow-root;
+}
+
 @media (min-width: 768px) {
+	.testimonial-section__calculator {
+		margin-bottom: 0;
+	}
+
 	.testimonial-header {
-		margin-top: 1.25rem;
+		margin-top: 0;
+		padding-top: clamp(4.5rem, 8vw, 7rem);
+	}
+}
+
+@media (min-width: 992px) {
+	.testimonial-header {
+		padding-top: clamp(6rem, 10vw, 9.5rem);
 	}
 }
 </style>

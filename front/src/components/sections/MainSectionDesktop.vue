@@ -1,7 +1,9 @@
 <template>
 	<HeroHeader />
-	<TrustpilotDesktop />
-	<TestimonialsSection />
+	<div class="home-reviews-black-band">
+		<TrustpilotDesktop />
+		<TestimonialsSection />
+	</div>
 	<AsSeenIn />
 	<CompaniesStrip />
 	<VideoThumbnail />

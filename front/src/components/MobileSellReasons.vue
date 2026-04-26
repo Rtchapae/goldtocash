@@ -38,14 +38,9 @@
 			</Swiper>
 		</div>
 
-		<!-- Figma 2680-2322: image before calculator -->
-		<div class="mobile-calculator-banner">
-			<img src="/images/calculator-banner-mobile.png" alt="" class="mobile-calculator-banner-img">
-		</div>
-
 		<div class="mobile-calculator-section">
 			<ClientOnly>
-				<ValueCalculator heading="Scrap gold calculator" scroll-to-top-on-sell />
+				<GoldCalculator :show-heading="false" />
 			</ClientOnly>
 		</div>
 
@@ -119,7 +114,7 @@ function scrollToTop() {
 	window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import ValueCalculator from '@/components/ValueCalculator.vue'
+import GoldCalculator from '@/components/GoldCalculator.vue'
 import ClientOnly from '@/components/ClientOnly.vue'
 import MobileHowItWorksBlock from '@/components/MobileHowItWorksBlock.vue'
 import { Pagination } from 'swiper/modules'
