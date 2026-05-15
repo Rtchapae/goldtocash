@@ -1,7 +1,6 @@
 export const KIT_FORM_TEXTS = {
 	TITLE: 'Request Free Kit',
-	BONUS: 'Get 10% Bonus',
-	
+
 	BUTTON_REQUEST_KIT_DESKTOP: 'Request Free Kit',
 	BUTTON_REQUEST_KIT_MOBILE: 'Get My Free Kit',
 	BUTTON_CONTINUE_UNVERIFIED: 'Continue Unverified',

@@ -21,6 +21,7 @@
 						<div class="post-content">
 							<img
 								v-if="post.image"
+								:key="`${post.id}-${post.image}`"
 								class="blog-image float-right ml-16 show-for-large"
 								:src="post.image"
 								:alt="post.title"

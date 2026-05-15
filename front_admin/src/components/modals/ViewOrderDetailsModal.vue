@@ -39,9 +39,23 @@
 							<tr>
 								<td>Phone</td>
 								<td class="user-phone">
-									<a :href="`tel:${normalizePhone(order.phone)}`">
-										{{ formatPhone(order.phone) }}
-									</a>
+									<span class="user-phone-inline">
+										<a :href="`tel:${normalizePhone(order.phone)}`">
+											{{ formatPhone(order.phone) }}
+										</a>
+										<iconify-icon
+											v-if="order.phone_verified"
+											icon="solar:check-circle-bold"
+											class="user-phone-verify-icon text-success"
+											title="Verified"
+										/>
+										<iconify-icon
+											v-else
+											icon="solar:close-circle-bold"
+											class="user-phone-verify-icon text-danger"
+											title="Unverified"
+										/>
+									</span>
 								</td>
 							</tr>
 							<tr>
@@ -130,4 +144,20 @@ const close = () => {
 }
 </script>
 
+<style scoped>
+.user-phone-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-wrap: nowrap;
+	max-width: 100%;
+}
 
+.user-phone-inline :deep(.user-phone-verify-icon) {
+	display: inline-block;
+	width: 1.125rem;
+	height: 1.125rem;
+	flex: 0 0 1.125rem;
+	vertical-align: middle;
+}
+</style>

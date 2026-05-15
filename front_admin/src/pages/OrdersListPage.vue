@@ -146,18 +146,11 @@
 								</template>
 
 								<template #cell-url="{ row }">
-									{{ row.url || '' }}
+									<OrderUrlTruncated :url="row.url" />
 								</template>
 
 								<template #cell-source="{ row }">
-									<span
-										v-for="badge in (row.source_badges || [])"
-										:key="badge.key + String(badge.value)"
-										class="badge bg-secondary text-white text-monospace px-2 py-1 fw-normal me-1"
-										:title="badge.key"
-									>
-										{{ badge.value }}
-									</span>
+									<OrderSourceBadgesCollapse :badges="row.source_badges || []" />
 								</template>
 
 								<template #cell-email="{ row }">
@@ -170,18 +163,6 @@
 									<a :href="`tel:${normalizePhone(row.phone)}`">
 										{{ formatPhone(row.phone) }}
 									</a>
-									<iconify-icon
-										v-if="row.phone_verified"
-										icon="solar:check-circle-bold"
-										class="text-success ms-1 icon-size-base"
-										title="Verified"
-									></iconify-icon>
-									<iconify-icon
-										v-else
-										icon="solar:close-circle-bold"
-										class="text-danger ms-1 icon-size-base"
-										title="Unverified"
-									></iconify-icon>
 								</template>
 
 								<template #cell-order_number="{ row }">
@@ -316,6 +297,8 @@ import ViewOrderHistoryModal from '@/components/modals/ViewOrderHistoryModal.vue
 import EditOrderDetailsModal from '@/components/modals/EditOrderDetailsModal.vue'
 import EditOrderShippingDetailsModal from '@/components/modals/EditOrderShippingDetailsModal.vue'
 import ViewOrderFilesModal from '@/components/modals/ViewOrderFilesModal.vue'
+import OrderUrlTruncated from '@/components/orders/OrderUrlTruncated.vue'
+import OrderSourceBadgesCollapse from '@/components/orders/OrderSourceBadgesCollapse.vue'
 import { fetchAdminOrders, getOrderDetails, getOrderHistory, getOrderFiles, updateOrder, updateOrderShipping } from '@/api/adminOrders'
 import {
 	DEFAULT_PER_PAGE,

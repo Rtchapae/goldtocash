@@ -125,6 +125,7 @@
 import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { API_BASE_URL } from '@/api/client'
+import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
 
 const props = defineProps({
 	modelValue: {
@@ -150,7 +151,10 @@ const featuredPreviewUrl = computed(() => {
 		return localPreviewObjectUrl.value
 	}
 	const u = form.value?.image
-	return typeof u === 'string' && u.trim() ? u.trim() : null
+	if (typeof u !== 'string' || !u.trim()) {
+		return null
+	}
+	return resolveAdminAssetUrl(u.trim())
 })
 
 const revokeLocalPreview = () => {

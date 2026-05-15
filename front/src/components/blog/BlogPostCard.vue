@@ -4,7 +4,7 @@
 			<div class="card-body">
 				<div class="image-link">
 					<a :href="articleUrl">
-						<img class="image" :src="post.image" :alt="post.title">
+						<img class="image" :key="post.image" :src="post.image" :alt="post.title">
 					</a>
 				</div>
 				<div class="card-section p-2 h4">

@@ -153,3 +153,11 @@
 	}
 }
 
+/* URL / source: ellipsis + collapse (cells contain .order-url-trunc / .order-source-cell) */
+.orders-table td:has(.order-url-trunc) {
+	max-width: 10rem;
+}
+
+.orders-table td:has(.order-source-cell) {
+	max-width: 14rem;
+}
