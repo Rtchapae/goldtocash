@@ -7,8 +7,6 @@
 					<input type="hidden" name="_token" value="">
 					<h2 class="kit-form-title">
 						{{ KIT_FORM_TEXTS.TITLE }}
-						<br />
-						<span class="kit-form-bonus">{{ KIT_FORM_TEXTS.BONUS }}</span>
 					</h2>
 				<FormContent
 					:is-mobile="true"
@@ -57,8 +55,6 @@
 			<input type="hidden" name="_token" value="">
 			<h3>
 				{{ KIT_FORM_TEXTS.TITLE }}
-				<br />
-				<span>{{ KIT_FORM_TEXTS.BONUS }}</span>
 			</h3>
 			<FormContent
 				:is-mobile="false"
@@ -403,10 +399,6 @@ onUnmounted(() => {
 .kit-form-title {
 	text-align: center;
 	margin-bottom: 30px;
-}
-
-.kit-form-bonus {
-	color: var(--primary);
 }
 
 .kit-form-submit-btn {

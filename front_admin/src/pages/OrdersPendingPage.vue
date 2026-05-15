@@ -8,14 +8,14 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body orders-card-body">
-							<div class="d-flex justify-content-between mb-3">
-								<div class="name-search-wrapper">
+							<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+								<div class="name-search-wrapper flex-grow-1" style="min-width: 200px; max-width: 520px;">
 									<form @submit.prevent="handleNameSearch" class="d-flex">
 										<input
 											v-model="nameQuery"
 											type="text"
 											class="form-control flex-grow-1"
-											placeholder="Enter name..."
+											placeholder="Search by name, email, or phone..."
 											@input="debouncedNameSearch"
 										/>
 										<button v-if="nameQuery" type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearNameSearch">
@@ -23,6 +23,15 @@
 										</button>
 									</form>
 								</div>
+								<PeriodFilter
+									toolbar
+									v-model="currentPeriod"
+									:from="fromDate"
+									:to="toDate"
+									@update:from="fromDate = $event"
+									@update:to="toDate = $event"
+									@change="handlePeriodChange"
+								/>
 							</div>
 							<hr />
 
@@ -67,15 +76,6 @@
 											</option>
 										</select>
 									</div>
-
-									<PeriodFilter
-										v-model="currentPeriod"
-										:from="fromDate"
-										:to="toDate"
-										@update:from="fromDate = $event"
-										@update:to="toDate = $event"
-										@change="handlePeriodChange"
-									/>
 								</div>
 							</div>
 
@@ -241,6 +241,7 @@
 	<ViewOrderHistoryModal
 		:show="showHistoryModal"
 		:history="orderHistory"
+		:order-created-at="selectedOrder ? (selectedOrder.created_at || selectedOrder.date_created || '') : ''"
 		@close="closeHistoryModal"
 	/>
 	<EditOrderDetailsModal
@@ -336,16 +337,22 @@ const debouncedNameSearch = () => {
 		clearTimeout(nameSearchTimer)
 	}
 	nameSearchTimer = setTimeout(() => {
+		currentPage.value = 1
 		loadOrders()
 	}, SEARCH_DEBOUNCE_DELAY)
 }
 
 const clearNameSearch = () => {
 	nameQuery.value = ''
+	currentPage.value = 1
 	loadOrders()
 }
 
 const handleNameSearch = () => {
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	currentPage.value = 1
 	loadOrders()
 }
 

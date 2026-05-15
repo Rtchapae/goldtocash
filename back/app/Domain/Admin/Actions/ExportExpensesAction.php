@@ -13,7 +13,7 @@ class ExportExpensesAction
     ) {
     }
 
-    public function execute(): StreamedResponse
+    public function execute(?string $search = null): StreamedResponse
     {
         $adminUser = Auth::guard('admin')->user();
 
@@ -42,7 +42,7 @@ class ExportExpensesAction
             'order_updated_at',
         ];
 
-        $callback = function() use ($fieldsAllowed, $adminUser) {
+        $callback = function() use ($fieldsAllowed, $adminUser, $search) {
             $handle = fopen('php://output', 'w');
 
             fputcsv($handle, $fieldsAllowed);
@@ -63,7 +63,8 @@ class ExportExpensesAction
                         ];
                         fputcsv($handle, $row);
                     }
-                }
+                },
+                $search
             );
 
             fclose($handle);

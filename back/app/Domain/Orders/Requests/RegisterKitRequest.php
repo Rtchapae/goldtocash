@@ -26,6 +26,13 @@ class RegisterKitRequest extends FormRequest
             'country' => ['nullable', 'string', 'max:255'],
             'verification_code' => ['nullable', 'string', 'size:4'],
             'allow_unverified' => ['nullable', 'boolean'],
+            'submission_url' => ['nullable', 'string', 'max:2048'],
+            'referrer' => ['nullable', 'string', 'max:2048'],
+            'utm_source' => ['nullable', 'string', 'max:255'],
+            'utm_medium' => ['nullable', 'string', 'max:255'],
+            'utm_campaign' => ['nullable', 'string', 'max:255'],
+            'utm_term' => ['nullable', 'string', 'max:255'],
+            'utm_content' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

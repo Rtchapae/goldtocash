@@ -10,6 +10,21 @@ class SmsUtils
         return preg_replace('/^\+?1?/', '', $phone);
     }
 
+    /**
+     * Last 10 digits (US) for comparing stored phones in any format to E.164 (+1…).
+     */
+    public static function digits10(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone) ?? '';
+        if (strlen($digits) >= 11 && str_starts_with($digits, '1')) {
+            $digits = substr($digits, -10);
+        } elseif (strlen($digits) > 10) {
+            $digits = substr($digits, -10);
+        }
+
+        return strlen($digits) === 10 ? $digits : '';
+    }
+
     public static function isValidPhone(string $phone): bool
     {
         if (strlen($phone) !== 10) {

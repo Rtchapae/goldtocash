@@ -1,6 +1,13 @@
 <template>
 	<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-		<div class="d-flex align-items-center gap-2">
+		<div class="d-flex align-items-center gap-2 flex-wrap">
+			<router-link
+				v-if="backTo"
+				:to="backTo"
+				class="btn btn-sm btn-outline-secondary"
+			>
+				{{ backLabel }}
+			</router-link>
 			<h6 class="fw-semibold mb-0">{{ title }}</h6>
 			<div v-if="loading" class="spinner-border spinner-border-sm text-primary" role="status">
 				<span class="visually-hidden">Loading...</span>
@@ -20,7 +27,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
 	title: {
 		type: String,
 		required: true
@@ -28,8 +35,17 @@ const props = defineProps({
 	loading: {
 		type: Boolean,
 		default: false
+	},
+	/** When set, shows a secondary button-style link (e.g. back to list). */
+	backTo: {
+		type: String,
+		default: ''
+	},
+	backLabel: {
+		type: String,
+		default: 'Back'
 	}
-});
+})
 </script>
 
 <style scoped>

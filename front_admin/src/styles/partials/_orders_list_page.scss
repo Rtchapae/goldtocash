@@ -68,6 +68,17 @@
 	gap: 0.25rem;
 }
 
+/* Icon action cells: two buttons per row within the column (overrides Bootstrap .d-flex) */
+.orders-table .action-buttons {
+	display: grid !important;
+	grid-template-columns: repeat(2, minmax(0, auto));
+	gap: 0.25rem;
+	align-items: center;
+	justify-content: start;
+	width: fit-content;
+	max-width: 100%;
+}
+
 .utm-campaign-filter,
 .utm-medium-filter,
 .source-filter,

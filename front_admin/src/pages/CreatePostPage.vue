@@ -2,7 +2,12 @@
 	<div>
 		<NavbarHeader />
 		<div class="dashboard-main-body">
-			<PageHeader :title="isEditMode ? 'Edit post' : 'Create new post'" :loading="isSubmitting || isLoading" />
+			<PageHeader
+				:title="isEditMode ? 'Edit post' : 'Create new post'"
+				:loading="isSubmitting || isLoading"
+				back-to="/posts"
+				back-label="Back to posts"
+			/>
 
 			<div class="row">
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
@@ -54,7 +59,8 @@ const form = ref({
 	seo_description: '',
 	path_prefix: '',
 	body: '',
-	active: true
+	active: true,
+	image: null
 })
 
 const loadPost = async () => {
@@ -74,7 +80,8 @@ const loadPost = async () => {
 			seo_description: postData.seo_description || '',
 			path_prefix: postData.path_prefix || '',
 			body: postData.body || '',
-			active: postData.active ?? true
+			active: postData.active ?? true,
+			image: postData.image || null
 		}
 	} catch (error) {
 		const errorMessage = error.status === 404
@@ -149,7 +156,8 @@ watch(() => route.params.id, async (newId, oldId) => {
 			seo_description: '',
 			path_prefix: '',
 			body: '',
-			active: true
+			active: true,
+			image: null
 		}
 		await nextTick()
 		if (newId) {

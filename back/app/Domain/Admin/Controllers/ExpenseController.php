@@ -8,6 +8,7 @@ use App\Domain\Admin\Requests\ListExpensesRequest;
 use App\Domain\Admin\Resources\ExpenseResource;
 use App\Domain\Admin\Resources\ExpenseResourceCollection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,6 +27,7 @@ class ExpenseController extends Controller
             page: $request->page(),
             orderBy: $request->orderBy(),
             orderDir: $request->orderDir(),
+            search: $request->search(),
         );
 
         return response()->json(new ExpenseResourceCollection(
@@ -34,9 +36,12 @@ class ExpenseController extends Controller
         ));
     }
 
-    public function exportCsv(): StreamedResponse
+    public function exportCsv(Request $request): StreamedResponse
     {
-        return $this->exportExpensesAction->execute();
+        $raw = $request->query('search');
+        $search = is_string($raw) && $raw !== '' ? mb_substr($raw, 0, 255) : null;
+
+        return $this->exportExpensesAction->execute($search);
     }
 }
 

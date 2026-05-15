@@ -441,10 +441,6 @@ onUnmounted(() => {
 	margin-bottom: 24px;
 }
 
-.mobile-form-bonus {
-	color: var(--primary);
-}
-
 .register-submit-btn {
 	border-radius: 4px;
 }

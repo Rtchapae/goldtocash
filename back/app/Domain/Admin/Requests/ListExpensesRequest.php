@@ -16,6 +16,7 @@ class ListExpensesRequest extends FormRequest
         return [
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'search' => ['nullable', 'string', 'max:255'],
             'order-by' => ['nullable', 'string', 'in:email,id,name,phone,amount,shipping,created_at,updated_at'],
             'order-dir' => ['nullable', 'string', 'in:asc,desc'],
         ];
@@ -39,6 +40,13 @@ class ListExpensesRequest extends FormRequest
     public function orderDir(): string
     {
         return $this->input('order-dir', 'desc');
+    }
+
+    public function search(): ?string
+    {
+        $value = $this->input('search');
+
+        return $value !== null && $value !== '' ? (string) $value : null;
     }
 }
 

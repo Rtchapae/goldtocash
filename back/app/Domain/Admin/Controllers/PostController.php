@@ -33,6 +33,7 @@ class PostController extends Controller
             'to' => $request->to(),
             'order-by' => $request->orderBy(),
             'order-dir' => $request->orderDir(),
+            'search' => $request->search(),
         ];
 
         $results = $this->postRepository->search($filters);

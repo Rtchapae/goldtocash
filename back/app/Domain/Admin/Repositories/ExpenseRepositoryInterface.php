@@ -12,9 +12,10 @@ interface ExpenseRepositoryInterface
         int $page,
         int $excludeUserId,
         ?string $orderBy = null,
-        string $orderDir = 'desc'
+        string $orderDir = 'desc',
+        ?string $search = null,
     ): LengthAwarePaginator;
 
-    public function getExpensesForExport(int $excludeUserId, callable $callback): void;
+    public function getExpensesForExport(int $excludeUserId, callable $callback, ?string $search = null): void;
 }
 

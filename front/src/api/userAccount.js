@@ -1,5 +1,6 @@
 import { getMe } from './auth.js'
 import { get, put, post, postFormData } from './client.js'
+import { collectKitAttribution } from './kitRegistration.js'
 
 export const getUserProfile = async () => {
 	return getMe()
@@ -34,7 +35,7 @@ export const markMessagesAsRead = async () => {
 }
 
 export const createKitRequest = async () => {
-	return post('/front/user/orders/create', {})
+	return post('/front/user/orders/create', collectKitAttribution())
 }
 
 export const respondToOffer = async (orderId, action) => {

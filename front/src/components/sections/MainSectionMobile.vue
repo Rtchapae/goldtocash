@@ -37,13 +37,10 @@
         <div class="p-3 mt-5 muted-bg">
             <MobileWhatWePay />
                 </div>
-        <MobilePromoModal v-if="showPromo" @close="showPromo = false" />
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-
 function scrollToTop() {
 	window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -53,23 +50,6 @@ import TestimonialsSection from '@/components/TestimonialsSection.vue'
 import MobileBbbSection from '@/components/MobileBbbSection.vue'
 import MobileSellReasons from '@/components/MobileSellReasons.vue'
 import MobileWhatWePay from '@/components/MobileWhatWePay.vue'
-import MobilePromoModal from '@/components/modals/MobilePromoModal.vue'
-
-const showPromo = ref(false)
-let promoTimerId = null
-
-onMounted(() => {
-	promoTimerId = setTimeout(() => {
-		showPromo.value = true
-	}, 10000)
-})
-
-onBeforeUnmount(() => {
-	if (promoTimerId) {
-		clearTimeout(promoTimerId)
-		promoTimerId = null
-	}
-})
 </script>
 
 <style scoped>

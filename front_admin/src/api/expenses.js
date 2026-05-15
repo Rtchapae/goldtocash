@@ -6,6 +6,7 @@ export const fetchExpenses = async (params = {}) => {
 	
 	if (params.page) queryParams.append('page', params.page)
 	if (params.per_page) queryParams.append('per_page', params.per_page)
+	if (params.search) queryParams.append('search', params.search)
 	if (params['order-by']) queryParams.append('order-by', params['order-by'])
 	if (params['order-dir']) queryParams.append('order-dir', params['order-dir'])
 	
@@ -13,8 +14,11 @@ export const fetchExpenses = async (params = {}) => {
 	return get(endpoint)
 }
 
-export const exportExpensesToCsv = async () => {
-	const response = await apiRequest('/admin/expenses/export', {
+export const exportExpensesToCsv = async (params = {}) => {
+	const queryParams = new URLSearchParams()
+	if (params.search) queryParams.append('search', params.search)
+	const qs = queryParams.toString()
+	const response = await apiRequest(`/admin/expenses/export${qs ? '?' + qs : ''}`, {
 		method: 'GET'
 	})
 	

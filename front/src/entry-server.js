@@ -15,7 +15,7 @@ export async function render(url, context = {}) {
 	const statusCode = router.currentRoute.value?.meta?.statusCode ?? 200
 	const current = router.currentRoute.value
 	const metaTags = await buildSsrMetaTags(
-		{ name: current?.name, path: current?.path },
+		{ name: current?.name, path: current?.path, params: current?.params },
 		{ apiBaseUrl: context.ssrApiBaseUrl }
 	)
 

@@ -46,7 +46,7 @@ class OrderResource extends JsonResource
             'last_name' => $user->last_name ?? '',
             'email' => $user->email ?? '',
             'phone' => $user->phone ?? '',
-            'phone_verified' => $user->verify ?? false,
+            'phone_verified' => (int) ($user->verify ?? 0) === 1,
             'address' => $user->address ?? '',
             'city' => $user->city ?? '',
             'state' => $user->state ?? '',

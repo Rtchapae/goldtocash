@@ -5,6 +5,7 @@ namespace App\Domain\Orders\Actions;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\TraceRepositoryInterface;
+use App\Support\AdminUserSearch;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
@@ -57,13 +58,11 @@ class ListOrdersAction
             $query->where('orders.branch_id', $branchId);
         }
 
-        $this->applyTimeFilter($query, $period, $from, $to, $nameQuery);
+        $this->applyTimeFilter($query, $period, $from, $to);
 
         $this->applyTraceFilters($query, $sourceFilter, $utmCampaignFilter, $utmMediumFilter);
 
-        if ($nameQuery) {
-            $query->where('users.name', 'LIKE', '%' . $nameQuery . '%');
-        }
+        AdminUserSearch::apply($query, $nameQuery);
 
         $this->applySorting($query, $orderBy, $orderDir);
 
@@ -100,12 +99,7 @@ class ListOrdersAction
         string $period,
         ?string $from,
         ?string $to,
-        ?string $nameQuery
     ): void {
-        if ($nameQuery) {
-            return;
-        }
-
         $now = Carbon::now();
 
         switch ($period) {

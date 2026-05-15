@@ -36,4 +36,36 @@ export const formatDate = (date, format = 'YYYY-MM-DD') => {
 	return `${year}-${month}-${day}`
 }
 
+/** e.g. 04-28-26 */
+export const formatDateMMDDYY = (dateTime) => {
+	if (!dateTime) return ''
+
+	const dateObj = new Date(dateTime)
+	if (isNaN(dateObj.getTime())) {
+		return typeof dateTime === 'string' ? dateTime : ''
+	}
+
+	const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+	const day = String(dateObj.getDate()).padStart(2, '0')
+	const yy = String(dateObj.getFullYear()).slice(-2)
+
+	return `${month}-${day}-${yy}`
+}
+
+/** Local time HH:mm:ss */
+export const formatTimeOnly = (dateTime) => {
+	if (!dateTime) return ''
+
+	const dateObj = new Date(dateTime)
+	if (isNaN(dateObj.getTime())) {
+		return ''
+	}
+
+	const hours = String(dateObj.getHours()).padStart(2, '0')
+	const minutes = String(dateObj.getMinutes()).padStart(2, '0')
+	const seconds = String(dateObj.getSeconds()).padStart(2, '0')
+
+	return `${hours}:${minutes}:${seconds}`
+}
+
 

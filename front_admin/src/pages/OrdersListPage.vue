@@ -8,14 +8,14 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body orders-card-body">
-							<div class="d-flex justify-content-between mb-3">
-								<div class="name-search-wrapper">
+							<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+								<div class="name-search-wrapper flex-grow-1" style="min-width: 200px; max-width: 520px;">
 									<form @submit.prevent="handleNameSearch" class="d-flex">
 										<input
 											v-model="nameQuery"
 											type="text"
 											class="form-control flex-grow-1"
-											placeholder="Enter name..."
+											placeholder="Search by name, email, or phone..."
 											@input="debouncedNameSearch"
 										/>
 										<button v-if="nameQuery" type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearNameSearch">
@@ -23,6 +23,15 @@
 										</button>
 									</form>
 								</div>
+								<PeriodFilter
+									toolbar
+									v-model="currentPeriod"
+									:from="fromDate"
+									:to="toDate"
+									@update:from="fromDate = $event"
+									@update:to="toDate = $event"
+									@change="handlePeriodChange"
+								/>
 							</div>
 							<hr />
 
@@ -86,15 +95,6 @@
 											</option>
 										</select>
 									</div>
-
-									<PeriodFilter
-										v-model="currentPeriod"
-										:from="fromDate"
-										:to="toDate"
-										@update:from="fromDate = $event"
-										@update:to="toDate = $event"
-										@change="handlePeriodChange"
-									/>
 								</div>
 							</div>
 
@@ -189,7 +189,7 @@
 								</template>
 
 								<template #cell-date_created="{ row }">
-									{{ row.created_at }}
+									{{ formatDateMMDDYY(orderRowTimestamp(row)) }}
 								</template>
 
 								<template #cell-amount="{ row }">
@@ -281,6 +281,7 @@
 	<ViewOrderHistoryModal
 		:show="showHistoryModal"
 		:history="orderHistory"
+		:order-created-at="selectedOrder ? orderRowTimestamp(selectedOrder) : ''"
 		@close="closeHistoryModal"
 	/>
 	<EditOrderDetailsModal
@@ -328,7 +329,10 @@ import {
 } from '@/config/orders'
 import { getStatusBadgeClass } from '@/utils/orderStatus'
 import { formatName, formatPhone, normalizePhone } from '@/utils/format'
+import { formatDateMMDDYY, formatTimeOnly } from '@/utils/date'
 import { useToast } from '@/composables/useToast'
+
+const orderRowTimestamp = (row) => row?.created_at || row?.date_created || ''
 
 const orders = ref([])
 const isLoading = ref(false)
@@ -380,16 +384,22 @@ const debouncedNameSearch = () => {
 		clearTimeout(nameSearchTimer)
 	}
 	nameSearchTimer = setTimeout(() => {
+		currentPage.value = 1
 		loadOrders()
 	}, SEARCH_DEBOUNCE_DELAY)
 }
 
 const clearNameSearch = () => {
 	nameQuery.value = ''
+	currentPage.value = 1
 	loadOrders()
 }
 
 const handleNameSearch = () => {
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	currentPage.value = 1
 	loadOrders()
 }
 
@@ -493,9 +503,11 @@ const convertToCsv = (data) => {
 				case 'amount':
 					value = value ? `$${parseFloat(value).toFixed(2)}` : ''
 					break
-				case 'date_created':
-					value = value || ''
+				case 'date_created': {
+					const ts = row.created_at || row.date_created || value
+					value = ts ? `${formatDateMMDDYY(ts)} ${formatTimeOnly(ts)}`.trim() : ''
 					break
+				}
 				case 'branch':
 					value = (value === 'online') ? '' : (row.branch_name || 'N/A')
 					break

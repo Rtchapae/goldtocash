@@ -8,6 +8,29 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 					<div class="card-body orders-card-body">
+						<div class="d-flex justify-content-between mb-3">
+							<div class="name-search-wrapper flex-grow-1" style="max-width: 480px;">
+								<form class="d-flex" @submit.prevent="handleNameSearch">
+									<input
+										v-model="nameQuery"
+										type="text"
+										class="form-control flex-grow-1"
+										placeholder="Search by name, email, or phone..."
+										@input="debouncedNameSearch"
+									/>
+									<button
+										v-if="nameQuery"
+										type="button"
+										class="btn btn-sm btn-outline-secondary ms-2"
+										@click="clearNameSearch"
+									>
+										Clear
+									</button>
+								</form>
+							</div>
+						</div>
+						<hr />
+
 						<div class="pb-3">
 							<div class="panel d-flex align-items-start flex-wrap gap-3">
 								<PeriodFilter
@@ -140,6 +163,7 @@
 		<ViewOrderHistoryModal
 			:show="showHistoryModal"
 			:history="orderHistory"
+			:order-created-at="selectedOrder ? (selectedOrder.created_at || selectedOrder.date_created || '') : ''"
 			@close="closeHistoryModal"
 		/>
 		<EditOrderDetailsModal
@@ -176,6 +200,7 @@ import {
 	SORT_DIR_ASC,
 	SORT_DIR_DESC,
 	PAGE_SIZE_OPTIONS,
+	SEARCH_DEBOUNCE_DELAY,
 } from '@/config/orders'
 import { getStatusBadgeClass } from '@/utils/orderStatus'
 import { formatName, formatPhone, normalizePhone } from '@/utils/format'
@@ -194,6 +219,33 @@ const orderColumns = [
 
 const orders = ref([])
 const isLoading = ref(false)
+const nameQuery = ref('')
+
+let nameSearchTimer = null
+
+const debouncedNameSearch = () => {
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	nameSearchTimer = setTimeout(() => {
+		currentPage.value = 1
+		loadOrders()
+	}, SEARCH_DEBOUNCE_DELAY)
+}
+
+const clearNameSearch = () => {
+	nameQuery.value = ''
+	currentPage.value = 1
+	loadOrders()
+}
+
+const handleNameSearch = () => {
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	currentPage.value = 1
+	loadOrders()
+}
 
 const currentPage = ref(DEFAULT_PAGE)
 const perPage = ref(DEFAULT_PER_PAGE)
@@ -378,6 +430,10 @@ const loadOrders = async () => {
 		if (currentPeriod.value === 'custom' && fromDate.value && toDate.value) {
 			params.from = fromDate.value
 			params.to = toDate.value
+		}
+
+		if (nameQuery.value) {
+			params.nameQuery = nameQuery.value
 		}
 
 		if (orderBy.value) {

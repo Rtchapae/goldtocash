@@ -77,7 +77,15 @@
 		</div>
 
 		<div class="form-group mb-4">
-			<label for="image" class="form-label fw-semibold mb-2">Image</label>
+			<label for="image" class="form-label fw-semibold mb-2">Featured image</label>
+			<div v-if="featuredPreviewUrl" class="mb-2">
+				<img
+					:src="featuredPreviewUrl"
+					alt=""
+					class="img-thumbnail post-featured-preview"
+					style="max-height: 220px; max-width: 100%; object-fit: contain;"
+				/>
+			</div>
 			<input
 				ref="imageInput"
 				type="file"
@@ -85,7 +93,12 @@
 				id="image"
 				class="form-control"
 				accept="image/*"
+				@click="onFeaturedImageClick"
+				@change="onFeaturedImageChange"
 			/>
+			<p class="form-text text-muted small mb-0">
+				Pick a new file to replace the image on the public site (e.g. Gold News on /sell-gold). You can re-select the same file after saving by clicking the field again.
+			</p>
 		</div>
 
 		<div class="form-group mb-4">
@@ -109,8 +122,9 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
+import { API_BASE_URL } from '@/api/client'
 
 const props = defineProps({
 	modelValue: {
@@ -128,6 +142,40 @@ const emit = defineEmits(['update:modelValue', 'submit'])
 const form = ref({ ...props.modelValue })
 const imageInput = ref(null)
 const isUpdatingFromProps = ref(false)
+/** Local object URL for a newly chosen file (not persisted until Save). */
+const localPreviewObjectUrl = ref(null)
+
+const featuredPreviewUrl = computed(() => {
+	if (localPreviewObjectUrl.value) {
+		return localPreviewObjectUrl.value
+	}
+	const u = form.value?.image
+	return typeof u === 'string' && u.trim() ? u.trim() : null
+})
+
+const revokeLocalPreview = () => {
+	if (localPreviewObjectUrl.value) {
+		URL.revokeObjectURL(localPreviewObjectUrl.value)
+		localPreviewObjectUrl.value = null
+	}
+}
+
+const onFeaturedImageClick = (e) => {
+	// Allow choosing the same file again (change event would not fire otherwise).
+	const input = e.target
+	if (input && 'value' in input) {
+		input.value = ''
+	}
+}
+
+const onFeaturedImageChange = (e) => {
+	revokeLocalPreview()
+	const file = e.target?.files?.[0]
+	if (!file) {
+		return
+	}
+	localPreviewObjectUrl.value = URL.createObjectURL(file)
+}
 
 const pathPrefixOptions = [
 	{ value: '', label: '/gold-info' },
@@ -177,7 +225,6 @@ const editorInit = {
 					return
 				}
 				
-				const API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/api/v1'
 				const uploadUrl = `${API_BASE_URL}/admin/posts/upload-image`
 				
 				const response = await fetch(uploadUrl, {
@@ -234,7 +281,12 @@ watch(() => props.modelValue, (newValue, oldValue) => {
 	if (JSON.stringify(newValue) === JSON.stringify(oldValue)) {
 		return
 	}
-	
+
+	revokeLocalPreview()
+	if (imageInput.value) {
+		imageInput.value.value = ''
+	}
+
 	isUpdatingFromProps.value = true
 	form.value = { ...newValue }
 	setTimeout(() => {
@@ -254,6 +306,10 @@ const handleSubmit = () => {
 		imageFile: imageInput.value?.files?.[0] || null
 	})
 }
+
+onBeforeUnmount(() => {
+	revokeLocalPreview()
+})
 
 defineExpose({
 	imageInput

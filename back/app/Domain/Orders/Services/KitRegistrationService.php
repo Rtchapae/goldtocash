@@ -24,6 +24,7 @@ class KitRegistrationService
         private readonly UserRepositoryInterface $userRepository,
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly FedexService $fedexService,
+        private readonly KitAttributionService $kitAttributionService,
     ) {
     }
 
@@ -67,27 +68,23 @@ class KitRegistrationService
                     $label = $labelData['label'];
                     $fedexOrder = $labelData['fedex_order'];
 
-                    $order = $this->orderRepository->create([
-                        'user_id' => $user->id,
-                        'status' => OrderStatus::KIT_REQUESTED->value,
-                        'order_type' => OrderType::ONLINE->value,
-                        'welcome' => true,
-                        'send_label' => false,
-                        'description' => json_encode($fedexOrder),
-                    ]);
+                    $order = $this->orderRepository->create(array_merge(
+                        $this->baseKitOrderPayload($user->id, $validated),
+                        [
+                            'description' => json_encode($fedexOrder),
+                        ]
+                    ));
 
                     $this->saveShippingLabel($order, $label);
 
                     $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
                 } else {
-                    $order = $this->orderRepository->create([
-                        'user_id' => $user->id,
-                        'status' => OrderStatus::KIT_REQUESTED->value,
-                        'order_type' => OrderType::ONLINE->value,
-                        'welcome' => true,
-                        'send_label' => false,
-                    ]);
+                    $order = $this->orderRepository->create(
+                        $this->baseKitOrderPayload($user->id, $validated)
+                    );
                 }
+
+                $this->kitAttributionService->recordMarketingTrace($user, $validated);
 
                 try {
                     $this->orderRepository->sendKitRequestEmail($user, $order);
@@ -152,6 +149,7 @@ class KitRegistrationService
             }
         }
 
+        $smsVerified = false;
         if (!$allowUnverified) {
             $isCodeValid = $this->verifyPhoneCode($phone, $verificationCode);
 
@@ -162,6 +160,7 @@ class KitRegistrationService
                     'message' => 'Invalid verification code. Please check that your phone number is correct and try again.',
                 ];
             }
+            $smsVerified = true;
         }
 
         $userPassPlain = Str::random(10);
@@ -179,6 +178,7 @@ class KitRegistrationService
             'zip' => $validated['zip'],
             'country' => $validated['country'] ?? 'USA',
             'password' => Hash::make($userPassPlain),
+            'verify' => $smsVerified ? 1 : 0,
         ]);
 
         if ($this->hasFedexCredentials()) {
@@ -204,14 +204,12 @@ class KitRegistrationService
             $label = $labelData['label'];
             $fedexOrder = $labelData['fedex_order'];
 
-            $order = $this->orderRepository->create([
-                'user_id' => $user->id,
-                'status' => OrderStatus::KIT_REQUESTED->value,
-                'order_type' => OrderType::ONLINE->value,
-                'welcome' => true,
-                'send_label' => false,
-                'description' => json_encode($fedexOrder),
-            ]);
+            $order = $this->orderRepository->create(array_merge(
+                $this->baseKitOrderPayload($user->id, $validated),
+                [
+                    'description' => json_encode($fedexOrder),
+                ]
+            ));
 
             try {
                 $this->saveShippingLabel($order, $label);
@@ -225,14 +223,12 @@ class KitRegistrationService
 
             $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
         } else {
-            $order = $this->orderRepository->create([
-                'user_id' => $user->id,
-                'status' => OrderStatus::KIT_REQUESTED->value,
-                'order_type' => OrderType::ONLINE->value,
-                'welcome' => true,
-                'send_label' => false,
-            ]);
+            $order = $this->orderRepository->create(
+                $this->baseKitOrderPayload($user->id, $validated)
+            );
         }
+
+        $this->kitAttributionService->recordMarketingTrace($user, $validated);
 
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = Auth::guard('front');
@@ -489,6 +485,27 @@ class KitRegistrationService
         }
 
         return '+1' . $digits;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function baseKitOrderPayload(int $userId, array $validated): array
+    {
+        $data = [
+            'user_id' => $userId,
+            'status' => OrderStatus::KIT_REQUESTED->value,
+            'order_type' => OrderType::ONLINE->value,
+            'welcome' => true,
+            'send_label' => false,
+        ];
+
+        $url = $this->kitAttributionService->extractSubmissionUrl($validated);
+        if ($url !== null) {
+            $data['submission_url'] = $url;
+        }
+
+        return $data;
     }
 }
 

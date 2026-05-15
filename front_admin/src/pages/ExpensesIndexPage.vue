@@ -8,17 +8,34 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body orders-card-body">
-							<div class="d-flex justify-content-between mb-3">
-								<div class="col-sm-12 d-flex justify-content-end">
-									<button
-										type="button"
-										class="btn btn-primary"
-										@click="handleExportCsv"
-										:disabled="isExporting"
-									>
-										{{ isExporting ? 'Exporting...' : 'Save to CSV' }}
-									</button>
+							<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+								<div class="name-search-wrapper flex-grow-1" style="max-width: 420px;">
+									<form class="d-flex" @submit.prevent="handleSearchSubmit">
+										<input
+											v-model="searchQuery"
+											type="text"
+											class="form-control flex-grow-1"
+											placeholder="Search by name, email, or phone..."
+											@input="debouncedSearch"
+										/>
+										<button
+											v-if="searchQuery"
+											type="button"
+											class="btn btn-sm btn-outline-secondary ms-2"
+											@click="clearSearch"
+										>
+											Clear
+										</button>
+									</form>
 								</div>
+								<button
+									type="button"
+									class="btn btn-primary"
+									@click="handleExportCsv"
+									:disabled="isExporting"
+								>
+									{{ isExporting ? 'Exporting...' : 'Save to CSV' }}
+								</button>
 							</div>
 							<hr />
 
@@ -137,7 +154,13 @@ import UITable from '@/components/ui/UITable.vue'
 import EditOrderShippingDetailsModal from '@/components/modals/EditOrderShippingDetailsModal.vue'
 import { fetchExpenses, exportExpensesToCsv } from '@/api/expenses'
 import { updateOrderShipping } from '@/api/adminOrders'
-import { PAGE_SIZE_OPTIONS, DEFAULT_PER_PAGE, DEFAULT_PAGE, DEFAULT_SORT_DIR } from '@/config/orders'
+import {
+	PAGE_SIZE_OPTIONS,
+	DEFAULT_PER_PAGE,
+	DEFAULT_PAGE,
+	DEFAULT_SORT_DIR,
+	SEARCH_DEBOUNCE_DELAY,
+} from '@/config/orders'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
@@ -153,7 +176,34 @@ const currentPage = ref(DEFAULT_PAGE)
 const perPage = ref(DEFAULT_PER_PAGE)
 const totalItems = ref(0)
 const lastPage = ref(1)
-	
+const searchQuery = ref('')
+
+let searchDebounceTimer = null
+
+const debouncedSearch = () => {
+	if (searchDebounceTimer) {
+		clearTimeout(searchDebounceTimer)
+	}
+	searchDebounceTimer = setTimeout(() => {
+		currentPage.value = 1
+		loadExpenses()
+	}, SEARCH_DEBOUNCE_DELAY)
+}
+
+const clearSearch = () => {
+	searchQuery.value = ''
+	currentPage.value = 1
+	loadExpenses()
+}
+
+const handleSearchSubmit = () => {
+	if (searchDebounceTimer) {
+		clearTimeout(searchDebounceTimer)
+	}
+	currentPage.value = 1
+	loadExpenses()
+}
+
 const orderBy = ref(null)
 const orderDir = ref(DEFAULT_SORT_DIR)
 
@@ -181,6 +231,10 @@ const loadExpenses = async () => {
 		if (orderBy.value) {
 			params['order-by'] = orderBy.value
 			params['order-dir'] = orderDir.value
+		}
+
+		if (searchQuery.value) {
+			params.search = searchQuery.value
 		}
 
 		const response = await fetchExpenses(params)
@@ -232,7 +286,7 @@ const handlePerPageChange = (newPerPage) => {
 const handleExportCsv = async () => {
 	isExporting.value = true
 	try {
-		await exportExpensesToCsv()
+		await exportExpensesToCsv(searchQuery.value ? { search: searchQuery.value } : {})
 		toast.success('Expenses exported successfully')
 	} catch (error) {
 		const errorMessage = error.status === 401
