@@ -98,7 +98,7 @@ const loadPost = async () => {
 	}
 }
 
-const handleSubmit = async ({ form: formData, imageFile }) => {
+const handleSubmit = async ({ form: formData, imageFile, removeFeaturedImage }) => {
 	const title = (formData.title || '').trim()
 	const body = (formData.body || '').trim()
 	
@@ -122,15 +122,19 @@ const handleSubmit = async ({ form: formData, imageFile }) => {
 			submitFormData.append('image', imageFile)
 		}
 
+		if (isEditMode.value && postId.value && removeFeaturedImage) {
+			submitFormData.append('remove_featured_image', '1')
+		}
+
 		if (isEditMode.value && postId.value) {
 			await updatePost(postId.value, submitFormData)
 			toast.success('Post updated successfully')
+			router.push('/posts')
 		} else {
 			await createPost(submitFormData)
 			toast.success('Post created successfully')
+			router.push('/posts')
 		}
-		
-		router.push('/posts')
 	} catch (error) {
 		let errorMessage = error.message || (isEditMode.value ? 'Failed to update post' : 'Failed to create post')
 		

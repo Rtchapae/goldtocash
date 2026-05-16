@@ -71,7 +71,9 @@ class PostController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/blog/images', $imageName);
+            // Must use the "public" disk: default disk is "local" (storage/app/private), so storeAs(..., "public")
+            // without a disk would write under private/ and nginx /storage/ would 404.
+            $image->storeAs('blog/images', $imageName, 'public');
             $data['image'] = $imageName;
         }
 
@@ -100,13 +102,18 @@ class PostController extends Controller
 
         if ($request->hasFile('image')) {
             if ($post->image) {
-                Storage::delete('public/blog/images/' . $post->image);
+                Storage::disk('public')->delete('blog/images/' . $post->image);
             }
 
             $image = $request->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/blog/images', $imageName);
+            $image->storeAs('blog/images', $imageName, 'public');
             $data['image'] = $imageName;
+        } elseif ($request->boolean('remove_featured_image')) {
+            if ($post->image) {
+                Storage::disk('public')->delete('blog/images/' . $post->image);
+            }
+            $data['image'] = null;
         }
 
         $updated = $this->postRepository->update($id, $data);
@@ -117,7 +124,7 @@ class PostController extends Controller
 
         $post = $this->postRepository->findById($id);
 
-        return response()->json(new PostResource($post));
+        return response()->json(new PostEditResource($post));
     }
 
     public function destroy(int $id): JsonResponse
@@ -143,11 +150,8 @@ class PostController extends Controller
 
             Storage::disk('public')->putFileAs('blog/images', $image, $imageName);
 
-            $url = Storage::disk('public')->url('blog/images/' . $imageName);
-
-            if (!str_starts_with($url, 'http')) {
-                $url = asset('storage/blog/images/' . $imageName);
-            }
+            // Relative path only: asset()/request Host behind Vite proxy can point at the wrong origin.
+            $url = '/storage/blog/images/'.$imageName;
 
             return response()->json([
                 'location' => $url

@@ -7,14 +7,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostEditResource extends JsonResource
 {
+    /**
+     * Relative storage URL (same shape as FrontPostResource). Do not use asset(): ApiMiddleware
+     * sets app.url from the request Host, so behind Vite proxy asset() can point at :5173 and break images.
+     */
     private function adminImageUrl(): string
     {
         /** @var Post $this */
-        $base = asset('storage/blog/images/'.$this->image);
         $v = (string) ($this->updated_at?->getTimestamp() ?? $this->id);
-        $sep = str_contains($base, '?') ? '&' : '?';
 
-        return $base.$sep.'v='.$v;
+        return '/storage/blog/images/'.$this->image.'?v='.$v;
     }
 
     public function toArray($request): array

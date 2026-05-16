@@ -48,7 +48,7 @@ export const getPost = async (id) => {
 
 export const updatePost = async (id, formData) => {
 	const response = await apiRequest(`/admin/posts/${id}`, {
-		method: 'PUT',
+		method: 'POST',
 		body: formData
 	})
 

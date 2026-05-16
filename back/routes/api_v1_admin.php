@@ -113,9 +113,11 @@ Route::prefix('admin')
             Route::get('/', [PostController::class, 'index']);
             Route::post('/', [PostController::class, 'store']);
             Route::post('upload-image', [PostController::class, 'uploadImage']);
-            Route::get('{id}', [PostController::class, 'show']);
-            Route::put('{id}', [PostController::class, 'update']);
-            Route::delete('{id}', [PostController::class, 'destroy']);
+            Route::get('{id}', [PostController::class, 'show'])->whereNumber('id');
+            Route::put('{id}', [PostController::class, 'update'])->whereNumber('id');
+            // Multipart: PHP often omits files on PUT — POST with numeric id only (never matches "upload-image").
+            Route::post('{id}', [PostController::class, 'update'])->whereNumber('id');
+            Route::delete('{id}', [PostController::class, 'destroy'])->whereNumber('id');
         });
 
     });
