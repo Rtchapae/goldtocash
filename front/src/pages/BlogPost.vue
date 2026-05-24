@@ -109,6 +109,7 @@ const loadPost = async () => {
 			const title = post.value.seo_title || post.value.title
 			const description = post.value.seo_description || getExcerpt(post.value.body)
 			seoService.setMeta({ title, description })
+			seoService.sendGaPageView(route)
 			await mountKitForms()
 		}
 	} catch (err) {

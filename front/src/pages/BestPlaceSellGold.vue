@@ -18,7 +18,7 @@
 			<p>From small pieces of jewelry to full collections of bullion, every transaction follows the same standards. Items are professionally evaluated, prices are based on live market rates, and sellers remain in full control from start to finish.</p>
 
 			<h2>Why Gold to Cash Is the Best Place to Sell Gold Online</h2>
-			<p>Not all gold buyers operate the same way. Some offer convenience but lack transparency. Others advertise high payouts without showing how offers are calculated.</p>
+			<p>Not all gold buyers operate the same way. Some offer convenience but lack transparency. Others advertise high payouts without showing <a href="/gold-calculator">how offers are calculated</a>.</p>
 			<p>Gold to Cash stands apart by combining professional appraisal methods with a fully documented selling experience. Every item is evaluated individually, and every offer is supported by a detailed breakdown.</p>
 			<p>Sellers choose Gold to Cash because they receive:</p>
 			<ul class="bullets">
@@ -66,7 +66,7 @@
 				<figcaption>Condition does not limit eligibility. New, used, broken, or damaged pieces are evaluated based on metal content rather than appearance.</figcaption>
 			</figure>
 
-			<p>Gold to Cash purchases a wide range of items that contain gold or other precious metals. Condition does not limit eligibility. New, used, broken, or damaged pieces are all evaluated based on metal content rather than appearance.</p>
+			<p>Gold to Cash purchases a <a href="/what-we-buy">wide range of items</a> that contain gold or other precious metals. Condition does not limit eligibility. New, used, broken, or damaged pieces are all evaluated based on metal content rather than appearance.</p>
 			<p>Many items that no longer have wearable or resale value can still hold substantial worth due to their precious metal composition. Every shipment is reviewed individually, and each item is included in the appraisal as long as it contains gold, silver, or platinum.</p>
 			<p>Accepted items include:</p>
 

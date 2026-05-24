@@ -127,7 +127,7 @@ loading="lazy"
 <p>The entire process can be completed without travel, appointments, or carrying valuables in public. All materials needed to sell your gold are provided directly to you. This allows you to ship your items securely without leaving your home and removes the stress of visiting multiple buyers in person.</p>
 
 <h3>Transparent Pricing</h3>
-<p>Itemized offer reports show exactly how value is calculated based on purity, weight, and market price. Each item is evaluated individually rather than grouped together. This ensures every gram of precious metal is accounted for and helps you understand how the final payout is determined.</p>
+<p>Itemized offer reports show exactly how value is calculated based on <a href="/gold-calculator">purity, weight, and market price</a>. Each item is evaluated individually rather than grouped together. This ensures every gram of precious metal is accounted for and helps you understand how the final payout is determined.</p>
 
 <h3>Faster Payments</h3>
 <p>Payment is initiated within 24 hours of offer acceptance. There are no extended holding periods or unnecessary processing delays. Once you approve the offer, funds move quickly, making the process ideal for those who need timely access to cash.</p>
@@ -163,7 +163,7 @@ loading="lazy"
 <p>Customers may receive up to 95% of market value for bullion and up to 90% for gold jewelry, depending on item type. Every item is evaluated separately, so each gram contributes to your final payout.</p>
 
 <h2>Why Some Gold Buyers Pay More Than Others</h2>
-<p>Not all gold buyers operate the same way. Several factors affect how much a buyer can offer.</p>
+<p><a href="/how-it-works">Not all gold buyers operate the same way</a>. Several factors affect how much a buyer can offer.</p>
 <p><strong>Advanced Testing Equipment</strong> – Professional technology allows precise identification of purity without damaging items, reducing guesswork and underpricing.</p>
 <p><strong>Market Access</strong> – High-volume buyers maintain relationships with refiners and global markets, allowing stronger payout rates.</p>
 <p><strong>Lower Overhead</strong> – Online operations reduce storefront costs, enabling higher payouts compared to many local dealers.</p>

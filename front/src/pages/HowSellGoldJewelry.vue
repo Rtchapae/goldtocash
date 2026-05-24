@@ -99,7 +99,7 @@ loading="lazy"
 <figcaption>Online gold buyers accept a wide range of jewelry, including broken and mismatched pieces.</figcaption>
 </figure>
 
-<p>Online gold buyers accept far more than traditional jewelry stores. Items do not need to be new, wearable, or complete.</p>
+<p>Online gold buyers <a href="/what-we-buy">accept far more</a> than traditional jewelry stores. Items do not need to be new, wearable, or complete.</p>
 <p>Accepted items include:</p>
 
 <h3>Jewelry</h3>
@@ -113,7 +113,7 @@ loading="lazy"
 
 <h3>Coins</h3>
 <ul class="bullets">
-<li>Gold, silver, and platinum coins</li>
+<li><a href="/sell-gold-coins">Gold, silver, and platinum coins</a></li>
 <li>Collectible coins</li>
 <li>Any country or denomination</li>
 </ul>
@@ -143,7 +143,7 @@ loading="lazy"
 <li>Condition of the item</li>
 <li>Total metal content</li>
 </ul>
-<p>Customers can receive up to 95% of the market price for gold bullion and up to 90% for gold jewelry, depending on item type and composition. Gold prices fluctuate daily, which is why live pricing and professional testing play an important role in determining accurate offers.</p>
+<p>Customers can receive up to 95% of the market price for gold bullion and up to 90% for gold jewelry, depending on item type and composition. Gold prices fluctuate daily, which is why live pricing and professional testing play an important role in <a href="/what-we-pay">determining accurate offers</a>.</p>
 
 <h2>Why Selling Gold Online Makes Sense</h2>
 <p>Selling gold jewelry online offers several advantages compared to visiting local pawn shops or jewelry stores. Instead of negotiating in person or accepting unclear pricing, online selling provides a structured process built around transparency and convenience.</p>
@@ -153,7 +153,7 @@ loading="lazy"
 <p>You can complete the entire process from home without traveling, scheduling appointments, or carrying valuable items in public. Everything needed to sell your gold is mailed directly to you.</p>
 
 <h3>Transparent Pricing</h3>
-<p>Each offer includes a detailed, itemized report that clearly explains how the value of your gold is calculated. This allows you to see how weight, purity, and market price affect your payout.</p>
+<p>Each offer includes a detailed, itemized report that clearly explains <a href="/gold-calculator">how the value of your gold is calculated</a>. This allows you to see how weight, purity, and market price affect your payout.</p>
 
 <h3>Faster Payments</h3>
 <p>Once an offer is accepted, payment is initiated within 24 hours, allowing you to access your funds quickly. There are no waiting periods or unnecessary processing delays.</p>

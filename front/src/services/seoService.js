@@ -69,7 +69,6 @@ class SeoService {
 
 	async loadSeoForRoute(route) {
 		if (route?.name && BLOG_POST_ROUTE_NAMES.includes(route.name)) {
-			this.sendGaPageView(route)
 			return
 		}
 		try {

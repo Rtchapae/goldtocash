@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "node scripts/assert-max-public-image-size.mjs && vite build && vite build --ssr src/entry-server.js --outDir dist/server",
-    "build:docker": "node scripts/compress-large-public-images.mjs && node scripts/assert-max-public-image-size.mjs && vite build && vite build --ssr src/entry-server.js --outDir dist/server",
+    "build": "vite build && vite build --ssr src/entry-server.js --outDir dist/server && node scripts/generate-static-sitemap-paths.mjs",
     "preview": "cross-env NODE_ENV=production node server.js",
     "images:compress": "node scripts/compress-large-public-images.mjs",
     "images:check": "node scripts/assert-max-public-image-size.mjs"
@@ -29,9 +28,6 @@
     "vite": "^5.4.9",
     "vue": "^3.5.12",
     "vue-router": "^4.3.3"
-  },
-  "devDependencies": {
-    "sharp": "^0.33.5"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

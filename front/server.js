@@ -1,17 +1,70 @@
 import express from 'express'
 import compression from 'compression'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { readFileSync, existsSync } from 'node:fs'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+function loadLegacyImageRedirects() {
+	const p = path.join(__dirname, 'legacy-image-redirects.json')
+	if (!existsSync(p)) return {}
+	try {
+		const o = JSON.parse(readFileSync(p, 'utf8'))
+		return typeof o === 'object' && o !== null && !Array.isArray(o) ? o : {}
+	} catch {
+		return {}
+	}
+}
+
 const isProd = process.env.NODE_ENV === 'production'
 const port = process.env.PORT ? Number(process.env.PORT) : 5175
+
+async function loadStaticSitemapPaths(vite) {
+	if (!isProd && vite) {
+		const routerModule = await vite.ssrLoadModule('/src/router/index.js')
+		return routerModule.getStaticSitemapPaths()
+	}
+
+	const entryPath = path.resolve(__dirname, 'dist/server/entry-server.js')
+	try {
+		const entryServer = await import(pathToFileURL(entryPath).href)
+		if (typeof entryServer.getStaticSitemapPaths === 'function') {
+			return entryServer.getStaticSitemapPaths()
+		}
+	} catch (e) {
+		console.warn('Sitemap: failed to load getStaticSitemapPaths from SSR bundle', e.message || e)
+	}
+
+	const fallbackPath = path.join(__dirname, 'public/static-sitemap-paths.json')
+	if (existsSync(fallbackPath)) {
+		try {
+			const parsed = JSON.parse(readFileSync(fallbackPath, 'utf8'))
+			if (Array.isArray(parsed)) {
+				console.log('Sitemap: using static-sitemap-paths.json fallback (', parsed.length, 'paths)')
+				return parsed
+			}
+		} catch (e) {
+			console.warn('Sitemap: failed to read static-sitemap-paths.json', e.message || e)
+		}
+	}
+
+	return ['/']
+}
 
 async function createServer() {
 	const app = express()
 	app.use(compression())
+
+	// Old .png URLs after lossy migration (bookmarks, email, CDN) → current file
+	const legacyImages = loadLegacyImageRedirects()
+	for (const [fromPath, toPath] of Object.entries(legacyImages)) {
+		if (typeof fromPath !== 'string' || typeof toPath !== 'string') continue
+		app.get(fromPath, (_req, res) => {
+			res.redirect(301, toPath)
+		})
+	}
 
 	// Log every request first (so we see in logs if nginx reaches this process)
 	app.use((req, res, next) => {
@@ -19,29 +72,9 @@ async function createServer() {
 		next()
 	})
 
-	// Serve static files BEFORE SSR middleware
-	if (!isProd) {
-		// Development: serve source files
-		app.use('/src', express.static(path.join(__dirname, 'src')))
-		app.use('/@vite', express.static(path.join(__dirname, 'node_modules/vite/dist/client')))
-		app.use('/@fs', express.static('/'))
-	} else {
-		// Production: serve built assets
-		app.use('/assets', express.static(path.join(__dirname, 'dist/client/assets')))
-	}
-	// Favicon and manifest at root (e.g. /favicon.ico, /apple-touch-icon.png, /site.webmanifest)
-	app.use(express.static(path.join(__dirname, 'public'), { index: false }))
-	app.use('/images', express.static(path.join(__dirname, 'public/images')))
-	app.use('/img', express.static(path.join(__dirname, 'src/assets/img')))
-
-	// Allow WebSocket connections for HMR
-	app.use((req, res, next) => {
-		next()
-	})
-
 	let vite
 	if (!isProd) {
-		// Development mode: use Vite dev server with SSR
+		// Development: Vite first so it handles /src, CSS, transforms before static
 		const { createServer } = await import('vite')
 		vite = await createServer({
 			root: __dirname,
@@ -53,10 +86,14 @@ async function createServer() {
 		})
 		app.use(vite.middlewares)
 		console.log('Running in development SSR mode (HMR disabled)')
-	} else {
-		// Production mode: no Vite middleware, just serve requests
-		console.log('Running in production SSR mode')
 	}
+
+	if (isProd) {
+		app.use('/assets', express.static(path.join(__dirname, 'dist/client/assets')))
+	}
+	app.use(express.static(path.join(__dirname, 'public'), { index: false }))
+	app.use('/images', express.static(path.join(__dirname, 'public/images')))
+	app.use('/img', express.static(path.join(__dirname, 'src/assets/img')))
 
 	// Sitemap: static paths from front router, dynamic slugs from backend (fallback to static-only if backend fails)
 	app.get('/sitemap.xml', async (req, res) => {
@@ -68,22 +105,14 @@ async function createServer() {
 		const apiBaseUrl = process.env.API_BASE_URL || `${req.protocol}://${requestHost}/api/v1`
 		const apiHost = process.env.API_HOST || (process.env.SITE_URL ? new URL(process.env.SITE_URL).hostname : null)
 
-		let getStaticSitemapPaths
+		let staticPaths
 		try {
-			if (!isProd && vite) {
-				const routerModule = await vite.ssrLoadModule('/src/router/index.js')
-				getStaticSitemapPaths = routerModule.getStaticSitemapPaths
-			} else {
-				const entryServer = await import(path.resolve(__dirname, 'dist/server/entry-server.js'))
-				getStaticSitemapPaths = entryServer.getStaticSitemapPaths
-			}
+			staticPaths = await loadStaticSitemapPaths(vite)
 		} catch (e) {
-			console.error('Sitemap: failed to load getStaticSitemapPaths', e)
+			console.error('Sitemap: failed to load static paths', e)
 			res.status(500).set('Content-Type', 'text/plain').end('Sitemap error')
 			return
 		}
-
-		const staticPaths = getStaticSitemapPaths()
 
 		let data = { gold_info: [], sell: [], sell_gold: [] }
 		const sitemapUrlsPath = `${apiBaseUrl.replace(/\/$/, '')}/sitemap-urls`
@@ -183,7 +212,9 @@ ${urls.join('\n')}
 
 			console.timeLog('Server Request Time', 'Template loaded')
 
-			const { appHtml, state, metaTags, statusCode } = await render(url)
+			const { appHtml, state, metaTags, statusCode } = await render(url, {
+				ssrApiBaseUrl: process.env.SSR_API_BASE_URL || undefined,
+			})
 			console.timeLog('Server Request Time', 'SSR render completed')
 
 			let html = template
