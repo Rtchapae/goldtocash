@@ -61,8 +61,9 @@ const totalPages = computed(() => {
 })
 
 const gridColumnClass = computed(() => {
-	const isThreeColumns = route.query.small === 'yes'
-	return isThreeColumns ? 'col-lg-4' : 'col-lg-6'
+	// Default: 3 columns; ?small=yes switches to 2 larger cards (grid toggle)
+	const isTwoColumns = route.query.small === 'yes'
+	return isTwoColumns ? 'col-lg-6' : 'col-lg-4'
 })
 
 const loadPosts = async () => {

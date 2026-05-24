@@ -6,19 +6,27 @@ export const formatName = (user) => {
 	}
 	return user.name || ''
 }
+/** US digits only (10), strips leading country code 1 from 11-digit numbers. */
+export const phoneDigitsOnly = (phone) => {
+	if (phone == null || phone === '') return ''
+	let digits = String(phone).replace(/\D/g, '')
+	if (digits.length === 11 && digits.startsWith('1')) {
+		digits = digits.slice(1)
+	}
+	return digits
+}
+
 export const formatPhone = (phone) => {
 	if (!phone) return ''
-	const cleaned = phone.replace(/\D/g, '')
+	const cleaned = phoneDigitsOnly(phone)
 	if (cleaned.length === 10) {
 		return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
 	}
-	return phone
+	return String(phone).trim()
 }
 
-export const normalizePhone = (phone) => {
-	if (!phone) return ''
-	return phone.replace(/\D/g, '')
-}
+/** Digits for tel: links (US 10-digit, no +1 prefix). */
+export const normalizePhone = (phone) => phoneDigitsOnly(phone)
 
 export const formatAmount = (amount) => {
 	if (!amount || amount === 'None' || amount === 'none' || amount === null || amount === undefined) {

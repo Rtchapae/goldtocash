@@ -1,6 +1,16 @@
 // UI Table Component Styles
 
 .basic-data-table {
+	// Phone column: single line, (XXX) XXX-XXXX display (see formatPhone)
+	td:has(a[href^='tel:']) {
+		white-space: nowrap;
+	}
+
+	a[href^='tel:'] {
+		white-space: nowrap;
+		display: inline-block;
+	}
+
 	.dt-length {
 		select.dt-input {
 			width: auto;
