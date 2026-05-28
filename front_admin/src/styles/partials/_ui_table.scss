@@ -22,6 +22,31 @@
 		position: relative;
 	}
 
+	.table-wrapper--infinite {
+		overflow-x: auto;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+
+		thead th {
+			position: sticky;
+			top: 0;
+			z-index: 2;
+			background-color: var(--bs-table-bg, #fff);
+		}
+	}
+
+	.infinite-scroll-sentinel {
+		height: 2px;
+		width: 100%;
+		pointer-events: none;
+	}
+
+	.infinite-scroll-sentinel-row td {
+		padding: 0 !important;
+		background: transparent !important;
+		border: none !important;
+	}
+
 	.table-loading-overlay {
 		position: absolute;
 		top: 0;

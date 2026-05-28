@@ -79,9 +79,20 @@
 				<label for="mobile-address" :class="{ hasValue: !!fullAddress }">Address</label>
 			</div>
 
-			<!-- Hidden: populated by Google Places, sent to backend -->
+			<div class="control-group form-group">
+				<input
+					v-model="address2"
+					type="text"
+					class="form-control"
+					id="mobile-address2"
+					name="address2"
+					autocomplete="address-line2"
+					placeholder=" "
+				/>
+				<label for="mobile-address2" :class="{ hasValue: !!address2 }">Apt / Unit</label>
+			</div>
+
 			<input type="hidden" name="address" :value="address || fullAddress" />
-			<input type="hidden" name="address2" :value="address2" />
 			<input type="hidden" name="city" :value="city" />
 			<input type="hidden" name="state" :value="state" />
 			<input type="hidden" name="zip" :value="zip" />

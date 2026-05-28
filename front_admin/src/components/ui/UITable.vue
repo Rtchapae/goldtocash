@@ -45,7 +45,13 @@
 
 			<div class="dt-layout-row dt-layout-table">
 				<div class="dt-layout-cell">
-					<div class="table-responsive table-wrapper">
+					<div
+						ref="scrollContainerRef"
+						class="table-responsive table-wrapper"
+						:class="{ 'table-wrapper--infinite': infiniteScroll }"
+						:style="scrollContainerStyle"
+						@scroll.passive="onScrollContainer"
+					>
 						<div v-if="loading" class="table-loading-overlay">
 							<div class="table-loading">
 								<div class="loading-dots">
@@ -114,43 +120,69 @@
 									</td>
 								</tr>
 								<template v-else>
-									<tr v-for="(row, index) in paginatedRows" :key="row[idKey] ?? index">
-										<td v-if="showIndex" class="sorting_1">
-											<div class="form-check style-check d-flex align-items-center">
-												<input class="form-check-input" type="checkbox">
-												<label class="form-check-label">
-													{{ globalIndex(index) }}
-												</label>
-											</div>
-										</td>
-										<td
-											v-for="column in columns"
-											:key="column.key"
-											:class="column.class"
-										>
-											<slot
-												:name="`cell-${column.key}`"
-												:row="row"
-												:index="index"
+									<template v-for="(row, index) in paginatedRows" :key="row[idKey] ?? index">
+										<tr>
+											<td v-if="showIndex" class="sorting_1">
+												<div class="form-check style-check d-flex align-items-center">
+													<input class="form-check-input" type="checkbox">
+													<label class="form-check-label">
+														{{ globalIndex(index) }}
+													</label>
+												</div>
+											</td>
+											<td
+												v-for="column in columns"
+												:key="column.key"
+												:class="column.class"
 											>
-												{{ row[column.key] }}
-											</slot>
-										</td>
-									</tr>
+												<slot
+													:name="`cell-${column.key}`"
+													:row="row"
+													:index="index"
+												>
+													{{ row[column.key] }}
+												</slot>
+											</td>
+										</tr>
+										<tr
+											v-if="infiniteScroll && index === loadMoreTriggerIndex"
+											class="infinite-scroll-sentinel-row"
+										>
+											<td :colspan="totalColspan" class="p-0 border-0">
+												<div :ref="bindSentinelRef" class="infinite-scroll-sentinel" aria-hidden="true"></div>
+											</td>
+										</tr>
+									</template>
 								</template>
 							</tbody>
 						</table>
+						<div
+							v-if="infiniteScroll && loadingMore"
+							class="infinite-scroll-loading text-center py-2 text-muted"
+						>
+							<div class="loading-dots d-inline-flex">
+								<span></span>
+								<span></span>
+								<span></span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="dt-layout-row mt-3" v-if="showInfo || showPagination">
+			<div class="dt-layout-row mt-3" v-if="showInfo || (showPagination && !infiniteScroll)">
 				<div class="dt-layout-cell dt-start" v-if="showInfo">
 					<div class="dt-info">
-						Showing {{ startEntry }} to {{ endEntry }} of {{ totalEntries }} entries
+						<template v-if="infiniteScroll">
+							Loaded {{ loadedCount }} of {{ totalEntries }} entries
+							<span v-if="hasMore && !loading && !loadingMore" class="text-muted"> — scroll for more</span>
+						</template>
+						<template v-else>
+							Showing {{ startEntry }} to {{ endEntry }} of {{ totalEntries }} entries
+						</template>
 					</div>
 				</div>
-				<div class="dt-layout-cell dt-end" v-if="showPagination && totalPages > 1">
+				<div class="dt-layout-cell dt-end" v-if="showPagination && !infiniteScroll && totalPages > 1">
 					<div class="dt-paging paging_full_numbers">
 						<button
 							class="dt-paging-button first"
@@ -204,7 +236,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import {
 	DEFAULT_PAGE_SIZE,
 	DEFAULT_SERVER_PER_PAGE,
@@ -233,32 +265,7 @@ import {
 	CSS_CLASS_ORDERING_DESC,
 } from '@/config/table'
 
-const emit = defineEmits(['update:page-size', 'page-change', 'per-page-change'])
-
-const isDarkMode = ref(false)
-
-const checkTheme = () => {
-	if (typeof document !== 'undefined') {
-		isDarkMode.value = document.documentElement.hasAttribute('data-theme') &&
-			document.documentElement.getAttribute('data-theme') === 'dark'
-	}
-}
-
-const observer = new MutationObserver(() => {
-	checkTheme()
-})
-
-onMounted(() => {
-	checkTheme()
-	observer.observe(document.documentElement, {
-		attributes: true,
-		attributeFilter: ['data-theme']
-	})
-})
-
-onUnmounted(() => {
-	observer.disconnect()
-})
+const emit = defineEmits(['update:page-size', 'page-change', 'per-page-change', 'load-more'])
 
 const props = defineProps({
 	title: {
@@ -353,7 +360,65 @@ const props = defineProps({
 	emptyMessage: {
 		type: String,
 		default: DEFAULT_EMPTY_MESSAGE
+	},
+	infiniteScroll: {
+		type: Boolean,
+		default: false
+	},
+	hasMore: {
+		type: Boolean,
+		default: false
+	},
+	loadingMore: {
+		type: Boolean,
+		default: false
+	},
+	/** Rows before end of loaded list where next page is requested (e.g. 10 → trigger near row 40 of 50). */
+	loadMoreOffset: {
+		type: Number,
+		default: 10
+	},
+	scrollMaxHeight: {
+		type: String,
+		default: 'calc(100vh - 320px)'
 	}
+})
+
+const SCROLL_LOAD_MARGIN_PX = 120
+
+const scrollContainerRef = ref(null)
+const sentinelEl = ref(null)
+let infiniteScrollObserver = null
+let loadMoreEmitted = false
+
+const bindSentinelRef = (el) => {
+	sentinelEl.value = el
+}
+
+const scrollContainerStyle = computed(() => {
+	if (!props.infiniteScroll) {
+		return undefined
+	}
+	return {
+		maxHeight: props.scrollMaxHeight,
+		overflowY: 'auto',
+		overflowX: 'auto',
+	}
+})
+
+const getSentinelElement = () => sentinelEl.value || null
+
+const isDarkMode = ref(false)
+
+const checkTheme = () => {
+	if (typeof document !== 'undefined') {
+		isDarkMode.value = document.documentElement.hasAttribute('data-theme') &&
+			document.documentElement.getAttribute('data-theme') === 'dark'
+	}
+}
+
+const observer = new MutationObserver(() => {
+	checkTheme()
 })
 
 const searchTerm = ref('')
@@ -444,6 +509,151 @@ const endEntry = computed(() => {
 	}
 	return Math.min(currentPage.value * pageSize.value, totalEntries.value)
 })
+
+const loadedCount = computed(() => {
+	if (props.infiniteScroll) {
+		return allRows.value.length
+	}
+	return endEntry.value
+})
+
+/** Index of row after which the load-more sentinel is inserted (e.g. row ~40 when 50 loaded, offset 10). */
+const loadMoreTriggerIndex = computed(() => {
+	const count = paginatedRows.value.length
+	if (count <= 0) {
+		return -1
+	}
+	const offset = Math.max(1, props.loadMoreOffset)
+	if (count <= offset) {
+		return count - 1
+	}
+	return count - offset
+})
+
+const tryLoadMore = () => {
+	if (
+		loadMoreEmitted
+		|| !props.infiniteScroll
+		|| !props.hasMore
+		|| props.loading
+		|| props.loadingMore
+	) {
+		return
+	}
+	loadMoreEmitted = true
+	emit('load-more')
+}
+
+const checkInfiniteScrollProximity = () => {
+	if (!props.infiniteScroll || !props.hasMore || props.loading || props.loadingMore) {
+		return false
+	}
+
+	const root = scrollContainerRef.value
+	const sentinel = getSentinelElement()
+	if (!root || !sentinel) {
+		return false
+	}
+
+	const rootRect = root.getBoundingClientRect()
+	const sentinelRect = sentinel.getBoundingClientRect()
+
+	if (sentinelRect.top <= rootRect.bottom + SCROLL_LOAD_MARGIN_PX) {
+		tryLoadMore()
+		return true
+	}
+	return false
+}
+
+const fillScrollContainerIfNeeded = () => {
+	const root = scrollContainerRef.value
+	if (!root || !props.infiniteScroll || !props.hasMore || props.loading || props.loadingMore) {
+		return
+	}
+	if (root.scrollHeight <= root.clientHeight + 4) {
+		tryLoadMore()
+	}
+}
+
+const onScrollContainer = () => {
+	checkInfiniteScrollProximity()
+}
+
+const setupInfiniteScrollObserver = () => {
+	teardownInfiniteScrollObserver()
+	if (!props.infiniteScroll || !props.hasMore) {
+		return
+	}
+
+	const root = scrollContainerRef.value
+	const target = getSentinelElement()
+	if (!root || !target) {
+		return
+	}
+
+	infiniteScrollObserver = new IntersectionObserver(
+		(entries) => {
+			if (entries.some((entry) => entry.isIntersecting)) {
+				tryLoadMore()
+			}
+		},
+		{
+			root,
+			rootMargin: `0px 0px ${SCROLL_LOAD_MARGIN_PX}px 0px`,
+			threshold: 0,
+		}
+	)
+	infiniteScrollObserver.observe(target)
+}
+
+const refreshInfiniteScroll = () => {
+	nextTick(() => {
+		setupInfiniteScrollObserver()
+		checkInfiniteScrollProximity()
+		fillScrollContainerIfNeeded()
+	})
+}
+
+watch(() => props.loadingMore, (loadingMore) => {
+	if (!loadingMore) {
+		loadMoreEmitted = false
+		refreshInfiniteScroll()
+	}
+})
+
+watch(
+	() => [
+		props.infiniteScroll,
+		props.rows.length,
+		props.hasMore,
+		props.loading,
+		loadMoreTriggerIndex.value,
+	],
+	() => {
+		refreshInfiniteScroll()
+	}
+)
+
+onMounted(() => {
+	checkTheme()
+	observer.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ['data-theme']
+	})
+	refreshInfiniteScroll()
+})
+
+onUnmounted(() => {
+	observer.disconnect()
+	teardownInfiniteScrollObserver()
+})
+
+const teardownInfiniteScrollObserver = () => {
+	if (infiniteScrollObserver) {
+		infiniteScrollObserver.disconnect()
+		infiniteScrollObserver = null
+	}
+}
 
 const pages = computed(() => {
 	const total = totalPages.value

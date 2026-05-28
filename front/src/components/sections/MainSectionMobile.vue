@@ -1,8 +1,5 @@
 <template>
     <div>
-        <div>
-            <img src="/images/gold-over-cash.png" class="img-full">
-        </div>
         <div class="">
             <MobileSophisticatedForm />
         </div>

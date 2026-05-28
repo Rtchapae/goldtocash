@@ -1,4 +1,6 @@
 export const DEFAULT_PER_PAGE = 15
+/** Page size for /orders infinite scroll only */
+export const ORDERS_INFINITE_SCROLL_PER_PAGE = 50
 export const DEFAULT_PAGE = 1
 
 export const DEFAULT_PERIOD = 'currentmonth'

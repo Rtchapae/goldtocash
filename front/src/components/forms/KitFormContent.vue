@@ -66,9 +66,20 @@
 			/>
 			<label :for="fieldId('address')" :class="{ hasValue: fullAddress }">Address</label>
 		</div>
-		<!-- Hidden: populated by Google Places or fallback to fullAddress -->
+		<div class="control-group form-group">
+			<input
+				type="text"
+				class="form-control"
+				:id="fieldId('address2')"
+				name="address2"
+				v-model="address2"
+				autocomplete="address-line2"
+				placeholder=""
+			/>
+			<label :for="fieldId('address2')" :class="{ hasValue: address2 }">Apt / Unit</label>
+		</div>
+		<!-- Hidden: street line for API (Google Places or typed address) -->
 		<input type="hidden" name="address" :value="address || fullAddress" />
-		<input type="hidden" name="address2" :value="address2" />
 		<input type="hidden" name="state" :value="state" />
 		<input type="hidden" name="city" :value="city" />
 		<template v-if="!isMobile">
