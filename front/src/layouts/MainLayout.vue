@@ -66,6 +66,9 @@ onMounted(() => {
 	setTimeout(() => {
 		showPreloader.value = false
 		requestAnimationFrame(() => {
+			if (typeof window !== 'undefined') {
+				window.dispatchEvent(new CustomEvent('gtc-app-ready'))
+			}
 			document.querySelectorAll('.swiper').forEach((container) => {
 				/* swiper/vue управляет сам; иначе двойной new Swiper ломает пагинацию */
 				if (

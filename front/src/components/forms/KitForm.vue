@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<!-- Mobile version -->
-		<div :class="mobileWrapperClass">
+		<!-- Mobile version (v-if: one address field in DOM — avoids Places on hidden input) -->
+		<div v-if="kitViewport === 'mobile'" :class="mobileWrapperClass">
 			<div class="kit-form">
 				<form :name="mobileFormName" :id="mobileFormId" class="standard-form" @submit.prevent="handleSubmit">
 					<input type="hidden" name="_token" value="">
@@ -51,7 +51,13 @@
 			</div>
 		</div>
 		<!-- Desktop version -->
-		<form :name="desktopFormName" :id="desktopFormId" :class="desktopFormClass" @submit.prevent="handleSubmit">
+		<form
+			v-if="kitViewport === 'desktop'"
+			:name="desktopFormName"
+			:id="desktopFormId"
+			:class="desktopFormClass"
+			@submit.prevent="handleSubmit"
+		>
 			<input type="hidden" name="_token" value="">
 			<h3>
 				{{ KIT_FORM_TEXTS.TITLE }}
@@ -93,7 +99,7 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, onBeforeUnmount, onUnmounted, ref } from 'vue'
 import FormContent from './KitFormContent.vue'
 import { useKitForm } from '@/composables/useKitForm'
 import { buildKitPayload } from '@/api/kitRegistration'
@@ -125,9 +131,40 @@ const mobileWrapperClass = computed(() => {
 
 const desktopFormClass = computed(() => {
 	if (props.inline) {
-		return 'standard-form d-none d-lg-block'
+		return 'standard-form'
 	}
-	return 'standard-form d-none d-lg-block'
+	return 'standard-form'
+})
+
+/** Only mount one kit form variant so Google Places binds to the visible address input. */
+const kitViewport = ref(props.mobile === true ? 'mobile' : 'desktop')
+
+function updateKitViewport() {
+	if (typeof window === 'undefined') return
+	if (props.mobile === true) {
+		kitViewport.value = 'mobile'
+		return
+	}
+	if (props.mobile === false) {
+		kitViewport.value = 'desktop'
+		return
+	}
+	kitViewport.value = window.innerWidth >= 992 ? 'desktop' : 'mobile'
+}
+
+onBeforeMount(() => {
+	updateKitViewport()
+})
+
+onMounted(() => {
+	updateKitViewport()
+	window.addEventListener('resize', updateKitViewport)
+})
+
+onBeforeUnmount(() => {
+	if (typeof window !== 'undefined') {
+		window.removeEventListener('resize', updateKitViewport)
+	}
 })
 
 const mobileFormName = KIT_FORM_TEXTS.FORM_MOBILE_NAME

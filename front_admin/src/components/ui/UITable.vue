@@ -50,7 +50,6 @@
 						class="table-responsive table-wrapper"
 						:class="{ 'table-wrapper--infinite': infiniteScroll }"
 						:style="scrollContainerStyle"
-						@scroll.passive="onScrollContainer"
 					>
 						<div v-if="loading" class="table-loading-overlay">
 							<div class="table-loading">
@@ -120,45 +119,42 @@
 									</td>
 								</tr>
 								<template v-else>
-									<template v-for="(row, index) in paginatedRows" :key="row[idKey] ?? index">
-										<tr>
-											<td v-if="showIndex" class="sorting_1">
-												<div class="form-check style-check d-flex align-items-center">
-													<input class="form-check-input" type="checkbox">
-													<label class="form-check-label">
-														{{ globalIndex(index) }}
-													</label>
-												</div>
-											</td>
-											<td
-												v-for="column in columns"
-												:key="column.key"
-												:class="column.class"
-											>
-												<slot
-													:name="`cell-${column.key}`"
-													:row="row"
-													:index="index"
-												>
-													{{ row[column.key] }}
-												</slot>
-											</td>
-										</tr>
-										<tr
-											v-if="infiniteScroll && index === loadMoreTriggerIndex"
-											class="infinite-scroll-sentinel-row"
+									<tr v-for="(row, index) in paginatedRows" :key="row[idKey] ?? index">
+										<td v-if="showIndex" class="sorting_1">
+											<div class="form-check style-check d-flex align-items-center">
+												<input class="form-check-input" type="checkbox">
+												<label class="form-check-label">
+													{{ globalIndex(index) }}
+												</label>
+											</div>
+										</td>
+										<td
+											v-for="column in columns"
+											:key="column.key"
+											:class="column.class"
 										>
-											<td :colspan="totalColspan" class="p-0 border-0">
-												<div :ref="bindSentinelRef" class="infinite-scroll-sentinel" aria-hidden="true"></div>
-											</td>
-										</tr>
-									</template>
+											<slot
+												:name="`cell-${column.key}`"
+												:row="row"
+												:index="index"
+											>
+												{{ row[column.key] }}
+											</slot>
+										</td>
+									</tr>
 								</template>
 							</tbody>
 						</table>
 						<div
+							v-if="infiniteScroll && paginatedRows.length > 0 && hasMore"
+							:ref="bindSentinelRef"
+							class="infinite-scroll-sentinel"
+							aria-hidden="true"
+						></div>
+						<div
 							v-if="infiniteScroll && loadingMore"
-							class="infinite-scroll-loading text-center py-2 text-muted"
+							class="infinite-scroll-loading text-center text-muted"
+							aria-hidden="true"
 						>
 							<div class="loading-dots d-inline-flex">
 								<span></span>
@@ -385,6 +381,8 @@ const props = defineProps({
 })
 
 const SCROLL_LOAD_MARGIN_PX = 120
+/** Approximate tbody row height for early load-more trigger via rootMargin */
+const INFINITE_SCROLL_ROW_HEIGHT_PX = 38
 
 const scrollContainerRef = ref(null)
 const sentinelEl = ref(null)
@@ -394,6 +392,11 @@ let loadMoreEmitted = false
 const bindSentinelRef = (el) => {
 	sentinelEl.value = el
 }
+
+const infiniteScrollRootMarginBottom = computed(() => {
+	const offset = Math.max(1, props.loadMoreOffset)
+	return offset * INFINITE_SCROLL_ROW_HEIGHT_PX + SCROLL_LOAD_MARGIN_PX
+})
 
 const scrollContainerStyle = computed(() => {
 	if (!props.infiniteScroll) {
@@ -517,19 +520,6 @@ const loadedCount = computed(() => {
 	return endEntry.value
 })
 
-/** Index of row after which the load-more sentinel is inserted (e.g. row ~40 when 50 loaded, offset 10). */
-const loadMoreTriggerIndex = computed(() => {
-	const count = paginatedRows.value.length
-	if (count <= 0) {
-		return -1
-	}
-	const offset = Math.max(1, props.loadMoreOffset)
-	if (count <= offset) {
-		return count - 1
-	}
-	return count - offset
-})
-
 const tryLoadMore = () => {
 	if (
 		loadMoreEmitted
@@ -544,27 +534,6 @@ const tryLoadMore = () => {
 	emit('load-more')
 }
 
-const checkInfiniteScrollProximity = () => {
-	if (!props.infiniteScroll || !props.hasMore || props.loading || props.loadingMore) {
-		return false
-	}
-
-	const root = scrollContainerRef.value
-	const sentinel = getSentinelElement()
-	if (!root || !sentinel) {
-		return false
-	}
-
-	const rootRect = root.getBoundingClientRect()
-	const sentinelRect = sentinel.getBoundingClientRect()
-
-	if (sentinelRect.top <= rootRect.bottom + SCROLL_LOAD_MARGIN_PX) {
-		tryLoadMore()
-		return true
-	}
-	return false
-}
-
 const fillScrollContainerIfNeeded = () => {
 	const root = scrollContainerRef.value
 	if (!root || !props.infiniteScroll || !props.hasMore || props.loading || props.loadingMore) {
@@ -573,10 +542,6 @@ const fillScrollContainerIfNeeded = () => {
 	if (root.scrollHeight <= root.clientHeight + 4) {
 		tryLoadMore()
 	}
-}
-
-const onScrollContainer = () => {
-	checkInfiniteScrollProximity()
 }
 
 const setupInfiniteScrollObserver = () => {
@@ -599,7 +564,7 @@ const setupInfiniteScrollObserver = () => {
 		},
 		{
 			root,
-			rootMargin: `0px 0px ${SCROLL_LOAD_MARGIN_PX}px 0px`,
+			rootMargin: `0px 0px ${infiniteScrollRootMarginBottom.value}px 0px`,
 			threshold: 0,
 		}
 	)
@@ -609,7 +574,6 @@ const setupInfiniteScrollObserver = () => {
 const refreshInfiniteScroll = () => {
 	nextTick(() => {
 		setupInfiniteScrollObserver()
-		checkInfiniteScrollProximity()
 		fillScrollContainerIfNeeded()
 	})
 }
@@ -624,13 +588,22 @@ watch(() => props.loadingMore, (loadingMore) => {
 watch(
 	() => [
 		props.infiniteScroll,
-		props.rows.length,
 		props.hasMore,
 		props.loading,
-		loadMoreTriggerIndex.value,
+		infiniteScrollRootMarginBottom.value,
 	],
 	() => {
 		refreshInfiniteScroll()
+	}
+)
+
+watch(
+	() => props.rows.length,
+	() => {
+		if (!props.infiniteScroll) {
+			return
+		}
+		nextTick(() => fillScrollContainerIfNeeded())
 	}
 )
 

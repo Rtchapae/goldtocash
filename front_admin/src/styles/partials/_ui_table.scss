@@ -26,6 +26,7 @@
 		overflow-x: auto;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
+		overflow-anchor: none;
 
 		thead th {
 			position: sticky;
@@ -36,15 +37,21 @@
 	}
 
 	.infinite-scroll-sentinel {
-		height: 2px;
+		height: 1px;
 		width: 100%;
+		flex-shrink: 0;
 		pointer-events: none;
 	}
 
-	.infinite-scroll-sentinel-row td {
-		padding: 0 !important;
-		background: transparent !important;
-		border: none !important;
+	.infinite-scroll-loading {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 0.35rem 0;
+		background: rgba(255, 255, 255, 0.9);
+		pointer-events: none;
+		z-index: 3;
 	}
 
 	.table-loading-overlay {

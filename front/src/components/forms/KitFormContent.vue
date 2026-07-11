@@ -212,7 +212,7 @@ watch(fullAddress, (val) => {
 const { phoneValue, phoneInputRef, setupMask } = usePhoneMask()
 const addressInputRef = ref(null)
 
-const { init: initPlacesAddress } = useGooglePlacesAddress({
+useGooglePlacesAddress({
 	inputRef: addressInputRef,
 	inputId: props.isMobile ? 'address' : 'address-inline',
 	onPlaceSelect: (place, addr) => {
@@ -299,17 +299,6 @@ onMounted(async () => {
 		}
 	}
 	trySetupMask()
-	let placesAttempts = 0
-	const tryInitPlaces = () => {
-		const input = addressInputRef.value || document.getElementById(props.isMobile ? 'address' : 'address-inline')
-		if (input && input.isConnected) {
-			initPlacesAddress().catch((e) => console.warn('[Places] init error', e))
-		} else if (placesAttempts < 25) {
-			placesAttempts++
-			setTimeout(tryInitPlaces, 200)
-		}
-	}
-	setTimeout(tryInitPlaces, 300)
 })
 
 watch([selectedCity, cityOther], () => {

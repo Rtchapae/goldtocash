@@ -1,10 +1,10 @@
 <template>
-	<div>
+	<div class="orders-list-page">
 		<NavbarHeader />
 		<div class="dashboard-main-body">
 			<PageHeader title="Active Orders" :loading="isLoading" />
 
-			<div class="row">
+			<div class="row orders-list-row">
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body orders-card-body orders-card-body--infinite-table">
@@ -181,9 +181,10 @@
 								</template>
 
 								<template #cell-status="{ row }">
-									<label :class="['badge', getStatusBadgeClass(row.status)]">
-										{{ row.status || 'Unknown' }}
-									</label>
+									<span v-if="isOrderStatusHidden(row.status)" class="text-muted">—</span>
+									<span v-else :class="getStatusBadgeClass(row.status)">
+										{{ formatOrderStatusLabel(row.status) }}
+									</span>
 								</template>
 
 								<template #cell-order_type="{ row }">
@@ -202,10 +203,10 @@
 								</template>
 
 								<template #cell-actions="{ row }">
-									<div class="d-flex align-items-center action-buttons">
+									<div class="d-flex align-items-center action-buttons action-buttons--orders">
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-primary"
+											class="btn btn-action-plain"
 											title="View"
 											@click="openViewModal(row)"
 										>
@@ -213,15 +214,15 @@
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-warning"
+											class="btn btn-action-plain"
 											title="Edit"
 											@click="openEditModal(row)"
 										>
-											<iconify-icon icon="solar:settings-outline" class="icon" />
+											<iconify-icon icon="solar:pen-outline" class="icon" />
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-info"
+											class="btn btn-action-plain"
 											title="Files"
 											@click="openFilesModal(row)"
 										>
@@ -229,7 +230,7 @@
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-success"
+											class="btn btn-action-plain"
 											title="History"
 											@click="openHistoryModal(row)"
 										>
@@ -313,7 +314,7 @@ import {
 	SEARCH_DEBOUNCE_DELAY,
 	ORDER_COLUMNS,
 } from '@/config/orders'
-import { getStatusBadgeClass } from '@/utils/orderStatus'
+import { getStatusBadgeClass, formatOrderStatusLabel, isOrderStatusHidden } from '@/utils/orderStatus'
 import { formatName, formatPhone, normalizePhone } from '@/utils/format'
 import { formatDateMMDDYY, formatTimeOnly } from '@/utils/date'
 import { useToast } from '@/composables/useToast'

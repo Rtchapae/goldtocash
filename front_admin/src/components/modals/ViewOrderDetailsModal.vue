@@ -61,8 +61,10 @@
 							<tr>
 								<td>Address</td>
 								<td class="order-address">
-									<template v-if="order.address || order.city || order.state || order.zip">
-										{{ order.address }}<br v-if="order.address">
+									<template v-if="order.address || order.address2 || order.city || order.state || order.zip">
+										<template v-if="formatStreetAddress(order.address, order.address2)">
+											{{ formatStreetAddress(order.address, order.address2) }}<br>
+										</template>
 										<template v-if="order.city || order.state || order.zip">
 											{{ order.city }}<template v-if="order.city && order.state">, </template>{{ order.state }} {{ order.zip }}
 										</template>
@@ -123,7 +125,7 @@
 
 <script setup>
 import { formatDateTime } from '@/utils/date'
-import { formatName, formatPhone, normalizePhone, formatAmount } from '@/utils/format'
+import { formatName, formatPhone, normalizePhone, formatAmount, formatStreetAddress } from '@/utils/format'
 import { getStatusBadgeClass } from '@/utils/orderStatus'
 
 const props = defineProps({

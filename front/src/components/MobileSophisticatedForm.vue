@@ -197,7 +197,7 @@ const { isLoading, submitForm } = useKitForm()
 const { phoneValue, phoneInputRef, setupMask } = usePhoneMask()
 const addressInputRef = ref(null)
 
-const { init: initPlacesAddress } = useGooglePlacesAddress({
+useGooglePlacesAddress({
 	inputRef: addressInputRef,
 	inputId: 'mobile-address',
 	onPlaceSelect: (place, addr) => {
@@ -426,19 +426,6 @@ onMounted(async () => {
 		}
 	}
 	tryMask()
-	let placesAttempts = 0
-	const tryInitPlaces = () => {
-		const input = addressInputRef.value || document.getElementById('mobile-address')
-		if (input && input.isConnected) {
-			initPlacesAddress().catch(() => {})
-			return
-		}
-		if (placesAttempts < 25) {
-			placesAttempts++
-			setTimeout(tryInitPlaces, 200)
-		}
-	}
-	setTimeout(tryInitPlaces, 400)
 })
 
 onUnmounted(() => {

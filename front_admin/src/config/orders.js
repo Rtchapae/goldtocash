@@ -24,18 +24,18 @@ export const PERIODS = [
 ]
 
 export const ORDER_COLUMNS = [
-	{ key: 'name', label: 'Name', sortable: true },
+	{ key: 'name', label: 'Name', sortable: true, class: 'col-name' },
 	{ key: 'url', label: 'URL', sortable: false },
-	{ key: 'source', label: 'Source', sortable: false },
+	{ key: 'source', label: 'Source', sortable: false, class: 'col-source' },
 	{ key: 'email', label: 'Email', sortable: true },
 	{ key: 'phone', label: 'Phone', sortable: true },
 	{ key: 'order_number', label: 'Order Number', sortable: true },
 	{ key: 'date_created', label: 'Date Created', sortable: true },
 	{ key: 'amount', label: 'Amount', sortable: true },
-	{ key: 'status', label: 'Status', sortable: true },
+	{ key: 'status', label: 'Status', sortable: true, class: 'col-status' },
 	{ key: 'order_type', label: 'Order Type', sortable: true },
 	{ key: 'branch', label: 'Branch', sortable: true },
-	{ key: 'actions', label: 'Action', sortable: false },
+	{ key: 'actions', label: 'Action', sortable: false, class: 'col-actions' },
 ]
 
 export const STATUS_BADGE_CLASSES = {

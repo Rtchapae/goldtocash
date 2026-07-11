@@ -1,3 +1,5 @@
+import { onMounted, onUnmounted, watch, nextTick } from 'vue'
+
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY
 
 let loadPromise = null
@@ -42,12 +44,21 @@ function loadGoogleMapsScript() {
 			poll()
 		}
 		script.onerror = () => {
+			loadPromise = null
 			reject(new Error('Failed to load Google Maps API'))
 		}
 		document.head.appendChild(script)
 	})
 
 	return loadPromise
+}
+
+function isInputVisible(input) {
+	if (!input?.isConnected) return false
+	const style = window.getComputedStyle(input)
+	if (style.display === 'none' || style.visibility === 'hidden') return false
+	const rect = input.getBoundingClientRect()
+	return rect.width > 0 && rect.height > 0
 }
 
 /**
@@ -93,18 +104,23 @@ function getAddressComponents(place) {
 	return result
 }
 
+const INIT_RETRY_DELAYS_MS = [0, 350, 700, 1200, 2000, 3500, 5500]
+
 /**
  * Initialize Google Places Autocomplete on an address input.
- * @param {Object} options
- * @param {import('vue').Ref<HTMLInputElement|null>} [options.inputRef] - Vue ref to input element
- * @param {string} [options.inputId] - ID of input element (if no ref)
- * @param {Function} [options.onPlaceSelect] - Callback(place, addressData) when user selects a place
- * @param {string[]} [options.fields] - Place fields to request (default: address_components, geometry, name, formatted_address)
- * @returns {{ init: () => Promise<void>, cleanup: () => void }}
+ * Retries after preloader / mobile-desktop layout swap (common on referral landings).
  */
-export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, fields = ['address_components', 'geometry', 'name', 'formatted_address'] }) {
+export function useGooglePlacesAddress({
+	inputRef,
+	inputId,
+	onPlaceSelect,
+	fields = ['address_components', 'geometry', 'name', 'formatted_address'],
+}) {
 	let autocompleteInstance = null
 	let attachedInput = null
+	let destroyed = false
+	let focusHandler = null
+	const retryTimers = []
 
 	const getInput = () => {
 		if (inputRef?.value) return inputRef.value
@@ -112,25 +128,12 @@ export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, field
 		return null
 	}
 
-	const init = async () => {
-		if (!API_KEY) {
-			return
+	const cleanup = () => {
+		if (focusHandler) {
+			const input = attachedInput || getInput()
+			input?.removeEventListener('focus', focusHandler)
+			focusHandler = null
 		}
-
-		const Autocomplete = await loadGoogleMapsScript()
-		if (!Autocomplete) {
-			return
-		}
-
-		const input = getInput()
-		if (!input || !input.isConnected) {
-			return
-		}
-
-		if (autocompleteInstance && attachedInput === input) {
-			return
-		}
-
 		if (autocompleteInstance) {
 			try {
 				google?.maps?.event?.clearInstanceListeners?.(autocompleteInstance)
@@ -138,18 +141,40 @@ export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, field
 			autocompleteInstance = null
 			attachedInput = null
 		}
+	}
+
+	const init = async () => {
+		if (!API_KEY || destroyed) {
+			return false
+		}
+
+		const Autocomplete = await loadGoogleMapsScript()
+		if (!Autocomplete) {
+			return false
+		}
+
+		const input = getInput()
+		if (!input || !input.isConnected || !isInputVisible(input)) {
+			return false
+		}
+
+		if (autocompleteInstance && attachedInput === input) {
+			return true
+		}
+
+		cleanup()
 
 		const options = {
 			componentRestrictions: { country: 'us' },
 			fields,
-			types: ['address']
+			types: ['address'],
 		}
 
 		try {
 			autocompleteInstance = new Autocomplete(input, options)
 			attachedInput = input
 		} catch (_) {
-			return
+			return false
 		}
 
 		if (onPlaceSelect && typeof onPlaceSelect === 'function') {
@@ -162,17 +187,60 @@ export function useGooglePlacesAddress({ inputRef, inputId, onPlaceSelect, field
 				onPlaceSelect(place, addressData)
 			})
 		}
+
+		return true
 	}
 
-	const cleanup = () => {
-		if (autocompleteInstance) {
-			try {
-				google?.maps?.event?.clearInstanceListeners?.(autocompleteInstance)
-			} catch (_) {}
-			autocompleteInstance = null
-			attachedInput = null
-		}
+	const attemptInit = () => {
+		init().catch((e) => {
+			if (import.meta.env.DEV) {
+				console.warn('[Places] init error', e)
+			}
+		})
 	}
+
+	const bindFocusFallback = () => {
+		const input = getInput()
+		if (!input || focusHandler) return
+		focusHandler = () => attemptInit()
+		input.addEventListener('focus', focusHandler)
+	}
+
+	const scheduleInitAttempts = () => {
+		retryTimers.forEach((id) => clearTimeout(id))
+		retryTimers.length = 0
+		INIT_RETRY_DELAYS_MS.forEach((delay) => {
+			retryTimers.push(setTimeout(attemptInit, delay))
+		})
+	}
+
+	onMounted(() => {
+		scheduleInitAttempts()
+		bindFocusFallback()
+
+		window.addEventListener('gtc-app-ready', attemptInit)
+		window.addEventListener('gtc-layout-ready', attemptInit)
+
+		watch(
+			() => inputRef?.value,
+			(el) => {
+				if (el) {
+					bindFocusFallback()
+					attemptInit()
+				}
+			}
+		)
+
+		nextTick(() => bindFocusFallback())
+	})
+
+	onUnmounted(() => {
+		destroyed = true
+		retryTimers.forEach((id) => clearTimeout(id))
+		window.removeEventListener('gtc-app-ready', attemptInit)
+		window.removeEventListener('gtc-layout-ready', attemptInit)
+		cleanup()
+	})
 
 	return { init, cleanup }
 }

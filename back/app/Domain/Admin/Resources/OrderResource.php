@@ -48,6 +48,7 @@ class OrderResource extends JsonResource
             'phone' => $user->phone ?? '',
             'phone_verified' => (int) ($user->verify ?? 0) === 1,
             'address' => $user->address ?? '',
+            'address2' => $user->address2 ?? '',
             'city' => $user->city ?? '',
             'state' => $user->state ?? '',
             'zip' => $user->zip ?? '',
