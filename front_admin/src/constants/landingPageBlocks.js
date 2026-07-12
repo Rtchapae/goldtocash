@@ -4,6 +4,8 @@ export const BLOCK_TYPES = [
 	{ type: 'image', label: 'Image', icon: 'solar:gallery-outline' },
 	{ type: 'text_image', label: 'Text + Image', icon: 'solar:widget-2-outline' },
 	{ type: 'cta', label: 'Button (CTA)', icon: 'solar:cursor-outline' },
+	{ type: 'kit_form', label: 'Kit request form', icon: 'solar:clipboard-list-outline' },
+	{ type: 'gold_calculator', label: 'Gold calculator', icon: 'solar:calculator-outline' },
 	{ type: 'spacer', label: 'Spacer', icon: 'solar:align-vertical-spacing-outline' },
 	{ type: 'divider', label: 'Divider', icon: 'solar:minus-circle-outline' },
 ]
@@ -25,6 +27,10 @@ export function createDefaultBlock(type) {
 			return { id, type, data: { title: '', text: '<p>Describe your offer.</p>', image: '', imagePosition: 'right' } }
 		case 'cta':
 			return { id, type, data: { text: 'Get started', url: '/', style: 'primary', align: 'center' } }
+		case 'kit_form':
+			return { id, type, data: { layout: 'centered', title: 'Request your free appraisal kit' } }
+		case 'gold_calculator':
+			return { id, type, data: { layout: 'centered', showHeading: true } }
 		case 'spacer':
 			return { id, type, data: { height: 'md' } }
 		case 'divider':
@@ -46,7 +52,10 @@ export const ALIGN_OPTIONS = [
 	{ value: 'right', label: 'Right' },
 ]
 
-export const SPACER_HEIGHT_OPTIONS = [
+export const LAYOUT_WIDTH_OPTIONS = [
+	{ value: 'centered', label: 'Centered (narrow)' },
+	{ value: 'full', label: 'Full width' },
+]
 	{ value: 'sm', label: 'Small (24px)' },
 	{ value: 'md', label: 'Medium (48px)' },
 	{ value: 'lg', label: 'Large (72px)' },

@@ -9,6 +9,8 @@ import LpText from './blocks/LpText.vue'
 import LpImage from './blocks/LpImage.vue'
 import LpTextImage from './blocks/LpTextImage.vue'
 import LpCta from './blocks/LpCta.vue'
+import LpKitForm from './blocks/LpKitForm.vue'
+import LpGoldCalculator from './blocks/LpGoldCalculator.vue'
 import LpSpacer from './blocks/LpSpacer.vue'
 import LpDivider from './blocks/LpDivider.vue'
 
@@ -22,6 +24,8 @@ const components = {
 	image: LpImage,
 	text_image: LpTextImage,
 	cta: LpCta,
+	kit_form: LpKitForm,
+	gold_calculator: LpGoldCalculator,
 	spacer: LpSpacer,
 	divider: LpDivider,
 }

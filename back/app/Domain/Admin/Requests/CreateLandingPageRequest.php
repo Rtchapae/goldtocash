@@ -46,7 +46,7 @@ class CreateLandingPageRequest extends FormRequest
             'blocks' => ['required', 'array', 'min:1'],
             'blocks.*.id' => ['required', 'string', 'max:64'],
             'blocks.*.type' => ['required', 'string', Rule::in([
-                'heading', 'text', 'image', 'text_image', 'cta', 'spacer', 'divider',
+                'heading', 'text', 'image', 'text_image', 'cta', 'kit_form', 'gold_calculator', 'spacer', 'divider',
             ])],
             'blocks.*.data' => ['required', 'array'],
             'seo_title' => ['nullable', 'string', 'max:255'],

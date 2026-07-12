@@ -11,6 +11,8 @@ import PreviewText from './preview/PreviewText.vue'
 import PreviewImage from './preview/PreviewImage.vue'
 import PreviewTextImage from './preview/PreviewTextImage.vue'
 import PreviewCta from './preview/PreviewCta.vue'
+import PreviewKitForm from './preview/PreviewKitForm.vue'
+import PreviewGoldCalculator from './preview/PreviewGoldCalculator.vue'
 import PreviewSpacer from './preview/PreviewSpacer.vue'
 import PreviewDivider from './preview/PreviewDivider.vue'
 
@@ -24,6 +26,8 @@ const components = {
 	image: PreviewImage,
 	text_image: PreviewTextImage,
 	cta: PreviewCta,
+	kit_form: PreviewKitForm,
+	gold_calculator: PreviewGoldCalculator,
 	spacer: PreviewSpacer,
 	divider: PreviewDivider,
 }

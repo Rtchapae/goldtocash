@@ -117,3 +117,30 @@
 .lp-divider--dots {
 	border-top: 2px dotted #ccc;
 }
+
+.lp-kit-form,
+.lp-gold-calculator {
+	margin: 1.25rem 0;
+}
+
+.lp-kit-form--centered,
+.lp-gold-calculator--centered {
+	max-width: 520px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.lp-kit-form__title,
+.lp-gold-calculator__title {
+	margin-bottom: 0.75rem;
+	text-align: center;
+}
+
+.lp-kit-form__placeholder {
+	background: #f3f4f6;
+	border: 1px dashed #ccc;
+	border-radius: 0.5rem;
+	padding: 1.5rem 1rem;
+	text-align: center;
+	color: #666;
+}

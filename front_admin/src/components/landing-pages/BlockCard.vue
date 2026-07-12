@@ -135,6 +135,30 @@
 				</div>
 			</template>
 
+			<template v-else-if="block.type === 'kit_form'">
+				<div class="mb-3">
+					<label class="form-label">Section title (optional)</label>
+					<input v-model="data.title" type="text" class="form-control" placeholder="Request your free appraisal kit" />
+				</div>
+				<label class="form-label">Layout</label>
+				<select v-model="data.layout" class="form-select">
+					<option v-for="opt in LAYOUT_WIDTH_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+				</select>
+				<p class="form-text mt-2">Shows the same kit request form as on the main site. Works on mobile and desktop.</p>
+			</template>
+
+			<template v-else-if="block.type === 'gold_calculator'">
+				<div class="form-check mb-3">
+					<input id="lp-calc-heading" v-model="data.showHeading" class="form-check-input" type="checkbox" />
+					<label class="form-check-label" for="lp-calc-heading">Show "Gold Calculator" heading</label>
+				</div>
+				<label class="form-label">Layout</label>
+				<select v-model="data.layout" class="form-select">
+					<option v-for="opt in LAYOUT_WIDTH_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+				</select>
+				<p class="form-text mt-2">Live gold value calculator — same widget as on the calculator page.</p>
+			</template>
+
 			<template v-else-if="block.type === 'spacer'">
 				<label class="form-label">Height</label>
 				<select v-model="data.height" class="form-select">
@@ -160,7 +184,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { BLOCK_TYPES, ALIGN_OPTIONS, FONT_SIZE_OPTIONS, SPACER_HEIGHT_OPTIONS } from '@/constants/landingPageBlocks'
+import { BLOCK_TYPES, ALIGN_OPTIONS, FONT_SIZE_OPTIONS, SPACER_HEIGHT_OPTIONS, LAYOUT_WIDTH_OPTIONS } from '@/constants/landingPageBlocks'
 import BlockPreview from './BlockPreview.vue'
 import SimpleRichText from './SimpleRichText.vue'
 import ImageUploadField from './ImageUploadField.vue'
