@@ -8,6 +8,7 @@ use App\Domain\Users\Controllers\FrontUserDocumentController;
 use App\Domain\Users\Controllers\PhoneVerificationController;
 use App\Domain\Messages\Controllers\FrontMessageController;
 use App\Domain\Posts\Controllers\FrontPostController;
+use App\Domain\LandingPages\Controllers\FrontLandingPageController;
 use App\Domain\Admin\Controllers\StateCityController;
 use App\Domain\Admin\Controllers\CountryController;
 use App\Domain\Seo\Controllers\FrontSeoController;
@@ -38,6 +39,11 @@ Route::get('trustpilot/reviews', [TrustpilotController::class, 'getReviews']);
 Route::prefix('posts')->group(function (): void {
     Route::get('/', [FrontPostController::class, 'index']);
     Route::get('{slug}', [FrontPostController::class, 'show']);
+});
+
+Route::prefix('landing-pages')->group(function (): void {
+    Route::get('paths', [FrontLandingPageController::class, 'paths']);
+    Route::get('by-path', [FrontLandingPageController::class, 'showByPath']);
 });
 
 Route::prefix('front/auth')->group(function (): void {

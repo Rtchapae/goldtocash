@@ -15,6 +15,8 @@ import TraceConversionsPage from '@/pages/TraceConversionsPage.vue';
 import TraceCampaignStatsPage from '@/pages/TraceCampaignStatsPage.vue';
 import AdminUsersPage from '@/pages/AdminUsersPage.vue';
 import SeoPagesIndexPage from '@/pages/SeoPages/SeoPagesIndexPage.vue';
+import LandingPagesIndexPage from '@/pages/LandingPagesIndexPage.vue';
+import CreateLandingPagePage from '@/pages/CreateLandingPagePage.vue';
 
 const routes = [
 	{
@@ -83,6 +85,24 @@ const routes = [
 		path: '/posts/edit/:id',
 		name: 'posts.edit',
 		component: CreatePostPage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/landing-pages',
+		name: 'landing-pages.index',
+		component: LandingPagesIndexPage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/landing-pages/create',
+		name: 'landing-pages.create',
+		component: CreateLandingPagePage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/landing-pages/edit/:id',
+		name: 'landing-pages.edit',
+		component: CreateLandingPagePage,
 		meta: { requiresAuth: true }
 	},
 	{

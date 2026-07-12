@@ -1,0 +1,139 @@
+/* Public landing page block styles */
+.section-landing-page,
+.landing-page-content {
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	color: #1a1a1a;
+}
+
+.lp-heading {
+	margin: 0 0 1rem;
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+.lp-heading--center { text-align: center; }
+.lp-heading--right { text-align: right; }
+
+.lp-text {
+	margin-bottom: 1rem;
+	line-height: 1.65;
+}
+
+.lp-text p:last-child {
+	margin-bottom: 0;
+}
+
+.lp-text--sm { font-size: 0.95rem; }
+.lp-text--md { font-size: 1.05rem; }
+.lp-text--lg { font-size: 1.2rem; }
+.lp-text--center { text-align: center; }
+.lp-text--right { text-align: right; }
+
+.lp-image {
+	margin: 0 0 1.25rem;
+}
+
+.lp-image img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 0.35rem;
+}
+
+.lp-image--half {
+	text-align: center;
+}
+
+.lp-image--half img {
+	max-width: min(100%, 480px);
+}
+
+.lp-image--center { text-align: center; }
+.lp-image--right { text-align: right; }
+
+.lp-image figcaption {
+	margin-top: 0.5rem;
+	font-size: 0.9rem;
+	color: #666;
+	text-align: center;
+}
+
+.lp-text-image {
+	display: grid;
+	gap: 1.25rem;
+	margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+	.lp-text-image {
+		grid-template-columns: 1fr 1fr;
+		align-items: center;
+		gap: 2rem;
+	}
+
+	.lp-text-image--image-left .lp-text-image__media {
+		order: -1;
+	}
+}
+
+.lp-text-image__title {
+	margin: 0 0 0.75rem;
+	font-size: 1.5rem;
+}
+
+.lp-text-image__media img {
+	width: 100%;
+	height: auto;
+	border-radius: 0.35rem;
+}
+
+.lp-cta-wrap {
+	margin: 1.25rem 0 1.5rem;
+}
+
+.lp-cta-wrap--center { text-align: center; }
+.lp-cta-wrap--right { text-align: right; }
+
+.lp-cta {
+	display: inline-block;
+	min-height: 2.75rem;
+	line-height: 1.2;
+	padding: 0.85rem 1.75rem;
+}
+
+.lp-cta--secondary {
+	background: #333 !important;
+	border-color: #333 !important;
+}
+
+.lp-spacer--sm { height: 24px; }
+.lp-spacer--md { height: 48px; }
+.lp-spacer--lg { height: 72px; }
+.lp-spacer--xl { height: 96px; }
+
+.lp-divider {
+	border: 0;
+	margin: 1.25rem 0;
+}
+
+.lp-divider--line {
+	border-top: 1px solid #ddd;
+}
+
+.lp-divider--dots {
+	border-top: 2px dotted #ccc;
+}
+
+@media (max-width: 767px) {
+	.lp-heading {
+		font-size: clamp(1.35rem, 5vw, 2rem);
+	}
+
+	.lp-text-image__title {
+		font-size: 1.25rem;
+	}
+
+	.lp-cta {
+		width: 100%;
+		max-width: 320px;
+	}
+}
