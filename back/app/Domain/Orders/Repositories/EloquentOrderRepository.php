@@ -2,16 +2,23 @@
 
 namespace App\Domain\Orders\Repositories;
 
+use App\Domain\CustomerIo\CustomerIoOrderSync;
+use App\Domain\Sms\Services\KitWelcomeSmsService;
 use App\Domain\Users\Models\User;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Enums\OrderStatus;
-use App\Jobs\SendKitRequestEmailJob;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class EloquentOrderRepository implements OrderRepositoryInterface
 {
+    public function __construct(
+        private readonly CustomerIoOrderSync $customerIoOrderSync,
+        private readonly KitWelcomeSmsService $kitWelcomeSmsService,
+    ) {
+    }
+
     public function create(array $data): Order
     {
         return Order::create($data);
@@ -69,7 +76,9 @@ class EloquentOrderRepository implements OrderRepositoryInterface
 
     public function sendKitRequestEmail(User $user, Order $order): void
     {
-        SendKitRequestEmailJob::dispatch($user, $order);
+        // Kit lifecycle emails: Customer.io (event: kit-request). Immediate SMS: Twilio day-0 template.
+        $this->customerIoOrderSync->syncKitRequest($user, $order);
+        $this->kitWelcomeSmsService->sendIfConfigured($user, $order);
     }
 
     public function getOrdersForStatusUpdate(int $afterId = 0, int $limit = 30): Collection

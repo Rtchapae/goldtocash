@@ -6,6 +6,7 @@ use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Enums\OrderType;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\UserRepositoryInterface;
+use App\Domain\Sms\Models\SentMessage;
 use App\Domain\Sms\Services\Providers\TwilioProvider;
 use App\Domain\Sms\Services\SmsUtils;
 use App\Domain\Users\Models\VerificationCode;
@@ -76,8 +77,6 @@ class KitRegistrationService
                     ));
 
                     $this->saveShippingLabel($order, $label);
-
-                    $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
                 } else {
                     $order = $this->orderRepository->create(
                         $this->baseKitOrderPayload($user->id, $validated)
@@ -86,19 +85,23 @@ class KitRegistrationService
 
                 $this->kitAttributionService->recordMarketingTrace($user, $validated);
 
-                try {
-                    $this->orderRepository->sendKitRequestEmail($user, $order);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send kit request email for existing user', [
-                        'user_id' => $user->id,
-                        'order_id' => $order->id,
-                        'error' => $e->getMessage(),
-                    ]);
+                $this->orderRepository->sendKitRequestEmail($user, $order);
+
+                if ($this->hasFedexCredentials() && isset($track_number, $label)) {
+                    try {
+                        $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to generate welcome letter for existing user', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
 
                 return [
                     'status' => true,
-                    'message' => $wasAlreadyAuthenticated ? 'Kit created successfully.' : 'Kit created successfully. Confirmation sent to your email.',
+                    'message' => 'Kit created successfully.',
                     'order_id' => $order->id,
                     'user_id' => $user->id,
                     'user' => $user,
@@ -220,8 +223,6 @@ class KitRegistrationService
                     'trace' => $e->getTraceAsString()
                 ]);
             }
-
-            $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
         } else {
             $order = $this->orderRepository->create(
                 $this->baseKitOrderPayload($user->id, $validated)
@@ -230,13 +231,25 @@ class KitRegistrationService
 
         $this->kitAttributionService->recordMarketingTrace($user, $validated);
 
+        $this->orderRepository->sendKitRequestEmail($user, $order);
+
+        if (isset($track_number, $label)) {
+            try {
+                $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
+            } catch (\Exception $e) {
+                Log::error('Failed to generate welcome letter for new user', [
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
         $guard = Auth::guard('front');
         $token = $guard->login($user);
 
         $this->userRepository->sendPasswordEmail($user, $userPassPlain);
-
-        $this->orderRepository->sendKitRequestEmail($user, $order);
 
         return [
             'status' => true,
@@ -268,6 +281,7 @@ class KitRegistrationService
             $message = "Your verification code is: $code";
             $twilioPhone = preg_replace('/^\+?1?/', '', $normalizedPhone);
             $result = $twilioProvider->send($from, $twilioPhone, $message);
+            SentMessage::storeDto($result);
 
             if ($result->getStatus() === 'failed') {
                 $details = $result->getDetails();

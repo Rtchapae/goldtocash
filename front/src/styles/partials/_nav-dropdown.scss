@@ -59,10 +59,23 @@
 .nav-dropdown-menu.mobile {
 	max-height: 0;
 	overflow: hidden;
-	transition: max-height .5s;
+	transition: max-height .4s ease;
+	list-style: none;
+	padding-left: 0;
+	margin: 0;
 }
 .nav-dropdown-menu.mobile.open {
-	max-height: 200px;
+	max-height: 70vh;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+.nav-dropdown-menu.mobile a {
+	display: block;
+	padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+	font-size: 0.875rem;
+	line-height: 1.35;
+	white-space: normal;
+	word-wrap: break-word;
 }
 
 

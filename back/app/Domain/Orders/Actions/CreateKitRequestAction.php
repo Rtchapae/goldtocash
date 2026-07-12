@@ -75,6 +75,9 @@ class CreateKitRequestAction
 
             $this->kitAttributionService->recordMarketingTrace($user, $attribution);
 
+            // CIO + welcome SMS must run before PDF/label work so a downstream failure cannot skip them.
+            $this->orderRepository->sendKitRequestEmail($user, $order);
+
             $this->saveShippingLabel($order, $label);
 
             $locations = $this->fedexService->getLocationsForZip($user->zip ?? '');
@@ -92,8 +95,6 @@ class CreateKitRequestAction
                 ->setPaper('letter', 'portrait');
 
             file_put_contents($path . "/letter.pdf", $pdf->output());
-
-            $this->orderRepository->sendKitRequestEmail($user, $order);
 
             return [
                 'status' => true,

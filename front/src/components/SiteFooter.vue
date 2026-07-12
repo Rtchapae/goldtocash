@@ -107,7 +107,7 @@
 						Dealer.
 					</p>
 					<p class="my-3 consent-text">
-						Copyright © 2020-2025
+						Copyright © 2020-{{ currentYear }}
 						<a href="/">Gold to Cash</a>
 						All Rights Reserved
 					</p>
@@ -126,6 +126,7 @@ import { ref, onMounted } from 'vue'
 import { fetchPosts } from '@/api/posts'
 
 const sellArticles = ref([])
+const currentYear = new Date().getFullYear()
 
 onMounted(async () => {
 	try {

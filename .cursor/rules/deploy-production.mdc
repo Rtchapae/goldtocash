@@ -1,0 +1,34 @@
+---
+description: Production deploy workflow for goldtocash.us (Cursor mobile + desktop)
+alwaysApply: true
+---
+
+# Production deploy (goldtocash.us)
+
+When the user asks to deploy, push to server, or build on production:
+
+1. **Commit changes to git first** (unless user explicitly wants uncommitted deploy).
+2. **Deploy from repo root** using git-based script (not manual scp lists):
+
+```powershell
+git pull
+.\scripts\deploy-from-git.ps1 -Mode last-commit -BackupAndRollback
+```
+
+3. **Choose flags by changed paths:**
+   - `front/` or `front_admin/` → Docker rebuilds `front`; add `-BuildAdmin` if `front_admin/` changed
+   - `back/` → restarts `backend`; add `-RunMigrations` if migrations changed
+   - `docker/` → may need manual `docker compose` on server
+
+4. **Alternative modes:**
+   - Uncommitted local changes: `.\scripts\deploy-from-git.ps1`
+   - Known file bundle: `.\scripts\deploy-from-git.ps1 -Mode manifest -Manifest mobile-pagespeed.txt`
+   - Explicit paths: `.\scripts\deploy-from-git.ps1 -Mode paths -Paths "front/src/App.vue"`
+
+5. **Server:** `root@159.89.186.46`, path `/var/www/goldtocash.us`. Requires SSH from the machine running the script.
+
+6. **Do not deploy:** `.env`, `node_modules`, `tmp/`, secrets, `download-from-server.secret.ps1`.
+
+7. Full human-readable guide: `docs/DEPLOY_MOBILE.md`
+
+After deploy, remind user that PageSpeed **field data** updates over ~28 days; lab Lighthouse is immediate.

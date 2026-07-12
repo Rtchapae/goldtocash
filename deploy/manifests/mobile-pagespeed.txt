@@ -1,0 +1,15 @@
+# Mobile PageSpeed — round 1 + round 2 (deployed 2026-07-12)
+front/index.html
+front/server.js
+front/src/App.vue
+front/src/entry-client.js
+front/src/entry-server.js
+front/src/pages/Main.vue
+front/src/layouts/MainLayout.vue
+front/src/components/LazyBelowFold.vue
+front/src/components/SiteFooter.vue
+front/src/components/sections/MainSectionMobile.vue
+front/src/styles/partials/_main_page.scss
+front/src/styles/partials/_nav-dropdown.scss
+front/src/utils/device.js
+front/public/images/woman-holding-cash-1.webp

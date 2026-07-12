@@ -3,22 +3,22 @@
         <div class="">
             <MobileSophisticatedForm />
         </div>
-        <div class="mt-5 px-3">
+        <LazyBelowFold :min-height="80" class="mt-5 px-3">
             <AsSeenIn />
-        </div>
+        </LazyBelowFold>
         <div class="mt-5 px-3">
             <div class="text-center">
-                <img src="/images/fedex-small-icon.svg" class="fedex-img">
+                <img src="/images/fedex-small-icon.svg" class="fedex-img" alt="" loading="lazy">
                 <p class="mt-3">Free &amp; Insured shipping up to $100,000*</p>
             </div>
         </div>
-        <div class="mt-5 px-3">
+        <LazyBelowFold :min-height="200" class="mt-5 px-3">
             <MobileBbbSection />
-        </div>
-        <div class="mt-5 px-3">
+        </LazyBelowFold>
+        <LazyBelowFold :min-height="480" class="mt-5 px-3">
             <MobileSellReasons />
-        </div>
-        <div id="mobile-testimonial">
+        </LazyBelowFold>
+        <LazyBelowFold id="mobile-testimonial" :min-height="360">
             <h2 class="mobile-testimonial-heading">
                 Customers like<br>
                 you talk about<br>
@@ -30,23 +30,27 @@
                     Get My Free Kit
                 </button>
             </div>
-        </div>
-        <div class="p-3 mt-5 muted-bg">
+        </LazyBelowFold>
+        <LazyBelowFold :min-height="320" class="p-3 mt-5 muted-bg">
             <MobileWhatWePay />
-                </div>
+        </LazyBelowFold>
     </div>
 </template>
 
 <script setup>
+import { defineAsyncComponent } from 'vue'
+import LazyBelowFold from '@/components/LazyBelowFold.vue'
+import MobileSophisticatedForm from '@/components/MobileSophisticatedForm.vue'
+
+const AsSeenIn = defineAsyncComponent(() => import('@/components/AsSeenIn.vue'))
+const MobileBbbSection = defineAsyncComponent(() => import('@/components/MobileBbbSection.vue'))
+const MobileSellReasons = defineAsyncComponent(() => import('@/components/MobileSellReasons.vue'))
+const TestimonialsSection = defineAsyncComponent(() => import('@/components/TestimonialsSection.vue'))
+const MobileWhatWePay = defineAsyncComponent(() => import('@/components/MobileWhatWePay.vue'))
+
 function scrollToTop() {
 	window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-import MobileSophisticatedForm from '@/components/MobileSophisticatedForm.vue'
-import AsSeenIn from '@/components/AsSeenIn.vue'
-import TestimonialsSection from '@/components/TestimonialsSection.vue'
-import MobileBbbSection from '@/components/MobileBbbSection.vue'
-import MobileSellReasons from '@/components/MobileSellReasons.vue'
-import MobileWhatWePay from '@/components/MobileWhatWePay.vue'
 </script>
 
 <style scoped>

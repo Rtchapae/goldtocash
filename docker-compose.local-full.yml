@@ -1,0 +1,145 @@
+# Full local stack (no prod): MySQL + Redis + Laravel + SSR front + admin Vite + nginx + Adminer.
+# Uses only docker.debug.env + ./data/mysql-local-full (never prod DB).
+#
+#   docker compose -f docker-compose.local-full.yml --env-file docker.debug.env up -d --build
+#   .\scripts\start-local-full.ps1
+#
+# URLs:  http://127.0.0.1:9080/  (site + /api)   http://127.0.0.1:9082/  (admin)   http://127.0.0.1:9083/  (Adminer)
+# Stop:  docker compose -f docker-compose.local-full.yml --env-file docker.debug.env down
+
+name: goldtocash-local
+
+networks:
+  gtc_local:
+    driver: bridge
+
+volumes:
+  redis_local:
+
+services:
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - docker.debug.env
+    volumes:
+      - ./data/mysql-local-full:/var/lib/mysql
+    networks:
+      - gtc_local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - gtc_local
+    volumes:
+      - redis_local:/data
+    command: redis-server --appendonly yes
+
+  backend:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+      target: production
+    env_file:
+      - docker.debug.env
+    environment:
+      APP_URL: http://127.0.0.1:9080
+      ADMIN_APP_URL: http://127.0.0.1:9082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    expose:
+      - "9000"
+    networks:
+      - gtc_local
+    volumes:
+      - ./back/app:/var/www/html/app
+      - ./back/bootstrap:/var/www/html/bootstrap
+      - ./back/config:/var/www/html/config
+      - ./back/database:/var/www/html/database
+      - ./back/resources:/var/www/html/resources
+      - ./back/routes:/var/www/html/routes
+      - ./back/public:/var/www/html/public
+      - ./back/storage:/var/www/html/storage
+      - ./back/artisan:/var/www/html/artisan
+      - ./back/composer.json:/var/www/html/composer.json
+      - ./back/composer.lock:/var/www/html/composer.lock
+    command: ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      target: development
+    env_file:
+      - docker.debug.env
+    environment:
+      NODE_ENV: development
+      API_BASE_URL: http://nginx/api/v1
+      SITE_URL: http://127.0.0.1:9080
+    depends_on:
+      - backend
+    expose:
+      - "5175"
+    networks:
+      - gtc_local
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    working_dir: /app
+
+  front_admin:
+    build:
+      context: ./front_admin
+      dockerfile: Dockerfile
+      target: development
+    env_file:
+      - docker.debug.env
+    environment:
+      ADMIN_API_PROXY_TARGET: http://nginx
+    depends_on:
+      - backend
+      - nginx
+    ports:
+      - "9082:5173"
+    expose:
+      - "5173"
+    networks:
+      - gtc_local
+    volumes:
+      - ./front_admin:/app
+      - /app/node_modules
+    working_dir: /app
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - backend
+      - front
+    ports:
+      - "9080:80"
+    volumes:
+      - ./docker/nginx/nginx.compose-local.conf:/etc/nginx/nginx.conf:ro
+      - ./back/public:/var/www/html/public:ro
+      - ./back/storage:/var/www/html/storage:ro
+    networks:
+      - gtc_local
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    ports:
+      - "9083:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - gtc_local

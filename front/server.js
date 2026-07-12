@@ -144,18 +144,26 @@ async function createServer() {
 
 		const loc = (path) => escapeXml(path === '/' ? base : `${base}${path.startsWith('/') ? path : '/' + path}`)
 
+		const seenLocs = new Set()
+		const pushUrl = (path, priority) => {
+			const entry = path === '/' ? base : `${base}${path.startsWith('/') ? path : '/' + path}`
+			if (seenLocs.has(entry)) return
+			seenLocs.add(entry)
+			urls.push(`  <url><loc>${loc(path)}</loc><changefreq>weekly</changefreq><priority>${priority}</priority></url>`)
+		}
+
 		const urls = []
 		for (const p of staticPaths) {
-			urls.push(`  <url><loc>${loc(p)}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`)
+			pushUrl(p, p === '/' ? '1.0' : '0.8')
 		}
 		for (const slug of data.gold_info || []) {
-			urls.push(`  <url><loc>${loc(`/gold-info/${slug}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
+			pushUrl(`/gold-info/${slug}`, '0.7')
 		}
 		for (const slug of data.sell || []) {
-			urls.push(`  <url><loc>${loc(`/sell/${slug}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
+			pushUrl(`/sell/${slug}`, '0.7')
 		}
 		for (const slug of data.sell_gold || []) {
-			urls.push(`  <url><loc>${loc(`/sell-gold/${slug}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`)
+			pushUrl(`/sell-gold/${slug}`, '0.7')
 		}
 
 		const hasPosts = (data.gold_info?.length || 0) + (data.sell?.length || 0) + (data.sell_gold?.length || 0) > 0
@@ -212,14 +220,18 @@ ${urls.join('\n')}
 
 			console.timeLog('Server Request Time', 'Template loaded')
 
-			const { appHtml, state, metaTags, statusCode } = await render(url, {
+			const { appHtml, state, metaTags, statusCode, ssrIsMobile } = await render(url, {
 				ssrApiBaseUrl: process.env.SSR_API_BASE_URL || undefined,
+				userAgent: req.headers['user-agent'] ?? '',
 			})
 			console.timeLog('Server Request Time', 'SSR render completed')
 
 			let html = template
 				.replace('<!--app-html-->', appHtml)
-				.replace('<!--pinia-state-->', `<script>window.__PINIA__=${JSON.stringify(state)}</script>`)
+				.replace(
+					'<!--pinia-state-->',
+					`<script>window.__SSR_MOBILE__=${JSON.stringify(!!ssrIsMobile)}</script><script>window.__PINIA__=${JSON.stringify(state)}</script>`
+				)
 
 			// Inject SEO meta tags if available
 			if (metaTags) {
