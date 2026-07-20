@@ -6,10 +6,10 @@ import seoService from '../services/seoService.js'
 const routes = [
 	{ path: '/', name: 'home', component: Main },
 	{ path: '/about', name: 'about', component: About },
-	{ path: '/sign-in', name: 'sign-in', component: () => import('@/pages/auth/SignIn.vue'), meta: { layout: 'AuthLayout' } },
-	{ path: '/password/reset', name: 'forgot-password', component: () => import('@/pages/auth/ForgotPassword.vue'), meta: { layout: 'AuthLayout' } },
+	{ path: '/sign-in', name: 'sign-in', component: () => import('@/pages/auth/SignIn.vue'), meta: { layout: 'AuthLayout', noIndex: true } },
+	{ path: '/password/reset', name: 'forgot-password', component: () => import('@/pages/auth/ForgotPassword.vue'), meta: { layout: 'AuthLayout', noIndex: true } },
 	{ path: '/password/email', redirect: { name: 'forgot-password' } },
-	{ path: '/how-it-works', name: 'how-it-works', component: () => import('@/pages/HowItWorks.vue') },
+	{ path: '/how-it-works', redirect: '/how-sell-gold' },
 	{ path: '/what-we-pay', name: 'what-we-pay', component: () => import('@/pages/WhatWePay.vue') },
 	{ path: '/cash-for-gold', name: 'cash-for-gold', component: () => import('@/pages/CashForGold.vue') },
 	{
@@ -52,6 +52,7 @@ const routes = [
 	{ path: '/scrap-gold-buyer-online', name: 'scrap-gold-buyer-online', component: () => import('@/pages/ScrapGoldBuyerOnline.vue') },
 	{ path: '/best-place-sell-gold', name: 'best-place-sell-gold', component: () => import('@/pages/BestPlaceSellGold.vue') },
 	{ path: '/gold-buyer-online', name: 'gold-buyer-online', component: () => import('@/pages/GoldBuyerOnline.vue') },
+	{ path: '/how-sell-gold', name: 'how-sell-gold', component: () => import('@/pages/HowSellGold.vue') },
 	{ path: '/how-sell-gold-jewelry-online-usa', name: 'how-sell-gold-jewelry-online-usa', component: () => import('@/pages/HowSellGoldJewelry.vue') },
 	{ path: '/gold-info/:slug', name: 'gold-info-post', component: () => import('@/pages/BlogPost.vue') },
 	{ path: '/sell/:slug', name: 'sell-article', component: () => import('@/pages/BlogPost.vue') },
@@ -63,7 +64,7 @@ const routes = [
 
 export function getStaticSitemapPaths() {
 	return routes
-		.filter((r) => !r.path.includes(':') && !r.meta?.requiresAuth)
+		.filter((r) => !r.path.includes(':') && !r.meta?.requiresAuth && !r.meta?.noIndex && !r.redirect)
 		.map((r) => r.path)
 }
 

@@ -1,9 +1,6 @@
 [
   "/",
   "/about",
-  "/sign-in",
-  "/password/reset",
-  "/password/email",
   "/how-it-works",
   "/what-we-pay",
   "/cash-for-gold",
@@ -32,5 +29,6 @@
   "/scrap-gold-buyer-online",
   "/best-place-sell-gold",
   "/gold-buyer-online",
+  "/how-sell-gold",
   "/how-sell-gold-jewelry-online-usa"
 ]

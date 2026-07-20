@@ -24,7 +24,7 @@
 						Request Free Kit
 					</button>
 					<li class="nav-item">
-						<a href="/how-it-works">How It Works</a>
+						<a href="/how-sell-gold">How to Sell Gold</a>
 					</li>
 					<!-- Dropdown menus (data-driven) -->
 					<template v-for="menu in menus" :key="menu.key">
@@ -93,11 +93,25 @@ const menus = [
 		label: 'What We Pay',
 		href: '/what-we-pay',
 		desktopItems: [
-			{ label: 'Cash for Gold', href: '/cash-for-gold' }
+			{ label: 'Cash for Gold', href: '/cash-for-gold' },
+			{ label: 'Free Gold Appraisal with Insured Shipping', href: '/free-gold-appraisal-insured-shipping' },
+			{ label: 'Scrap Gold Buyer Online', href: '/scrap-gold-buyer-online' },
+			{ label: 'Online Gold Jewelry Buyer in the USA', href: '/online-gold-jewelry-buyer-usa' },
+			{ label: 'Best Place to Sell Gold Online in the USA', href: '/best-place-sell-gold' },
+			{ label: 'Gold Buyer Online', href: '/gold-buyer-online' },
+			{ label: 'How to Sell Gold', href: '/how-sell-gold' },
+			{ label: 'How to Sell Gold Jewelry Online in the USA', href: '/how-sell-gold-jewelry-online-usa' }
 		],
 		mobileItems: [
 			{ label: 'What We Pay', href: '/what-we-pay' },
-			{ label: 'Cash for Gold', href: '/cash-for-gold' }
+			{ label: 'Cash for Gold', href: '/cash-for-gold' },
+			{ label: 'Free Gold Appraisal with Insured Shipping', href: '/free-gold-appraisal-insured-shipping' },
+			{ label: 'Scrap Gold Buyer Online', href: '/scrap-gold-buyer-online' },
+			{ label: 'Online Gold Jewelry Buyer in the USA', href: '/online-gold-jewelry-buyer-usa' },
+			{ label: 'Best Place to Sell Gold Online in the USA', href: '/best-place-sell-gold' },
+			{ label: 'Gold Buyer Online', href: '/gold-buyer-online' },
+			{ label: 'How to Sell Gold', href: '/how-sell-gold' },
+			{ label: 'How to Sell Gold Jewelry Online in the USA', href: '/how-sell-gold-jewelry-online-usa' }
 		]
 	},
 		{
@@ -105,6 +119,7 @@ const menus = [
 			label: 'What We Buy',
 			href: '/what-we-buy',
 			desktopItems: [
+				{ label: 'What We Buy', href: '/what-we-buy' },
 				{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
 				{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
 				{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },

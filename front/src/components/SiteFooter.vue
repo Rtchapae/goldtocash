@@ -36,7 +36,7 @@
 							<a href="/">Home</a>
 						</li>
 						<li class="nav-item-footer">
-							<a href="/how-it-works">How It Works</a>
+							<a href="/how-sell-gold">How to Sell Gold</a>
 						</li>
 						<li class="nav-item-footer">
 							<a href="/what-we-pay">What We Pay</a>

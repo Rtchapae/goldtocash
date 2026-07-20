@@ -325,6 +325,15 @@ final class DefaultSeoPages
                 'is_active' => true,
             ],
             [
+                'route_name' => 'how-sell-gold',
+                'page_url' => '/how-sell-gold',
+                'page_title' => 'How To Sell Gold',
+                'meta_title' => 'How To Sell Gold - 3 Easy Steps | Gold To Cash',
+                'meta_description' => 'Learn how to sell gold jewelry for cash in 3 easy steps. Request a free appraisal kit, get a professional evaluation, and get paid fast.',
+                'meta_keywords' => ['how to sell gold', 'sell gold jewelry', 'cash for gold', 'appraisal kit'],
+                'is_active' => true,
+            ],
+            [
                 'route_name' => 'how-sell-gold-jewelry-online-usa',
                 'page_url' => '/how-sell-gold-jewelry-online-usa',
                 'page_title' => 'How to Sell Gold Jewelry',

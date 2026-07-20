@@ -8,7 +8,10 @@
 			<header class="gc-faq__header">
 				<h2 id="gc-faq-heading" class="gc-faq__page-title">
 					<span class="gc-faq__page-title-part gc-faq__page-title-part--cream">FAQs</span>
-					<span class="gc-faq__page-title-part gc-faq__page-title-part--ink"> About Gold Value</span>
+					<span
+						v-if="variant !== 'how-sell' && variant !== 'what-we-buy' && variant !== 'what-sets-apart'"
+						class="gc-faq__page-title-part gc-faq__page-title-part--ink"
+					> About Gold Value</span>
 				</h2>
 			</header>
 
@@ -45,7 +48,7 @@ const props = defineProps({
 	variant: {
 		type: String,
 		default: 'calculator',
-		validator: (v) => ['calculator', 'scrap', 'dental'].includes(v),
+		validator: (v) => ['calculator', 'scrap', 'dental', 'how-sell', 'what-we-buy', 'what-sets-apart'].includes(v),
 	},
 })
 
@@ -131,6 +134,74 @@ const sectionBlocks = [
 			{
 				question: 'Do you buy other precious metals?',
 				answer: 'Yes. We also buy silver, platinum, and palladium scrap.',
+			},
+		],
+	},
+	{
+		id: 'how-sell',
+		title: '',
+		items: [
+			{
+				question: 'Do I need to clean or sort my gold before sending it in?',
+				answer:
+					'No need! Our experts handle any testing, sorting as well as cleaning. All you need it to include everything you’d like to sell in the mail-in kit',
+			},
+			{
+				question: 'How safe is it to mail gold?',
+				answer:
+					'Very Safe! Our prepaid shipping kit is trackable and fully insured through USPS for up to $5,000. If you have any questions, you can always give us a call at 564.237.7332 We are open Monday through Friday 9am - 5pm PST',
+			},
+			{
+				question: 'How long does the process take?',
+				answer:
+					'It generally comes down to the shipping time. However, once the item is in our possession, you will receive a payout offer from us within 24 hours. That said, the process can take up to 5 business days.',
+			},
+			{
+				question: 'How do I get paid?',
+				answer:
+					'We want to make every step of the process convenient and fast. That is why we offer four different payment options. Wire Transfer / ACH: Fast and Free! Direct deposit into your bank account within 1-3 business days. Company Check: Mailed to the address we have on file within 24 hours. Default payment method if you leave a payment option field blank in the Information Card or if there is an issue with using another payment option. Cash App: Fast and Free! A very popular and convenient option if you want to get paid faster. PayPal: Similar to Cash App - a free & convenient option if you want to get paid faster.',
+			},
+		],
+	},
+	{
+		id: 'what-we-buy',
+		title: '',
+		items: [
+			{
+				question: 'What is Scrap Gold?',
+				answer:
+					'Scrap gold is just a general term for any broken, worn out, or no longer used gold. Any old jewelry, watch cases, coins, or unrepaired gold qualifies as scrap gold. If you are unsure, feel free to send in your items for zero charge and our team will help identify what you may have',
+			},
+			{
+				question: 'Do you accept used or damaged items?',
+				answer:
+					'Your gold necklace is broken? Ring is dented? Selling a gold crown? No worries! We accept items in any condition! Our concern is only the weight and purity of the gold item, any other factors do not affect the price of our payout.',
+			},
+			{
+				question: 'How Do I Know If My Item Is Fully Gold or Gold Plated?',
+				answer:
+					'Without the proper tools and equipment, knowing the difference between what is pure gold or only gold-plated can be challenging. Let us handle it! If you send in your item or items - our team of specialists will test the item for you! If it happens to be gold-plated or not gold at all, we’ll simply send it back to you, for no charge',
+			},
+			{
+				question: 'Do you accept Silver Utensils?',
+				answer:
+					'Though we do accept silver, we do not accept silver utensils. When it comes to silver, we accept Silver Coins, Silver Bars, Silver Bullion, Silver Rounds, and dimes/quarters/half dollars dated 1964 or older',
+			},
+		],
+	},
+	{
+		id: 'what-sets-apart',
+		title: '',
+		items: [
+			{
+				question: 'Can I Trust Gold To Cash with handling my gold?',
+				answer:
+					'Absolutely. Gold to Cash is a secure and reputable online gold buyer, fully licensed under Washington State Chapter 19.60 RCW as a Secondhand Precious Metals Dealer. We operate in full compliance with state regulations and industry standards, ensuring that every transaction is handled professionally and responsibly. Over the years, thousands of customers have trusted Gold to Cash to sell their gold jewelry and precious metals, and many continue to recommend our service because of the reliability, transparency, and fair payouts we provide. Your valuables are protected throughout every stage of the transaction. From the moment your package is received, each item is carefully logged, handled by trained specialists, and safely stored. Our location is monitored and safeguarded by advanced security systems to ensure your items remain protected at all times. If you ever have questions about the process or the status of your shipment, our team is always available to help. To learn more about the experiences of other customers, we invite you to read verified customer reviews and see why so many people choose Gold to Cash when selling their gold.',
+			},
+			{
+				question: 'What is the Price Match Guarantee?',
+				answer:
+					'Our goal is to make sure every customer feels confident and satisfied with the offer they receive. We believe selling your gold should be straightforward, transparent, and rewarding, which is why we work hard to provide competitive payouts based on current market prices. If you happen to receive a higher offer from another reputable online gold buyer, we’re happy to review it. In many cases, we can match a verified competitor’s offer so you can still take advantage of our secure process, fast payments, and trusted service while receiving the value you deserve.*Terms and conditions apply.',
 			},
 		],
 	},

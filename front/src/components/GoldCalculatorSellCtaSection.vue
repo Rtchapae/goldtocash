@@ -1,7 +1,10 @@
 <template>
 	<section
 		class="gc-figma-507-899"
-		:class="{ 'gc-figma-507-899--dental': pageVariant === 'dental' }"
+		:class="{
+			'gc-figma-507-899--dental': pageVariant === 'dental',
+			'gc-figma-507-899--how-sell': pageVariant === 'how-sell',
+		}"
 		:data-figma-node="pageVariant === 'dental' ? '501-695' : '507-899'"
 		aria-labelledby="gc-figma-507-899-heading"
 	>
@@ -43,11 +46,12 @@ const props = defineProps({
 	pageVariant: {
 		type: String,
 		default: 'scrap',
-		validator: (v) => ['scrap', 'dental', 'calculator'].includes(v),
+		validator: (v) => ['scrap', 'dental', 'calculator', 'how-sell'].includes(v),
 	},
 })
 
 const isDental = computed(() => props.pageVariant === 'dental')
+const isHowSell = computed(() => props.pageVariant === 'how-sell')
 
 const title = computed(() =>
 	isDental.value
@@ -55,29 +59,44 @@ const title = computed(() =>
 		: 'Turn Your Scrap Gold Into Cash Today',
 )
 
-const paragraphFirst = computed(() =>
-	isDental.value
-		? 'Old dental work shouldn’t collect dust in a drawer. Even small pieces can add up fast.'
-		: 'Whether you have broken chains, mismatched earrings, or leftover scraps from a project, our calculator helps you see what your gold could be worth at today’s spot prices.',
-)
+const paragraphFirst = computed(() => {
+	if (isDental.value) {
+		return 'Old dental work shouldn’t collect dust in a drawer. Even small pieces can add up fast.'
+	}
+	if (isHowSell.value) {
+		return 'Whether it’s broken jewelry or forgotten keepsakes, your gold still holds value. With the current gold market, it may be a good time to capitalize on your gold items.'
+	}
+	return 'Whether you have broken chains, mismatched earrings, or leftover scraps from a project, our calculator helps you see what your gold could be worth at today’s spot prices.'
+})
 
-const paragraphSecond = computed(() =>
-	isDental.value
-		? 'Get an estimate today using our calculator, then request your free appraisal kit to find out your exact payout - fast, secure, and trusted by thousands of sellers nationwide.'
-		: 'Get an estimate in seconds, then request a free appraisal kit for an official offer from Gold To Cash.',
-)
+const paragraphSecond = computed(() => {
+	if (isDental.value) {
+		return 'Get an estimate today using our calculator, then request your free appraisal kit to find out your exact payout - fast, secure, and trusted by thousands of sellers nationwide.'
+	}
+	if (isHowSell.value) {
+		return 'If you’d like to join the thousands of Gold to Cash patrons, simply get a real-time estimate with our Scrap Gold Calculator, then fill out the form to request your free mail-in kit to receive a professional appraisal and fast payment. It’s free, reliable, and risk-free.'
+	}
+	return 'Get an estimate in seconds, then request a free appraisal kit for an official offer from Gold To Cash.'
+})
 
-const hero = computed(() =>
-	isDental.value
-		? {
-				src: '/images/calc/dental/sell-cta/hero.png',
-				alt: 'Dental gold and restorations ready to value and sell',
-			}
-		: {
-				src: '/images/image 3.png',
-				alt: 'Gold coins and scrap gold ready to sell',
-			},
-)
+const hero = computed(() => {
+	if (isDental.value) {
+		return {
+			src: '/images/calc/dental/sell-cta/hero.png',
+			alt: 'Dental gold and restorations ready to value and sell',
+		}
+	}
+	if (isHowSell.value) {
+		return {
+			src: '/images/how-sell-gold/cta-hero.webp',
+			alt: 'Gold jewelry ready to sell for cash',
+		}
+	}
+	return {
+		src: '/images/image 3.png',
+		alt: 'Gold coins and scrap gold ready to sell',
+	}
+})
 </script>
 
 <style scoped>
@@ -207,6 +226,16 @@ const hero = computed(() =>
 		flex: 1 1 auto;
 		max-width: 100%;
 	}
+
+	/* How-sell mobile (Figma 641:1362): image first, centered copy */
+	.gc-figma-507-899--how-sell .gc-figma-507-899__figure {
+		order: -1;
+	}
+
+	.gc-figma-507-899--how-sell .gc-figma-507-899__title,
+	.gc-figma-507-899--how-sell .gc-figma-507-899__p {
+		text-align: center;
+	}
 }
 
 @media (max-width: 767.98px) {
@@ -218,6 +247,11 @@ const hero = computed(() =>
 	.gc-figma-507-899__p {
 		font-size: 24px;
 		line-height: 1.25;
+	}
+
+	.gc-figma-507-899--how-sell .gc-figma-507-899__p {
+		font-size: 16px;
+		line-height: 1.45;
 	}
 }
 </style>
