@@ -97,7 +97,7 @@ const steps = [
 
 .hsg-hero__grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(280px, 604px);
+	grid-template-columns: minmax(0, 1fr) minmax(260px, 460px);
 	gap: 48px;
 	align-items: start;
 }
@@ -150,6 +150,9 @@ const steps = [
 
 .hsg-hero__form-wrap {
 	position: relative;
+	max-width: 460px;
+	width: 100%;
+	margin-left: auto;
 }
 
 .hsg-hero__form-card {
@@ -159,6 +162,8 @@ const steps = [
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 	padding: 8px 8px 16px;
 	box-sizing: border-box;
+	max-width: 460px;
+	width: 100%;
 }
 
 /* Figma 678:2692 — “Request Free Kit” + “Get 10% Bonus” as stacked centered headings */
@@ -204,6 +209,13 @@ const steps = [
 
 	.hsg-hero__steps {
 		gap: 28px;
+	}
+
+	.hsg-hero__form-wrap,
+	.hsg-hero__form-card {
+		max-width: 460px;
+		margin-left: auto;
+		margin-right: auto;
 	}
 }
 </style>

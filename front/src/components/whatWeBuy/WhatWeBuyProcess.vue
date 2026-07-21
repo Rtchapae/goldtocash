@@ -83,7 +83,7 @@ const steps = [
 
 .wwb-process__grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(280px, 604px);
+	grid-template-columns: minmax(0, 1fr) minmax(260px, 460px);
 	gap: 48px;
 	align-items: start;
 }
@@ -131,6 +131,12 @@ const steps = [
 	color: #000;
 }
 
+.wwb-process__form-wrap {
+	width: 100%;
+	max-width: 460px;
+	justify-self: end;
+}
+
 .wwb-process__form-card {
 	background: #fff;
 	border-radius: 12px;
@@ -138,6 +144,8 @@ const steps = [
 	padding: 8px 8px 16px;
 	box-sizing: border-box;
 	border: 1px solid #eee;
+	width: 100%;
+	max-width: 460px;
 }
 
 .wwb-process__form-card :deep(.kit-form-title) {
@@ -170,6 +178,13 @@ const steps = [
 	.wwb-process__grid {
 		grid-template-columns: 1fr;
 		gap: 40px;
+	}
+
+	.wwb-process__form-wrap,
+	.wwb-process__form-card {
+		max-width: 460px;
+		justify-self: center;
+		margin: 0 auto;
 	}
 
 	.wwb-process__step-num,

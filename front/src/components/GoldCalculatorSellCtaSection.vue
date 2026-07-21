@@ -18,7 +18,14 @@
 						<p class="gc-figma-507-899__p">
 							{{ paragraphFirst }}
 						</p>
-						<p class="gc-figma-507-899__p">
+						<p v-if="isHowSell" class="gc-figma-507-899__p">
+							If you’d like to join the thousands of Gold to Cash patrons, simply get a real-time estimate
+							with our
+							<a class="gc-figma-507-899__link" href="/gold-calculator">Scrap Gold Calculator</a>, then
+							fill out the form to request your free mail-in kit to receive a professional appraisal and
+							fast payment. It’s free, reliable, and risk-free.
+						</p>
+						<p v-else class="gc-figma-507-899__p">
 							{{ paragraphSecond }}
 						</p>
 					</div>
@@ -72,9 +79,6 @@ const paragraphFirst = computed(() => {
 const paragraphSecond = computed(() => {
 	if (isDental.value) {
 		return 'Get an estimate today using our calculator, then request your free appraisal kit to find out your exact payout - fast, secure, and trusted by thousands of sellers nationwide.'
-	}
-	if (isHowSell.value) {
-		return 'If you’d like to join the thousands of Gold to Cash patrons, simply get a real-time estimate with our Scrap Gold Calculator, then fill out the form to request your free mail-in kit to receive a professional appraisal and fast payment. It’s free, reliable, and risk-free.'
 	}
 	return 'Get an estimate in seconds, then request a free appraisal kit for an official offer from Gold To Cash.'
 })
@@ -203,6 +207,17 @@ const hero = computed(() => {
 	font-size: clamp(1rem, 1.8vw, 20px);
 	line-height: 1.2;
 	color: #000;
+}
+
+.gc-figma-507-899__link {
+	color: #c39e3d;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.gc-figma-507-899__link:hover {
+	color: #a8842f;
 }
 
 @media (max-width: 991px) {
