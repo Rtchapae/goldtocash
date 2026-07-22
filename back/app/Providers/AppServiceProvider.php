@@ -38,6 +38,8 @@ use App\Domain\Users\Repositories\SessionRepositoryInterface;
 use App\Domain\Users\Repositories\EloquentSessionRepository;
 use App\Domain\Seo\Repositories\SeoPageRepositoryInterface;
 use App\Domain\Seo\Repositories\EloquentSeoPageRepository;
+use App\Domain\LandingPages\Repositories\LandingPageRepositoryInterface;
+use App\Domain\LandingPages\Repositories\EloquentLandingPageRepository;
 use App\Domain\Admin\Actions\ListNotificationsAction;
 use App\Domain\Admin\Actions\MarkNotificationsAsReadAction;
 use App\Domain\Admin\Actions\GetNotificationCountAction;
@@ -68,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TraceEventRepositoryInterface::class, EloquentTraceEventRepository::class);
         $this->app->bind(SessionRepositoryInterface::class, EloquentSessionRepository::class);
         $this->app->bind(SeoPageRepositoryInterface::class, EloquentSeoPageRepository::class);
+        $this->app->bind(LandingPageRepositoryInterface::class, EloquentLandingPageRepository::class);
 
         // Notification services
         $this->app->singleton(NotificationService::class);

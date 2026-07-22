@@ -71,6 +71,9 @@ class SeoService {
 		if (route?.name && BLOG_POST_ROUTE_NAMES.includes(route.name)) {
 			return
 		}
+		if (route?.name === 'dynamic-page') {
+			return
+		}
 		try {
 			const seoData = await getCurrentRouteSeoData(route)
 			if (seoData) {

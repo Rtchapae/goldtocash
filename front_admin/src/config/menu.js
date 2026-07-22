@@ -62,6 +62,12 @@ export const adminMenu = [
 		type: 'link'
 	},
 	{
+		title: 'Page Builder',
+		icon: 'solar:widget-5-outline',
+		route: 'landing-pages.index',
+		type: 'link'
+	},
+	{
 		title: 'Trace Events',
 		icon: 'solar:pen-outline', // fa-pen
 		route: 'trace.events',

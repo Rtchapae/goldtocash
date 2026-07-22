@@ -12,6 +12,7 @@ use App\Domain\Admin\Controllers\MessageController;
 use App\Domain\Admin\Controllers\CountersController;
 use App\Domain\Admin\Controllers\SmsController;
 use App\Domain\Admin\Controllers\PostController;
+use App\Domain\Admin\Controllers\LandingPageController;
 use App\Domain\Admin\Controllers\DashboardController;
 use App\Domain\Users\Controllers\UserNoteController;
 
@@ -118,6 +119,15 @@ Route::prefix('admin')
             // Multipart: PHP often omits files on PUT — POST with numeric id only (never matches "upload-image").
             Route::post('{id}', [PostController::class, 'update'])->whereNumber('id');
             Route::delete('{id}', [PostController::class, 'destroy'])->whereNumber('id');
+        });
+
+        Route::prefix('landing-pages')->group(function (): void {
+            Route::get('/', [LandingPageController::class, 'index']);
+            Route::post('/', [LandingPageController::class, 'store']);
+            Route::post('upload-image', [LandingPageController::class, 'uploadImage']);
+            Route::get('{id}', [LandingPageController::class, 'show'])->whereNumber('id');
+            Route::put('{id}', [LandingPageController::class, 'update'])->whereNumber('id');
+            Route::delete('{id}', [LandingPageController::class, 'destroy'])->whereNumber('id');
         });
 
     });
