@@ -68,7 +68,7 @@
 					</li>
 				</template>
 				<li class="nav-item d-none d-lg-inline-block">
-					<a href="/why-us">Why Us</a>
+					<a href="/what-sets-apart">Why Us</a>
 				</li>
 				<li class="nav-item d-none d-xl-inline-block">
 					<a href="/faq">FAQ's</a>

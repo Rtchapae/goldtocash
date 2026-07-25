@@ -1,5 +1,5 @@
 <template>
-    <section class="d-none d-md-block section-trustpilot">
+    <section :class="['section-trustpilot', { 'd-none d-md-block': !showMobile }]">
         <div class="section-trustpilot-container">
             <Swiper
                 class="trustpilot-swiper"
@@ -66,15 +66,20 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import { trustpilotTestimonials as testimonials } from '@/constants/trustpilotTestimonials'
 
+defineProps({
+	/** When true, show below md (e.g. What Sets Apart). Home keeps desktop-only default. */
+	showMobile: { type: Boolean, default: false },
+})
+
 const modules = [Navigation, Pagination, Autoplay]
 
 const navigation = {
-    prevEl: '.swiper-prev-btn',
-    nextEl: '.swiper-next-btn'
+    prevEl: '.section-trustpilot .swiper-prev-btn',
+    nextEl: '.section-trustpilot .swiper-next-btn'
 }
 
 const pagination = {
-    el: '.trustpilot-swiper-pagination',
+    el: '.section-trustpilot .trustpilot-swiper-pagination',
     clickable: true
 }
 </script>

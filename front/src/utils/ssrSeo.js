@@ -7,6 +7,28 @@ const DEFAULT_META = {
 	keywords: 'gold, silver, precious metals, gold buyer, silver buyer, appraisal, kit request',
 }
 
+const NOINDEX_ROUTE_NAMES = new Set([
+	'sign-in',
+	'forgot-password',
+	'not-found',
+	'user-account',
+	'kit-request-success',
+])
+
+function resolveSiteBaseUrl() {
+	const strip = (u) => String(u).replace(/\/$/, '')
+	if (typeof process !== 'undefined' && process.env.SITE_URL) {
+		return strip(process.env.SITE_URL)
+	}
+	return 'https://goldtocash.us'
+}
+
+function canonicalPathFromRoute(route) {
+	const path = route?.path || '/'
+	if (path === '/') return '/'
+	return path.startsWith('/') ? path : `/${path}`
+}
+
 /**
  * Node SSR needs an absolute API URL. Docker often sets VITE_API_BASE_URL=https://... via env_file;
  * build may bake /api/v1 — then set SSR_API_BASE_URL=http://nginx/api/v1 (internal) or full public URL.
@@ -101,9 +123,13 @@ async function fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults) {
  */
 export async function buildSsrMetaTags(route, options = {}) {
 	const defaults = { ...DEFAULT_META }
+	const siteBase = resolveSiteBaseUrl()
+	const canonicalPath = canonicalPathFromRoute(route)
+	const canonicalUrl = `${siteBase}${canonicalPath === '/' ? '' : canonicalPath}`
+	const noindex = NOINDEX_ROUTE_NAMES.has(route?.name != null ? String(route.name) : '')
 	const apiBase = resolveApiBaseUrl(options.apiBaseUrl)
 	if (!apiBase) {
-		return metaTagsHtml(defaults)
+		return metaTagsHtml(defaults, { canonicalUrl, noindex })
 	}
 
 	const routeName = route?.name != null ? String(route.name) : ''
@@ -112,7 +138,7 @@ export async function buildSsrMetaTags(route, options = {}) {
 		const pathPrefix = blogPathPrefixForRouteName(routeName)
 		const postMeta = await fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults)
 		if (postMeta) {
-			return metaTagsHtml(postMeta)
+			return metaTagsHtml(postMeta, { canonicalUrl, noindex })
 		}
 	}
 
@@ -140,7 +166,7 @@ export async function buildSsrMetaTags(route, options = {}) {
 	}
 
 	if (!data || typeof data !== 'object') {
-		return metaTagsHtml(defaults)
+		return metaTagsHtml(defaults, { canonicalUrl, noindex })
 	}
 
 	const title = (data.title && String(data.title).trim()) || defaults.title
@@ -153,19 +179,24 @@ export async function buildSsrMetaTags(route, options = {}) {
 		if (!keywords.trim()) keywords = defaults.keywords
 	}
 
-	return metaTagsHtml({ title, description, keywords })
+	return metaTagsHtml({ title, description, keywords }, { canonicalUrl, noindex })
 }
 
-function metaTagsHtml({ title, description, keywords }) {
+function metaTagsHtml({ title, description, keywords }, { canonicalUrl, noindex = false } = {}) {
 	const t = escapeMetaText(title)
 	const d = escapeMetaText(description)
 	const k = escapeMetaText(keywords)
+	const c = escapeMetaText(canonicalUrl)
+	const robots = noindex ? 'noindex, nofollow' : 'index, follow'
 	return `
 	<title>${t}</title>
 	<meta name="description" content="${d}">
 	<meta name="keywords" content="${k}">
+	<meta name="robots" content="${robots}">
+	<link rel="canonical" href="${c}">
 	<meta property="og:title" content="${t}">
 	<meta property="og:description" content="${d}">
 	<meta property="og:type" content="website">
+	<meta property="og:url" content="${c}">
 `
 }

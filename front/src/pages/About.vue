@@ -1,17 +1,9 @@
 <template>
-	<section class="about">
-		<h2>About</h2>
-		<p>This page is rendered via SSR with Vue Router and Pinia.</p>
-	</section>
+	<AboutUsSection />
 </template>
 
 <script setup>
+import AboutUsSection from '@/components/AboutUsSection.vue'
 </script>
-
-<style scoped lang="scss">
-.about {
-	padding: 2rem;
-}
-</style>
 
 

@@ -45,7 +45,7 @@
 							<a href="/what-we-buy">What We Buy</a>
 						</li>
 						<li class="nav-item-footer">
-							<a href="/why-us">Why Us</a>
+							<a href="/what-sets-apart">Why Us</a>
 						</li>
 						<li class="nav-item-footer">
 							<a href="/faq">FAQ's</a>

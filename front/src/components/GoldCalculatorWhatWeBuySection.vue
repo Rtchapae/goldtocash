@@ -55,7 +55,7 @@ const props = defineProps({
 	pageVariant: {
 		type: String,
 		default: 'scrap',
-		validator: (v) => ['scrap', 'dental', 'calculator'].includes(v),
+		validator: (v) => ['scrap', 'dental', 'calculator', 'sets-apart'].includes(v),
 	},
 })
 
@@ -69,6 +69,16 @@ const SCRAP_ITEMS = [
 	{ label: 'Gold wire, contacts, or industrial gold', iconSrc: '/images/calc/what-we-buy/wwb-golds.svg' },
 ]
 
+const SETS_APART_ITEMS = [
+	{ label: 'Gold Chains, Bracelets, Rings', iconSrc: '/images/calc/what-we-buy/wwb-rings.svg' },
+	{ label: 'Broken, Damaged or mismatched gold jewelry', iconSrc: '/images/calc/what-we-buy/wwb-jewelry.svg' },
+	{ label: 'Gold Coins, bars, and nuggets', iconSrc: '/images/calc/what-we-buy/wwb-coins.svg' },
+	{ label: 'Dental Gold or Gold Fillings', iconSrc: '/images/calc/what-we-buy/wwb-tooth.svg' },
+	{ label: 'Gold Watches and watch cases', iconSrc: '/images/calc/what-we-buy/wwb-watch.svg' },
+	{ label: 'Gold Flakes, Filings and refinery scrap', iconSrc: '/images/calc/what-we-buy/wwb-chains.svg' },
+	{ label: 'Gold wire, contacts, and industrial gold', iconSrc: '/images/calc/what-we-buy/wwb-golds.svg' },
+]
+
 const DENTAL_ITEMS = [
 	{ label: 'Gold crowns and bridges', iconSrc: '/images/calc/dental/what-we-buy/icon-crowns-bridges.svg' },
 	{ label: 'Inlays and onlays', iconSrc: '/images/calc/dental/what-we-buy/icon-inlays-onlays.svg' },
@@ -79,36 +89,58 @@ const DENTAL_ITEMS = [
 ]
 
 const isDental = computed(() => props.pageVariant === 'dental')
+const isSetsApart = computed(() => props.pageVariant === 'sets-apart')
 
-const sectionTitle = computed(() =>
-	isDental.value ? 'What Can You Sell?' : 'What We Buy',
-)
+const sectionTitle = computed(() => {
+	if (isDental.value) return 'What Can You Sell?'
+	if (isSetsApart.value) return 'Items Gold to Cash will purchase'
+	return 'What We Buy'
+})
 
-const sectionIntro = computed(() =>
-	isDental.value
-		? 'We buy nearly all forms of dental gold, even items mixed with porcelain or other metals:'
-		: 'We purchase nearly all forms of scrap gold, including:',
-)
+const sectionIntro = computed(() => {
+	if (isDental.value) {
+		return 'We buy nearly all forms of dental gold, even items mixed with porcelain or other metals:'
+	}
+	if (isSetsApart.value) {
+		return 'We buy nearly any form of gold, including any scrap gold, gold jewelry and bullion. The most common items we work with include:'
+	}
+	return 'We purchase nearly all forms of scrap gold, including:'
+})
 
-const footerNote = computed(() =>
-	isDental.value
-		? 'If you’re unsure what you have, include it in your mail-in kit. Our experts will sort and test every piece for free'
-		: '',
-)
+const footerNote = computed(() => {
+	if (isDental.value) {
+		return 'If you’re unsure what you have, include it in your mail-in kit. Our experts will sort and test every piece for free'
+	}
+	if (isSetsApart.value) {
+		return 'If it’s made of gold, you can be confident that you will get an offer from us.'
+	}
+	return ''
+})
 
-const heroImage = computed(() =>
-	isDental.value
-		? {
-				src: '/images/calc/dental/what-we-buy/hero.png',
-				alt: 'Dental gold items including crowns, bridges, and scrap',
-			}
-		: {
-				src: '/images/AdobeStock_532211983 2.png',
-				alt: 'Assorted scrap gold jewelry and pieces',
-			},
-)
+const heroImage = computed(() => {
+	if (isDental.value) {
+		return {
+			src: '/images/calc/dental/what-we-buy/hero.png',
+			alt: 'Dental gold items including crowns, bridges, and scrap',
+		}
+	}
+	if (isSetsApart.value) {
+		return {
+			src: '/images/what-sets-apart/items-hero.webp',
+			alt: 'Assorted gold jewelry and scrap gold pieces',
+		}
+	}
+	return {
+		src: '/images/AdobeStock_532211983 2.png',
+		alt: 'Assorted scrap gold jewelry and pieces',
+	}
+})
 
-const items = computed(() => (isDental.value ? DENTAL_ITEMS : SCRAP_ITEMS))
+const items = computed(() => {
+	if (isDental.value) return DENTAL_ITEMS
+	if (isSetsApart.value) return SETS_APART_ITEMS
+	return SCRAP_ITEMS
+})
 </script>
 
 <style scoped>

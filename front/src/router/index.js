@@ -53,6 +53,7 @@ const routes = [
 	{ path: '/best-place-sell-gold', name: 'best-place-sell-gold', component: () => import('@/pages/BestPlaceSellGold.vue') },
 	{ path: '/gold-buyer-online', name: 'gold-buyer-online', component: () => import('@/pages/GoldBuyerOnline.vue') },
 	{ path: '/how-sell-gold', name: 'how-sell-gold', component: () => import('@/pages/HowSellGold.vue') },
+	{ path: '/what-sets-apart', name: 'what-sets-apart', component: () => import('@/pages/WhatSetsApart.vue') },
 	{ path: '/how-sell-gold-jewelry-online-usa', name: 'how-sell-gold-jewelry-online-usa', component: () => import('@/pages/HowSellGoldJewelry.vue') },
 	{ path: '/gold-info/:slug', name: 'gold-info-post', component: () => import('@/pages/BlogPost.vue') },
 	{ path: '/sell/:slug', name: 'sell-article', component: () => import('@/pages/BlogPost.vue') },
