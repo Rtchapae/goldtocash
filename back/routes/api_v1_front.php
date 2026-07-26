@@ -13,10 +13,12 @@ use App\Domain\Admin\Controllers\CountryController;
 use App\Domain\Seo\Controllers\FrontSeoController;
 use App\Domain\Seo\Controllers\FrontSitemapController;
 use App\Domain\Reviews\Controllers\TrustpilotController;
+use App\Domain\Contact\Controllers\ContactController;
 
 Route::get('calculator/current-price', [\App\Domain\Orders\Controllers\CalculatorController::class, 'getCurrentPrice']);
 Route::post('kit/register', [OrderController::class, 'registerKit']);
 Route::get('recent-payout', [\App\Domain\Orders\Controllers\RecentPayoutController::class, 'getRandomRecentPayout']);
+Route::post('sendmail', [ContactController::class, 'send']);
 
 Route::prefix('user')->group(function (): void {
     Route::post('send-code', [PhoneVerificationController::class, 'sendCode']);

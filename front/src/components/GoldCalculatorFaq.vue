@@ -9,7 +9,7 @@
 				<h2 id="gc-faq-heading" class="gc-faq__page-title">
 					<span class="gc-faq__page-title-part gc-faq__page-title-part--cream">FAQs</span>
 					<span
-						v-if="variant !== 'how-sell' && variant !== 'what-we-buy' && variant !== 'what-sets-apart'"
+						v-if="variant !== 'how-sell' && variant !== 'what-we-buy' && variant !== 'what-sets-apart' && variant !== 'what-we-pay'"
 						class="gc-faq__page-title-part gc-faq__page-title-part--ink"
 					> About Gold Value</span>
 				</h2>
@@ -48,7 +48,7 @@ const props = defineProps({
 	variant: {
 		type: String,
 		default: 'calculator',
-		validator: (v) => ['calculator', 'scrap', 'dental', 'how-sell', 'what-we-buy', 'what-sets-apart'].includes(v),
+		validator: (v) => ['calculator', 'scrap', 'dental', 'how-sell', 'what-we-buy', 'what-sets-apart', 'what-we-pay'].includes(v),
 	},
 })
 
@@ -202,6 +202,55 @@ const sectionBlocks = [
 				question: 'What is the Price Match Guarantee?',
 				answer:
 					'Our goal is to make sure every customer feels confident and satisfied with the offer they receive. We believe selling your gold should be straightforward, transparent, and rewarding, which is why we work hard to provide competitive payouts based on current market prices. If you happen to receive a higher offer from another reputable online gold buyer, we’re happy to review it. In many cases, we can match a verified competitor’s offer so you can still take advantage of our secure process, fast payments, and trusted service while receiving the value you deserve.*Terms and conditions apply.',
+			},
+		],
+	},
+	{
+		id: 'what-we-pay',
+		title: '',
+		items: [
+			{
+				question: 'How can I tell what karat my gold is?',
+				answer:
+					'Most gold jewelry is stamped with markings such as 10k, 14k, 18k, or 24k. These markings indicate the purity of the gold. If you\'re unsure, our team can test your jewelry for you.',
+			},
+			{
+				question: 'What does "spot price" mean?',
+				answer:
+					'Spot price is the current market value of gold or silver at a given moment. Precious metal prices change throughout the day based on global market activity.',
+			},
+			{
+				question: 'Is shipping my gold safe?',
+				answer:
+					'Yes. Our shipping kits are insured and trackable, so your items are protected throughout the entire process.',
+			},
+			{
+				question: 'How long does the process take?',
+				answer: 'Our customers receive an offer within 24 hours after your items arrive.',
+			},
+			{
+				question: 'Is your evaluation process free?',
+				answer: 'Yes. We provide free evaluations with no obligation to sell.',
+			},
+			{
+				question: 'Do you buy gold-plated jewelry?',
+				answer:
+					'No, since gold-plated jewelry typically contains very little precious metal and doesn\'t carry significant value. However, we purchase solid gold items ranging from 10k, 14k, 18k, 22k, and 24k gold.',
+			},
+			{
+				question: 'Does broken or damaged jewelry still have value?',
+				answer:
+					'Yes! We buy gold and silver jewelry in all conditions — including broken chains, single earrings, tangled necklaces, outdated jewelry, and items missing stones.',
+			},
+			{
+				question: 'Why should I sell my gold now?',
+				answer:
+					'Gold prices can fluctuate daily. When market prices are high, it may be a great opportunity to turn unwanted jewelry into cash.',
+			},
+			{
+				question: 'How do I get paid?',
+				answer:
+					'Once we receive and evaluate your gold, you\'ll receive an offer within 24 hours with payment options for your convenience.',
 			},
 		],
 	},

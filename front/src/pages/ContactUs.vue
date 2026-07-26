@@ -67,27 +67,65 @@
 					</ul>
 				</div>
 
-				<form class="contact-hero__form" action="/sendmail" method="post">
+				<form class="contact-hero__form" action="/sendmail" method="post" @submit.prevent="onSubmit">
 					<h2 class="contact-hero__form-title">Get in Touch With the Gold to Cash Team.</h2>
 
 					<label class="contact-hero__field">
 						<span class="contact-hero__field-label">Full Name</span>
-						<input class="contact-hero__input" type="text" name="name" required autocomplete="name" />
+						<input
+							v-model="form.name"
+							class="contact-hero__input"
+							type="text"
+							name="name"
+							required
+							autocomplete="name"
+							:disabled="submitting"
+						/>
 					</label>
 					<label class="contact-hero__field">
 						<span class="contact-hero__field-label">Email Address</span>
-						<input class="contact-hero__input" type="email" name="email" required autocomplete="email" />
+						<input
+							v-model="form.email"
+							class="contact-hero__input"
+							type="email"
+							name="email"
+							required
+							autocomplete="email"
+							:disabled="submitting"
+						/>
 					</label>
 					<label class="contact-hero__field">
 						<span class="contact-hero__field-label">Phone Number</span>
-						<input class="contact-hero__input" type="tel" name="phone" required autocomplete="tel" />
+						<input
+							v-model="form.phone"
+							class="contact-hero__input"
+							type="tel"
+							name="phone"
+							required
+							autocomplete="tel"
+							:disabled="submitting"
+						/>
 					</label>
 					<label class="contact-hero__field contact-hero__field--message">
 						<span class="contact-hero__field-label">Message</span>
-						<textarea class="contact-hero__input contact-hero__textarea" name="message" rows="4" required maxlength="999"></textarea>
+						<textarea
+							v-model="form.message"
+							class="contact-hero__input contact-hero__textarea"
+							name="message"
+							rows="4"
+							required
+							maxlength="999"
+							:disabled="submitting"
+						/>
 					</label>
 
-					<button type="submit" class="contact-hero__submit">Send Message</button>
+					<div v-if="statusMessage" id="success" class="contact-hero__status" :class="statusClass" role="status">
+						{{ statusMessage }}
+					</div>
+
+					<button type="submit" class="contact-hero__submit" :disabled="submitting">
+						{{ submitting ? 'Sending…' : 'Send Message' }}
+					</button>
 				</form>
 			</div>
 		</section>
@@ -112,7 +150,8 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { sendContactMessage } from '@/api/contact.js'
 import seoService from '@/services/seoService.js'
 
 /** Figma 1018:2644 contact + 1017:1599 FAQ */
@@ -148,6 +187,43 @@ const faqItems = [
 			'We are happy to help! You can reach us by email: hello@goldtocash.us, phone: 564.237.7332, or during office hours at 1101 Broadway St Suite 230A Vancouver, WA 98682.',
 	},
 ]
+
+const form = reactive({
+	name: '',
+	email: '',
+	phone: '',
+	message: '',
+})
+
+const submitting = ref(false)
+const statusMessage = ref('')
+const statusOk = ref(false)
+const statusClass = computed(() =>
+	statusOk.value ? 'contact-hero__status--success' : 'contact-hero__status--error',
+)
+
+const onSubmit = async () => {
+	statusMessage.value = ''
+	submitting.value = true
+	try {
+		const data = await sendContactMessage({ ...form })
+		statusOk.value = true
+		statusMessage.value =
+			data?.message || 'Your message has been sent. We will get back to you soon!'
+		form.name = ''
+		form.email = ''
+		form.phone = ''
+		form.message = ''
+	} catch (err) {
+		statusOk.value = false
+		statusMessage.value =
+			err?.data?.message ||
+			err?.message ||
+			'Sorry, something went wrong. Please try again or email hello@goldtocash.us.'
+	} finally {
+		submitting.value = false
+	}
+}
 
 onMounted(() => {
 	seoService.setMeta({
@@ -353,6 +429,31 @@ onMounted(() => {
 
 .contact-hero__submit:hover {
 	background: #222;
+}
+
+.contact-hero__submit:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.contact-hero__status {
+	margin: 4px 0 0;
+	border-radius: 2px;
+	color: #fff;
+	padding: 1em 1.25em;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.contact-hero__status--success {
+	background-color: green;
+	border-left: 0.618em solid rgba(0, 0, 0, 0.15);
+}
+
+.contact-hero__status--error {
+	background-color: red;
+	border-left: 0.618em solid rgba(0, 0, 0, 0.15);
 }
 
 /* —— FAQ (Figma 1017:1599) —— */

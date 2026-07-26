@@ -1,4 +1,12 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+function resolveApiBaseUrl() {
+	const devTarget = import.meta.env.VITE_DEV_TARGET || 'local'
+	if (import.meta.env.DEV && devTarget === 'local') {
+		return '/api/v1'
+	}
+	return import.meta.env.VITE_API_BASE_URL || '/api/v1'
+}
+
+const API_BASE_URL = resolveApiBaseUrl()
 
 const defaultOptions = {
 	headers: {
@@ -21,7 +29,7 @@ export const apiRequest = async (endpoint, options = {}, skipAuth = false) => {
 		},
 	}
 
-	const isPublicEndpoint = endpoint.includes('/seo') || endpoint.includes('/calculator')
+	const isPublicEndpoint = endpoint.includes('/seo') || endpoint.includes('/calculator') || endpoint.includes('/sendmail')
 	if (!skipAuth && !isPublicEndpoint) {
 		if (typeof window !== 'undefined') {
 			const token = localStorage.getItem('jwt_token')

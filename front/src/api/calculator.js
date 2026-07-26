@@ -25,7 +25,8 @@ export const getCurrentGoldPrice = async () => {
 
 	const numericPrice = typeof price === 'string' ? parseFloat(price) : price
 
-	if (isNaN(numericPrice) || numericPrice < 0) {
+	// Backend returns 0 when Redis `gold-price` is missing — treat as unavailable
+	if (isNaN(numericPrice) || numericPrice <= 0) {
 		throw new Error('Invalid price value')
 	}
 
