@@ -11,11 +11,11 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import WhatWePayHero from '@/components/whatWePay/WhatWePayHero.vue'
-import WhatWePayFactors from '@/components/whatWePay/WhatWePayFactors.vue'
-import WhatWePayCalculator from '@/components/whatWePay/WhatWePayCalculator.vue'
-import WhatWePayOfferSteps from '@/components/whatWePay/WhatWePayOfferSteps.vue'
-import WhatWePayBlog from '@/components/whatWePay/WhatWePayBlog.vue'
+import WhatWePayHero from '@/components/whatwepay/WhatWePayHero.vue'
+import WhatWePayFactors from '@/components/whatwepay/WhatWePayFactors.vue'
+import WhatWePayCalculator from '@/components/whatwepay/WhatWePayCalculator.vue'
+import WhatWePayOfferSteps from '@/components/whatwepay/WhatWePayOfferSteps.vue'
+import WhatWePayBlog from '@/components/whatwepay/WhatWePayBlog.vue'
 import GoldCalculatorFaq from '@/components/GoldCalculatorFaq.vue'
 import seoService from '@/services/seoService.js'
 
