@@ -1,79 +1,88 @@
 <template>
-	<section class="cms-page section-blog">
-		<div class="container page-content cms-page__inner">
-			<div v-if="isLoading" class="text-center py-5">
+	<section class="cms-page">
+		<div v-if="isLoading" class="container page-content cms-page__inner">
+			<div class="text-center py-5">
 				<div class="spinner-border text-primary" role="status">
 					<span class="visually-hidden">Loading...</span>
 				</div>
 			</div>
+		</div>
 
-			<div v-else-if="error" class="alert alert-danger my-5">
+		<div v-else-if="error" class="container page-content cms-page__inner">
+			<div class="alert alert-danger my-5">
 				{{ error }}
 			</div>
-
-			<template v-else-if="page">
-				<header v-if="showPageTitle" class="cms-page__header">
-					<h1 class="cms-page__title">{{ page.title }}</h1>
-				</header>
-
-				<div class="cms-page__blocks">
-					<template v-for="block in page.blocks" :key="block.id">
-						<div v-if="block.type === 'heading'" class="cms-block cms-block--heading">
-							<component :is="headingTag(block)" class="cms-block__heading">
-								{{ block.data?.text }}
-							</component>
-						</div>
-
-						<div
-							v-else-if="block.type === 'richtext'"
-							class="cms-block cms-block--richtext"
-							v-html="block.data?.html"
-						/>
-
-						<figure v-else-if="block.type === 'image' && block.data?.url" class="cms-block cms-block--image">
-							<img
-								:src="block.data.url"
-								:alt="block.data.alt || page.title"
-								loading="lazy"
-								decoding="async"
-							/>
-						</figure>
-
-						<div v-else-if="block.type === 'calculator'" class="cms-block cms-block--calculator">
-							<ValueCalculator :variant="calculatorVariant(block)" />
-						</div>
-
-						<section
-							v-else-if="block.type === 'faq'"
-							class="cms-block cms-block--faq contact-faq"
-							aria-labelledby="cms-faq-title"
-						>
-							<div class="contact-faq__inner">
-								<h2 id="cms-faq-title" class="contact-faq__title">FAQs</h2>
-								<div class="contact-faq__list">
-									<details
-										v-for="(item, idx) in (block.data?.items || [])"
-										:key="idx"
-										class="contact-faq__item"
-									>
-										<summary class="contact-faq__question">
-											<span class="contact-faq__question-text">{{ item.question }}</span>
-											<span class="contact-faq__toggle" aria-hidden="true" />
-										</summary>
-										<div class="contact-faq__answer">
-											<p>{{ item.answer }}</p>
-										</div>
-									</details>
-								</div>
-							</div>
-							<div class="seo-faq-schema" aria-hidden="true">
-								<FaqJsonLd :items="faqItems(block)" />
-							</div>
-						</section>
-					</template>
-				</div>
-			</template>
 		</div>
+
+		<template v-else-if="page">
+			<template v-for="(segment, si) in segments" :key="si">
+				<div v-if="segment.type === 'content'" class="container page-content cms-page__inner">
+					<header v-if="si === 0 && showPageTitle" class="cms-page__header">
+						<h1 class="cms-page__title">{{ page.title }}</h1>
+					</header>
+
+					<div class="cms-page__blocks">
+						<template v-for="block in segment.blocks" :key="block.id">
+							<div v-if="block.type === 'heading'" class="cms-block cms-block--heading">
+								<component :is="headingTag(block)" class="cms-block__heading">
+									{{ block.data?.text }}
+								</component>
+							</div>
+
+							<div
+								v-else-if="block.type === 'richtext'"
+								class="cms-block cms-block--richtext"
+								v-html="block.data?.html"
+							/>
+
+							<figure
+								v-else-if="block.type === 'image' && block.data?.url"
+								class="cms-block cms-block--image"
+							>
+								<img
+									:src="block.data.url"
+									:alt="block.data.alt || page.title"
+									loading="lazy"
+									decoding="async"
+								/>
+							</figure>
+
+							<div v-else-if="block.type === 'calculator'" class="cms-block cms-block--calculator">
+								<ValueCalculator :variant="calculatorVariant(block)" />
+							</div>
+						</template>
+					</div>
+				</div>
+
+				<section
+					v-else-if="segment.type === 'faq'"
+					class="contact-faq"
+					aria-labelledby="cms-faq-title"
+				>
+					<div class="contact-faq__inner">
+						<h2 id="cms-faq-title" class="contact-faq__title">FAQs</h2>
+						<div class="contact-faq__list">
+							<details
+								v-for="(item, idx) in (segment.block.data?.items || [])"
+								:key="idx"
+								class="contact-faq__item"
+							>
+								<summary class="contact-faq__question">
+									<span class="contact-faq__question-text">{{ item.question }}</span>
+									<span class="contact-faq__toggle" aria-hidden="true" />
+								</summary>
+								<div class="contact-faq__answer">
+									<p>{{ item.answer }}</p>
+								</div>
+							</details>
+						</div>
+					</div>
+					<div class="seo-faq-schema" aria-hidden="true">
+						<FaqJsonLd :items="faqItems(segment.block)" />
+					</div>
+				</section>
+			</template>
+		</template>
 	</section>
 </template>
 
@@ -94,11 +103,32 @@ const error = ref(null)
 
 const showPageTitle = computed(() => {
 	const blocks = page.value?.blocks || []
-	const first = blocks[0]
+	const first = blocks.find((b) => b.type !== 'faq')
 	if (first?.type === 'heading' && Number(first.data?.level) === 1) {
 		return false
 	}
 	return true
+})
+
+/** Group blocks so FAQ is a full-width section outside .container (no white gap). */
+const segments = computed(() => {
+	const blocks = page.value?.blocks || []
+	const out = []
+	let content = null
+	for (const block of blocks) {
+		if (block.type === 'faq') {
+			if (content) {
+				out.push(content)
+				content = null
+			}
+			out.push({ type: 'faq', block })
+			continue
+		}
+		if (!content) content = { type: 'content', blocks: [] }
+		content.blocks.push(block)
+	}
+	if (content) out.push(content)
+	return out
 })
 
 const headingTag = (block) => {
@@ -148,14 +178,15 @@ watch(() => route.params.slug, load)
 </script>
 
 <style scoped>
-/* Clear fixed navbar (slightly tighter than blog 150px) */
 .cms-page {
-	padding-bottom: 0;
+	width: 100%;
+	padding: 0;
+	margin: 0;
 }
 
 .cms-page .page-content {
-	padding-top: 120px;
-	padding-bottom: 0;
+	padding-top: 100px;
+	padding-bottom: 2.5rem;
 }
 
 .cms-page__title {
@@ -166,6 +197,10 @@ watch(() => route.params.slug, load)
 
 .cms-block {
 	margin-bottom: 1.75rem;
+}
+
+.cms-block:last-child {
+	margin-bottom: 0;
 }
 
 .cms-block__heading {
@@ -193,24 +228,13 @@ watch(() => route.params.slug, load)
 	margin: 2rem 0;
 }
 
-/* Full-bleed FAQ band (same as Contact Us) */
-.cms-block--faq.contact-faq {
-	width: 100vw;
-	max-width: 100vw;
-	position: relative;
-	left: 50%;
-	right: 50%;
-	margin-left: -50vw;
-	margin-right: -50vw;
-	margin-top: 2.5rem;
-	margin-bottom: 0 !important;
+/* Same band as Contact Us — full width, sits flush above benefits/footer */
+.contact-faq {
+	width: 100%;
 	background: #c39e3d;
 	padding: 100px 0;
 	box-sizing: border-box;
-}
-
-.cms-page__blocks > .cms-block--faq:last-child {
-	margin-bottom: 0 !important;
+	margin: 0;
 }
 
 .contact-faq__inner {
@@ -333,10 +357,11 @@ watch(() => route.params.slug, load)
 
 @media (max-width: 991.98px) {
 	.cms-page .page-content {
-		padding-top: 100px;
+		padding-top: 88px;
+		padding-bottom: 2rem;
 	}
 
-	.cms-block--faq.contact-faq {
+	.contact-faq {
 		padding: 64px 0 72px;
 	}
 
