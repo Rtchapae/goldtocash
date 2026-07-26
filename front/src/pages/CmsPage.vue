@@ -185,7 +185,8 @@ watch(() => route.params.slug, load)
 }
 
 .cms-page .page-content {
-	padding-top: 100px;
+	/* banner (~48px) + fixed navbar (~72px) + breathing room */
+	padding-top: 140px;
 	padding-bottom: 2.5rem;
 }
 
@@ -357,7 +358,7 @@ watch(() => route.params.slug, load)
 
 @media (max-width: 991.98px) {
 	.cms-page .page-content {
-		padding-top: 88px;
+		padding-top: 120px;
 		padding-bottom: 2rem;
 	}
 
