@@ -130,6 +130,9 @@
 	width: 100%;
 	max-width: 647px;
 	justify-self: end;
+	box-shadow:
+		10px 10px 0 0 #c39e3d,
+		10px 10px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 .wwp-hero__img {
