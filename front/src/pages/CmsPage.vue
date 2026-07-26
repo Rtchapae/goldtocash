@@ -1,5 +1,5 @@
 <template>
-	<section class="cms-page">
+	<section class="cms-page section-blog">
 		<div class="container page-content cms-page__inner">
 			<div v-if="isLoading" class="text-center py-5">
 				<div class="spinner-border text-primary" role="status">
@@ -43,29 +43,27 @@
 							<ValueCalculator :variant="calculatorVariant(block)" />
 						</div>
 
-						<section v-else-if="block.type === 'faq'" class="cms-block cms-block--faq gc-faq">
-							<div class="gc-faq__inner">
-								<header class="gc-faq__header">
-									<h2 class="gc-faq__page-title">
-										<span class="gc-faq__page-title-part gc-faq__page-title-part--cream">FAQs</span>
-									</h2>
-								</header>
-								<div class="gc-faq__groups">
-									<div class="gc-faq__list">
-										<details
-											v-for="(item, idx) in (block.data?.items || [])"
-											:key="idx"
-											class="gc-faq__item"
-										>
-											<summary class="gc-faq__question">
-												<span class="gc-faq__question-text">{{ item.question }}</span>
-												<span class="gc-faq__chev" aria-hidden="true" />
-											</summary>
-											<div class="gc-faq__answer">
-												<p>{{ item.answer }}</p>
-											</div>
-										</details>
-									</div>
+						<section
+							v-else-if="block.type === 'faq'"
+							class="cms-block cms-block--faq contact-faq"
+							aria-labelledby="cms-faq-title"
+						>
+							<div class="contact-faq__inner">
+								<h2 id="cms-faq-title" class="contact-faq__title">FAQs</h2>
+								<div class="contact-faq__list">
+									<details
+										v-for="(item, idx) in (block.data?.items || [])"
+										:key="idx"
+										class="contact-faq__item"
+									>
+										<summary class="contact-faq__question">
+											<span class="contact-faq__question-text">{{ item.question }}</span>
+											<span class="contact-faq__toggle" aria-hidden="true" />
+										</summary>
+										<div class="contact-faq__answer">
+											<p>{{ item.answer }}</p>
+										</div>
+									</details>
 								</div>
 							</div>
 							<div class="seo-faq-schema" aria-hidden="true">
@@ -150,8 +148,13 @@ watch(() => route.params.slug, load)
 </script>
 
 <style scoped>
+/* Match blog/content pages: clear fixed navbar + top banner */
 .cms-page {
-	padding: 2.5rem 0 4rem;
+	padding-bottom: 4rem;
+}
+
+.cms-page .page-content {
+	padding-top: 150px;
 }
 
 .cms-page__title {
@@ -189,7 +192,156 @@ watch(() => route.params.slug, load)
 	margin: 2rem 0;
 }
 
-.cms-block--faq {
-	margin: 2.5rem 0 0;
+/* Full-bleed FAQ band (same as Contact Us) */
+.cms-block--faq.contact-faq {
+	width: 100vw;
+	max-width: 100vw;
+	position: relative;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	margin-top: 2.5rem;
+	margin-bottom: 0;
+	background: #c39e3d;
+	padding: 100px 0;
+	box-sizing: border-box;
+}
+
+.contact-faq__inner {
+	max-width: 1230px;
+	margin: 0 auto;
+	padding: 0 24px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 40px;
+}
+
+.contact-faq__title {
+	margin: 0;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: 700;
+	font-size: clamp(2rem, 4vw, 48px);
+	line-height: 1.15;
+	text-align: center;
+	color: #fff9ee;
+}
+
+.contact-faq__list {
+	width: 100%;
+	max-width: 1228px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.contact-faq__item {
+	border: 3px solid #000;
+	background: #fff;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.contact-faq__question {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-height: 80px;
+	padding: 14px 20px;
+	cursor: pointer;
+	list-style: none;
+	box-sizing: border-box;
+	background: #fff;
+	color: #000;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: 700;
+	font-size: clamp(1.125rem, 2vw, 24px);
+	line-height: 1.2;
+}
+
+.contact-faq__question::-webkit-details-marker {
+	display: none;
+}
+
+.contact-faq__item[open] .contact-faq__question {
+	background: #000;
+	color: #fff;
+}
+
+.contact-faq__question-text {
+	flex: 1;
+}
+
+.contact-faq__toggle {
+	position: relative;
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+}
+
+.contact-faq__toggle::before,
+.contact-faq__toggle::after {
+	content: '';
+	position: absolute;
+	background: #000;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.contact-faq__toggle::before {
+	width: 18px;
+	height: 3px;
+}
+
+.contact-faq__toggle::after {
+	width: 3px;
+	height: 18px;
+}
+
+.contact-faq__item[open] .contact-faq__toggle::before,
+.contact-faq__item[open] .contact-faq__toggle::after {
+	background: #fff;
+}
+
+.contact-faq__item[open] .contact-faq__toggle::after {
+	display: none;
+}
+
+.contact-faq__answer {
+	padding: 16px 20px 20px;
+	background: #fff;
+	box-sizing: border-box;
+}
+
+.contact-faq__answer p {
+	margin: 0;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: 500;
+	font-size: clamp(1rem, 1.8vw, 20px);
+	line-height: 1.4;
+	color: #000;
+}
+
+@media (max-width: 991.98px) {
+	.cms-page .page-content {
+		padding-top: 120px;
+	}
+
+	.cms-block--faq.contact-faq {
+		padding: 64px 0 72px;
+	}
+
+	.contact-faq__inner {
+		gap: 28px;
+	}
+
+	.contact-faq__question {
+		min-height: 64px;
+		padding: 14px 16px;
+	}
 }
 </style>
