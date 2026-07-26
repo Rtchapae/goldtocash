@@ -78,7 +78,36 @@ function excerptFromHtml(html) {
  * @param {{ title: string, description: string, keywords: string }} defaults
  * @returns {Promise<{ title: string, description: string, keywords: string } | null>}
  */
-async function fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults) {
+async function fetchBuilderPageMetaForSsr(apiBase, slug, defaults) {
+	const url = `${apiBase}/builder-pages/${encodeURIComponent(slug)}`
+	try {
+		const controller = new AbortController()
+		const t = setTimeout(() => controller.abort(), 10000)
+		const res = await fetch(url, {
+			headers: { Accept: 'application/json' },
+			signal: controller.signal,
+		})
+		clearTimeout(t)
+		if (!res.ok) return null
+		const json = await res.json()
+		const page = json?.data
+		if (!page || typeof page !== 'object') return null
+
+		const title =
+			(page.seo_title && String(page.seo_title).trim()) || page.title || defaults.title
+		const description =
+			(page.seo_description && String(page.seo_description).trim()) || defaults.description
+
+		return {
+			title,
+			description,
+			keywords: defaults.keywords,
+		}
+	} catch {
+		return null
+	}
+}
+
 	const qs = new URLSearchParams()
 	if (pathPrefix != null && pathPrefix !== '') {
 		qs.append('path_prefix', pathPrefix)
@@ -139,6 +168,13 @@ export async function buildSsrMetaTags(route, options = {}) {
 		const postMeta = await fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults)
 		if (postMeta) {
 			return metaTagsHtml(postMeta, { canonicalUrl, noindex })
+		}
+	}
+
+	if (slug && routeName === 'cms-page') {
+		const pageMeta = await fetchBuilderPageMetaForSsr(apiBase, slug, defaults)
+		if (pageMeta) {
+			return metaTagsHtml(pageMeta, { canonicalUrl, noindex })
 		}
 	}
 

@@ -14,7 +14,9 @@ import TraceEventsPage from '@/pages/TraceEventsPage.vue';
 import TraceConversionsPage from '@/pages/TraceConversionsPage.vue';
 import TraceCampaignStatsPage from '@/pages/TraceCampaignStatsPage.vue';
 import AdminUsersPage from '@/pages/AdminUsersPage.vue';
-import SeoPagesIndexPage from '@/pages/SeoPages/SeoPagesIndexPage.vue';
+import SeoPagesIndexPage from '@/pages/SeoPages/SeoPagesIndexPage.vue'
+import BuilderPagesIndexPage from '@/pages/BuilderPagesIndexPage.vue'
+import BuilderPageEditPage from '@/pages/BuilderPageEditPage.vue';
 
 const routes = [
 	{
@@ -83,6 +85,24 @@ const routes = [
 		path: '/posts/edit/:id',
 		name: 'posts.edit',
 		component: CreatePostPage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/builder-pages',
+		name: 'builder-pages.index',
+		component: BuilderPagesIndexPage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/builder-pages/create',
+		name: 'builder-pages.create',
+		component: BuilderPageEditPage,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: '/builder-pages/edit/:id',
+		name: 'builder-pages.edit',
+		component: BuilderPageEditPage,
 		meta: { requiresAuth: true }
 	},
 	{

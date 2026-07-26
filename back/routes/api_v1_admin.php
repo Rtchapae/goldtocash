@@ -120,6 +120,16 @@ Route::prefix('admin')
             Route::delete('{id}', [PostController::class, 'destroy'])->whereNumber('id');
         });
 
+        Route::prefix('builder-pages')->group(function (): void {
+            Route::get('/', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'index']);
+            Route::post('/', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'store']);
+            Route::post('upload-image', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'uploadImage']);
+            Route::post('import-docx', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'importDocx']);
+            Route::get('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'show'])->whereNumber('id');
+            Route::put('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'update'])->whereNumber('id');
+            Route::delete('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'destroy'])->whereNumber('id');
+        });
+
     });
 
 

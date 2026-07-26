@@ -60,6 +60,12 @@ const routes = [
 	{ path: '/sell-gold/:slug', name: 'sell-gold-post', component: () => import('@/pages/BlogPost.vue') },
 	{ path: '/user/kit-request-success', name: 'kit-request-success', component: () => import('@/pages/account/KitRequestSuccess.vue'), meta: { requiresAuth: true } },
 	{ path: '/user/account', name: 'user-account', component: () => import('@/pages/account/UserAccount.vue'), meta: { requiresAuth: true } },
+	{
+		path: '/:slug',
+		name: 'cms-page',
+		component: () => import('@/pages/CmsPage.vue'),
+		meta: { cms: true },
+	},
 	{ path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/pages/NotFound.vue'), meta: { statusCode: 404 } }
 ]
 
