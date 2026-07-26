@@ -108,6 +108,14 @@ async function fetchBuilderPageMetaForSsr(apiBase, slug, defaults) {
 	}
 }
 
+/**
+ * @param {string} apiBase
+ * @param {string} slug
+ * @param {string | null} pathPrefix
+ * @param {{ title: string, description: string, keywords: string }} defaults
+ * @returns {Promise<{ title: string, description: string, keywords: string } | null>}
+ */
+async function fetchPostMetaForSsr(apiBase, slug, pathPrefix, defaults) {
 	const qs = new URLSearchParams()
 	if (pathPrefix != null && pathPrefix !== '') {
 		qs.append('path_prefix', pathPrefix)
