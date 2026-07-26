@@ -148,13 +148,14 @@ watch(() => route.params.slug, load)
 </script>
 
 <style scoped>
-/* Match blog/content pages: clear fixed navbar + top banner */
+/* Clear fixed navbar (slightly tighter than blog 150px) */
 .cms-page {
-	padding-bottom: 4rem;
+	padding-bottom: 0;
 }
 
 .cms-page .page-content {
-	padding-top: 150px;
+	padding-top: 120px;
+	padding-bottom: 0;
 }
 
 .cms-page__title {
@@ -202,10 +203,14 @@ watch(() => route.params.slug, load)
 	margin-left: -50vw;
 	margin-right: -50vw;
 	margin-top: 2.5rem;
-	margin-bottom: 0;
+	margin-bottom: 0 !important;
 	background: #c39e3d;
 	padding: 100px 0;
 	box-sizing: border-box;
+}
+
+.cms-page__blocks > .cms-block--faq:last-child {
+	margin-bottom: 0 !important;
 }
 
 .contact-faq__inner {
@@ -328,7 +333,7 @@ watch(() => route.params.slug, load)
 
 @media (max-width: 991.98px) {
 	.cms-page .page-content {
-		padding-top: 120px;
+		padding-top: 100px;
 	}
 
 	.cms-block--faq.contact-faq {
