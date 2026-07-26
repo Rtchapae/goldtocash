@@ -11,6 +11,26 @@ use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
+    private const CAPTCHA_TTL_SECONDS = 600;
+
+    public function captcha(): JsonResponse
+    {
+        $a = random_int(1, 9);
+        $b = random_int(1, 9);
+        $expires = time() + self::CAPTCHA_TTL_SECONDS;
+        $token = $this->signCaptcha($a, $b, $expires);
+
+        return response()->json([
+            'data' => [
+                'a' => $a,
+                'b' => $b,
+                'expires' => $expires,
+                'token' => $token,
+                'question' => "{$a} + {$b}",
+            ],
+        ]);
+    }
+
     public function send(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -18,6 +38,11 @@ class ContactController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'message' => ['required', 'string', 'max:999'],
+            'captcha_a' => ['required', 'integer', 'min:1', 'max:9'],
+            'captcha_b' => ['required', 'integer', 'min:1', 'max:9'],
+            'captcha_expires' => ['required', 'integer'],
+            'captcha_token' => ['required', 'string'],
+            'captcha_answer' => ['required', 'integer'],
         ]);
 
         if ($validator->fails()) {
@@ -29,6 +54,20 @@ class ContactController extends Controller
         }
 
         $data = $validator->validated();
+
+        if (! $this->verifyCaptcha(
+            (int) $data['captcha_a'],
+            (int) $data['captcha_b'],
+            (int) $data['captcha_expires'],
+            (string) $data['captcha_token'],
+            (int) $data['captcha_answer'],
+        )) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect captcha answer. Please try again.',
+            ], 422);
+        }
+
         $to = config('fedex.parcel_options.recipient_email', 'hello@goldtocash.us')
             ?: 'hello@goldtocash.us';
 
@@ -61,5 +100,24 @@ class ContactController extends Controller
             'success' => true,
             'message' => 'Your message has been sent. We will get back to you soon!',
         ]);
+    }
+
+    private function signCaptcha(int $a, int $b, int $expires): string
+    {
+        return hash_hmac('sha256', "{$a}:{$b}:{$expires}", (string) config('app.key'));
+    }
+
+    private function verifyCaptcha(int $a, int $b, int $expires, string $token, int $answer): bool
+    {
+        if ($expires < time()) {
+            return false;
+        }
+
+        $expected = $this->signCaptcha($a, $b, $expires);
+        if (! hash_equals($expected, $token)) {
+            return false;
+        }
+
+        return $answer === ($a + $b);
     }
 }

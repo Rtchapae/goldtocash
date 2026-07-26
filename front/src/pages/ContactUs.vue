@@ -119,11 +119,28 @@
 						/>
 					</label>
 
+					<label class="contact-hero__field contact-hero__field--captcha">
+						<span class="contact-hero__field-label">
+							Captcha: what is {{ captcha.question || '…' }}?
+						</span>
+						<input
+							v-model="form.captcha_answer"
+							class="contact-hero__input"
+							type="text"
+							inputmode="numeric"
+							name="captcha_answer"
+							required
+							autocomplete="off"
+							:disabled="submitting || !captcha.token"
+							placeholder="Your answer"
+						/>
+					</label>
+
 					<div v-if="statusMessage" id="success" class="contact-hero__status" :class="statusClass" role="status">
 						{{ statusMessage }}
 					</div>
 
-					<button type="submit" class="contact-hero__submit" :disabled="submitting">
+					<button type="submit" class="contact-hero__submit" :disabled="submitting || !captcha.token">
 						{{ submitting ? 'Sending…' : 'Send Message' }}
 					</button>
 				</form>
@@ -151,7 +168,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { sendContactMessage } from '@/api/contact.js'
+import { getContactCaptcha, sendContactMessage } from '@/api/contact.js'
 import seoService from '@/services/seoService.js'
 
 /** Figma 1018:2644 contact + 1017:1599 FAQ */
@@ -193,6 +210,15 @@ const form = reactive({
 	email: '',
 	phone: '',
 	message: '',
+	captcha_answer: '',
+})
+
+const captcha = reactive({
+	a: null,
+	b: null,
+	expires: null,
+	token: '',
+	question: '',
 })
 
 const submitting = ref(false)
@@ -202,11 +228,40 @@ const statusClass = computed(() =>
 	statusOk.value ? 'contact-hero__status--success' : 'contact-hero__status--error',
 )
 
+const loadCaptcha = async () => {
+	try {
+		const data = await getContactCaptcha()
+		captcha.a = data.a
+		captcha.b = data.b
+		captcha.expires = data.expires
+		captcha.token = data.token
+		captcha.question = data.question
+		form.captcha_answer = ''
+	} catch {
+		captcha.token = ''
+		captcha.question = ''
+		statusOk.value = false
+		statusMessage.value = 'Could not load captcha. Please refresh the page.'
+	}
+}
+
 const onSubmit = async () => {
 	statusMessage.value = ''
+	if (!captcha.token) {
+		statusOk.value = false
+		statusMessage.value = 'Captcha is not ready. Please refresh and try again.'
+		return
+	}
 	submitting.value = true
 	try {
-		const data = await sendContactMessage({ ...form })
+		const data = await sendContactMessage({
+			...form,
+			captcha_a: captcha.a,
+			captcha_b: captcha.b,
+			captcha_expires: captcha.expires,
+			captcha_token: captcha.token,
+			captcha_answer: Number.parseInt(String(form.captcha_answer).trim(), 10),
+		})
 		statusOk.value = true
 		statusMessage.value =
 			data?.message || 'Your message has been sent. We will get back to you soon!'
@@ -214,12 +269,15 @@ const onSubmit = async () => {
 		form.email = ''
 		form.phone = ''
 		form.message = ''
+		form.captcha_answer = ''
+		await loadCaptcha()
 	} catch (err) {
 		statusOk.value = false
 		statusMessage.value =
 			err?.data?.message ||
 			err?.message ||
 			'Sorry, something went wrong. Please try again or email hello@goldtocash.us.'
+		await loadCaptcha()
 	} finally {
 		submitting.value = false
 	}
@@ -231,6 +289,7 @@ onMounted(() => {
 		description:
 			'Questions about selling gold? Contact Gold to Cash by phone, email, or form. Office in Vancouver, WA. Fast responses Mon–Fri 9am–5pm.',
 	})
+	loadCaptcha()
 })
 </script>
 

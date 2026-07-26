@@ -19,6 +19,7 @@ Route::get('calculator/current-price', [\App\Domain\Orders\Controllers\Calculato
 Route::post('kit/register', [OrderController::class, 'registerKit']);
 Route::get('recent-payout', [\App\Domain\Orders\Controllers\RecentPayoutController::class, 'getRandomRecentPayout']);
 Route::post('sendmail', [ContactController::class, 'send']);
+Route::get('sendmail/captcha', [ContactController::class, 'captcha']);
 
 Route::prefix('user')->group(function (): void {
     Route::post('send-code', [PhoneVerificationController::class, 'sendCode']);
