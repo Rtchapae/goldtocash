@@ -9,7 +9,7 @@ use App\Domain\Orders\Enums\OrderType;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\BranchRepositoryInterface;
 use App\Domain\Users\Repositories\SessionRepositoryInterface;
-use Carbon\Carbon;
+use App\Support\AdminPeriodQuery;
 
 class GetDashboardAnalyticsAction
 {
@@ -160,64 +160,12 @@ class GetDashboardAnalyticsAction
 
     private function applyTimeFilter($query, PeriodFilter $period, ?string $from, ?string $to): void
     {
-        if ($period === PeriodFilter::ALL) {
-            return;
-        }
-
-        $now = Carbon::now();
-
-        match ($period) {
-            PeriodFilter::TODAY => $query->where('orders.created_at', '>=', $now->toDateString()),
-            PeriodFilter::YESTERDAY => $query->where('orders.created_at', '>=', $now->copy()->subDay()->toDateString())
-                ->where('orders.created_at', '<', $now->toDateString()),
-            PeriodFilter::LAST_MONTH => $query->where('orders.created_at', '>=', $now->copy()->subMonth()->startOfMonth()->toDateString())
-                ->where('orders.created_at', '<', $now->startOfMonth()->toDateString()),
-            PeriodFilter::CUSTOM => $this->applyCustomPeriodFilter($query, $from, $to),
-            PeriodFilter::CURRENT_MONTH => $query->where('orders.created_at', '>=', $now->startOfMonth()->toDateString()),
-        };
-    }
-
-    private function applyCustomPeriodFilter($query, ?string $from, ?string $to): void
-    {
-        if ($from) {
-            $fromDate = Carbon::parse($from)->startOfDay();
-            $query->where('orders.created_at', '>=', $fromDate);
-        }
-        if ($to) {
-            $toDate = Carbon::parse($to)->endOfDay();
-            $query->where('orders.created_at', '<=', $toDate);
-        }
+        AdminPeriodQuery::apply($query, $period->value, $from, $to);
     }
 
     private function applySessionTimeFilter($query, PeriodFilter $period, ?string $from, ?string $to): void
     {
-        if ($period === PeriodFilter::ALL) {
-            return;
-        }
-
-        $now = Carbon::now();
-
-        match ($period) {
-            PeriodFilter::TODAY => $query->where('sessions.created_at', '>=', $now->toDateString()),
-            PeriodFilter::YESTERDAY => $query->where('sessions.created_at', '>=', $now->copy()->subDay()->toDateString())
-                ->where('sessions.created_at', '<', $now->toDateString()),
-            PeriodFilter::LAST_MONTH => $query->where('sessions.created_at', '>=', $now->copy()->subMonth()->startOfMonth()->toDateString())
-                ->where('sessions.created_at', '<', $now->startOfMonth()->toDateString()),
-            PeriodFilter::CUSTOM => $this->applySessionCustomPeriodFilter($query, $from, $to),
-            PeriodFilter::CURRENT_MONTH => $query->where('sessions.created_at', '>=', $now->startOfMonth()->toDateString()),
-        };
-    }
-
-    private function applySessionCustomPeriodFilter($query, ?string $from, ?string $to): void
-    {
-        if ($from) {
-            $fromDate = Carbon::parse($from)->startOfDay();
-            $query->where('sessions.created_at', '>=', $fromDate);
-        }
-        if ($to) {
-            $toDate = Carbon::parse($to)->endOfDay();
-            $query->where('sessions.created_at', '<=', $toDate);
-        }
+        AdminPeriodQuery::apply($query, $period->value, $from, $to, 'sessions.created_at');
     }
 
 }

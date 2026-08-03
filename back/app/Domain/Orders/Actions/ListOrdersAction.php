@@ -5,10 +5,10 @@ namespace App\Domain\Orders\Actions;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\TraceRepositoryInterface;
+use App\Support\AdminPeriodQuery;
 use App\Support\AdminUserSearch;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class ListOrdersAction
 {
@@ -100,36 +100,7 @@ class ListOrdersAction
         ?string $from,
         ?string $to,
     ): void {
-        $now = Carbon::now();
-
-        switch ($period) {
-            case 'today':
-                $query->whereDate('orders.created_at', $now->toDateString());
-                break;
-            case 'yesterday':
-                $query->whereDate('orders.created_at', $now->copy()->subDay()->toDateString());
-                break;
-            case 'currentmonth':
-                $query->whereYear('orders.created_at', $now->year)
-                    ->whereMonth('orders.created_at', $now->month);
-                break;
-            case 'lastmonth':
-                $lastMonth = $now->copy()->subMonth();
-                $query->whereYear('orders.created_at', $lastMonth->year)
-                    ->whereMonth('orders.created_at', $lastMonth->month);
-                break;
-            case 'custom':
-                if ($from) {
-                    $query->whereDate('orders.created_at', '>=', Carbon::parse($from)->toDateString());
-                }
-                if ($to) {
-                    $query->whereDate('orders.created_at', '<=', Carbon::parse($to)->toDateString());
-                }
-                break;
-            case 'all':
-            default:
-                break;
-        }
+        AdminPeriodQuery::apply($query, $period, $from, $to);
     }
 
     private function applyTraceFilters(

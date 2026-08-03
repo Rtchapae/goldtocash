@@ -37,9 +37,9 @@ export const formatDate = (date, format = 'YYYY-MM-DD') => {
 }
 
 /**
- * Format admin order dates unambiguously (US month/day/year).
- * Parses Laravel naive `Y-m-d H:i:s` (app timezone) without JS timezone shifting.
- * e.g. 08/03/2026
+ * US short date MM-DD-YY (e.g. 08-03-26).
+ * Parses Laravel naive `Y-m-d H:i:s` (app timezone) without JS timezone shifting,
+ * so Aug 1 00:30 LA does not become Jul 31 in the browser.
  */
 export const formatDateMMDDYY = (dateTime) => {
 	if (!dateTime) return ''
@@ -47,7 +47,7 @@ export const formatDateMMDDYY = (dateTime) => {
 	const raw = String(dateTime).trim()
 	const mysql = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?/)
 	if (mysql) {
-		return `${mysql[2]}/${mysql[3]}/${mysql[1]}`
+		return `${mysql[2]}-${mysql[3]}-${mysql[1].slice(-2)}`
 	}
 
 	const dateObj = new Date(dateTime)
@@ -57,9 +57,9 @@ export const formatDateMMDDYY = (dateTime) => {
 
 	const month = String(dateObj.getMonth() + 1).padStart(2, '0')
 	const day = String(dateObj.getDate()).padStart(2, '0')
-	const year = dateObj.getFullYear()
+	const yy = String(dateObj.getFullYear()).slice(-2)
 
-	return `${month}/${day}/${year}`
+	return `${month}-${day}-${yy}`
 }
 
 /** Local time HH:mm:ss */
