@@ -220,13 +220,11 @@
 								</template>
 
 								<template v-else-if="block.type === 'form'">
-									<label class="form-label">Kit form style</label>
-									<select v-model="block.data.template" class="form-select" style="max-width: 280px;">
-										<option value="modern">Modern</option>
-										<option value="traditional">Traditional</option>
-										<option value="sophisticated">Sophisticated</option>
+									<label class="form-label">Form</label>
+									<select v-model="block.data.formType" class="form-select" style="max-width: 280px;">
+										<option value="kit">Request Free Kit</option>
 									</select>
-									<p class="small text-muted mb-0 mt-2">Embeds the Request Free Kit form (same as blog posts).</p>
+									<p class="small text-muted mb-0 mt-2">Embeds the Request Free Kit form on the public page.</p>
 								</template>
 
 								<template v-else-if="block.type === 'faq'">
@@ -323,7 +321,7 @@ const emptyBlock = (type) => {
 		}
 	}
 	if (type === 'calculator') return { id, type, data: { variant: 'default' } }
-	if (type === 'form') return { id, type, data: { template: 'modern' } }
+	if (type === 'form') return { id, type, data: { formType: 'kit' } }
 	if (type === 'faq') {
 		return {
 			id,
@@ -522,7 +520,7 @@ const normalizeImportedBlocks = (blocks) =>
 		if (b.type === 'form') {
 			return {
 				...b,
-				data: { template: b.data?.template || 'modern' },
+				data: { formType: b.data?.formType || 'kit' },
 			}
 		}
 		if (b.type === 'faq') {

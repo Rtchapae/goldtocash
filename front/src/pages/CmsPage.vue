@@ -57,7 +57,6 @@
 							<div
 								v-else-if="block.type === 'form'"
 								class="cms-block cms-block--form"
-								:data-template="block.data?.template || 'modern'"
 							>
 								<KitForm inline />
 							</div>
