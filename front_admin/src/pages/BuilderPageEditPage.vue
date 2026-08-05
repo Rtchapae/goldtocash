@@ -146,7 +146,7 @@
 											<label class="form-label">Alt text</label>
 											<input v-model="block.data.alt" type="text" class="form-control" />
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-3">
 											<label class="form-label">Alignment</label>
 											<select v-model="block.data.align" class="form-select">
 												<option value="center">Center</option>
@@ -154,37 +154,57 @@
 												<option value="right">Right</option>
 											</select>
 										</div>
-										<div class="col-md-4">
-											<label class="form-label">Width (%)</label>
+										<div class="col-md-3">
+											<label class="form-label">Width (px)</label>
 											<input
-												v-model.number="block.data.widthPercent"
+												v-model.number="block.data.widthPx"
 												type="number"
-												min="10"
-												max="100"
-												step="5"
-												class="form-control"
-											/>
-										</div>
-										<div class="col-md-4">
-											<label class="form-label">Max width (px, optional)</label>
-											<input
-												v-model.number="block.data.maxWidth"
-												type="number"
-												min="80"
+												min="40"
 												max="1600"
 												step="10"
 												class="form-control"
 												placeholder="auto"
 											/>
 										</div>
+										<div class="col-md-3">
+											<label class="form-label">Height (px)</label>
+											<input
+												v-model.number="block.data.heightPx"
+												type="number"
+												min="40"
+												max="1600"
+												step="10"
+												class="form-control"
+												placeholder="auto"
+											/>
+										</div>
+										<div class="col-md-3">
+											<label class="form-label">Fit</label>
+											<select v-model="block.data.objectFit" class="form-select">
+												<option value="contain">Contain</option>
+												<option value="cover">Cover</option>
+												<option value="fill">Stretch</option>
+											</select>
+										</div>
 										<div v-if="block.data.url" class="col-12">
+											<p class="small text-muted mb-2">
+												Drag the corner handle to resize. Hold Shift to freely change width/height.
+											</p>
 											<div class="pb-image-preview" :style="imagePreviewStyle(block)">
-												<img
-													:src="resolveAdminAssetUrl(block.data.url)"
-													alt=""
-													class="rounded border"
-													:style="imagePreviewImgStyle(block)"
-												/>
+												<div class="pb-image-resize" :style="imageResizeBoxStyle(block)">
+													<img
+														:src="resolveAdminAssetUrl(block.data.url)"
+														alt=""
+														draggable="false"
+														:style="imagePreviewImgStyle(block)"
+														@load="onImagePreviewLoad(block, $event)"
+													/>
+													<span
+														class="pb-image-resize__handle"
+														title="Drag to resize"
+														@mousedown.prevent="startImageResize(block, $event)"
+													/>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -238,7 +258,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavbarHeader from '@/components/NavbarHeader.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
@@ -290,7 +310,16 @@ const emptyBlock = (type) => {
 		return {
 			id,
 			type,
-			data: { url: '', alt: '', align: 'center', widthPercent: 100, maxWidth: null },
+			data: {
+				url: '',
+				alt: '',
+				align: 'center',
+				widthPx: null,
+				heightPx: null,
+				objectFit: 'contain',
+				widthPercent: 100,
+				maxWidth: null,
+			},
 		}
 	}
 	if (type === 'calculator') return { id, type, data: { variant: 'default' } }
@@ -342,20 +371,100 @@ const addFaqItem = (block) => {
 	block.data.items.push({ question: '', answer: '' })
 }
 
+const imageResizeState = ref(null)
+
 const imagePreviewStyle = (block) => {
 	const align = block.data?.align || 'center'
 	return { textAlign: align }
 }
 
-const imagePreviewImgStyle = (block) => {
-	const width = Math.min(100, Math.max(10, Number(block.data?.widthPercent) || 100))
-	const maxWidth = block.data?.maxWidth ? `${block.data.maxWidth}px` : '480px'
+const imageDisplaySize = (block) => {
+	const widthPx = Number(block.data?.widthPx) || Number(block.data?.maxWidth) || 0
+	const heightPx = Number(block.data?.heightPx) || 0
 	return {
-		width: `${width}%`,
-		maxWidth,
-		height: 'auto',
+		widthPx: widthPx > 0 ? widthPx : null,
+		heightPx: heightPx > 0 ? heightPx : null,
 	}
 }
+
+const imageResizeBoxStyle = (block) => {
+	const { widthPx, heightPx } = imageDisplaySize(block)
+	return {
+		width: widthPx ? `${widthPx}px` : 'auto',
+		height: heightPx ? `${heightPx}px` : 'auto',
+		maxWidth: '100%',
+	}
+}
+
+const imagePreviewImgStyle = (block) => {
+	const { widthPx, heightPx } = imageDisplaySize(block)
+	const fit = block.data?.objectFit || 'contain'
+	return {
+		width: widthPx || heightPx ? '100%' : 'auto',
+		height: heightPx ? '100%' : 'auto',
+		maxWidth: '100%',
+		objectFit: heightPx || widthPx ? fit : 'contain',
+		display: 'block',
+	}
+}
+
+const onImagePreviewLoad = (block, event) => {
+	if (block.data?.widthPx || block.data?.heightPx || block.data?.maxWidth) return
+	const img = event.target
+	if (!img?.naturalWidth) return
+	const maxPreview = 480
+	const scale = Math.min(1, maxPreview / img.naturalWidth)
+	block.data.widthPx = Math.round(img.naturalWidth * scale)
+	block.data.heightPx = Math.round(img.naturalHeight * scale)
+}
+
+const startImageResize = (block, event) => {
+	const box = event.currentTarget.parentElement
+	if (!box) return
+	const rect = box.getBoundingClientRect()
+	imageResizeState.value = {
+		block,
+		startX: event.clientX,
+		startY: event.clientY,
+		startW: rect.width,
+		startH: rect.height,
+		lockAspect: !event.shiftKey,
+		ratio: rect.width / Math.max(1, rect.height),
+	}
+	document.body.classList.add('pb-image-resizing')
+	window.addEventListener('mousemove', onImageResizeMove)
+	window.addEventListener('mouseup', endImageResize)
+}
+
+const onImageResizeMove = (event) => {
+	const state = imageResizeState.value
+	if (!state) return
+	const dx = event.clientX - state.startX
+	const dy = event.clientY - state.startY
+	let w = Math.max(40, Math.min(1600, Math.round(state.startW + dx)))
+	let h = Math.max(40, Math.min(1600, Math.round(state.startH + dy)))
+	const lockAspect = state.lockAspect && !event.shiftKey
+	if (lockAspect) {
+		if (Math.abs(dx) >= Math.abs(dy)) {
+			h = Math.max(40, Math.round(w / state.ratio))
+		} else {
+			w = Math.max(40, Math.round(h * state.ratio))
+		}
+	}
+	state.block.data.widthPx = w
+	state.block.data.heightPx = h
+	state.block.data.maxWidth = w
+}
+
+const endImageResize = () => {
+	if (!imageResizeState.value) return
+	imageResizeState.value = null
+	document.body.classList.remove('pb-image-resizing')
+	window.removeEventListener('mousemove', onImageResizeMove)
+	window.removeEventListener('mouseup', endImageResize)
+}
+
+onBeforeUnmount(endImageResize)
 
 const slugify = (value) =>
 	String(value || '')
@@ -402,8 +511,11 @@ const normalizeImportedBlocks = (blocks) =>
 					url: b.data?.url || '',
 					alt: b.data?.alt || '',
 					align: b.data?.align || 'center',
+					widthPx: b.data?.widthPx ?? b.data?.maxWidth ?? null,
+					heightPx: b.data?.heightPx ?? null,
+					objectFit: b.data?.objectFit || 'contain',
 					widthPercent: b.data?.widthPercent ?? 100,
-					maxWidth: b.data?.maxWidth ?? null,
+					maxWidth: b.data?.maxWidth ?? b.data?.widthPx ?? null,
 				},
 			}
 		}
@@ -519,11 +631,38 @@ onMounted(loadPage)
 	transition: box-shadow 0.3s ease;
 }
 
-.pb-image-preview img {
-	max-height: 240px;
-	width: auto;
-	max-width: 100%;
-	height: auto;
+.pb-image-preview {
+	overflow: auto;
+	padding: 4px 12px 12px 4px;
+}
+
+.pb-image-resize {
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
+	border: 1px dashed #c39e3d;
+	background: #fafafa;
+	line-height: 0;
+	user-select: none;
+}
+
+.pb-image-resize img {
+	pointer-events: none;
+	user-select: none;
+}
+
+.pb-image-resize__handle {
+	position: absolute;
+	right: -7px;
+	bottom: -7px;
+	width: 14px;
+	height: 14px;
+	border-radius: 2px;
+	background: #c39e3d;
+	border: 2px solid #fff;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+	cursor: nwse-resize;
+	z-index: 2;
 }
 
 .pb-faq-item :deep(.tox-tinymce) {
@@ -532,5 +671,17 @@ onMounted(loadPage)
 
 .pb-faq-item :deep(.tox .tox-edit-area__iframe) {
 	background: #fff;
+}
+</style>
+
+<style>
+body.pb-image-resizing {
+	cursor: nwse-resize !important;
+	user-select: none !important;
+}
+
+body.pb-image-resizing * {
+	cursor: nwse-resize !important;
+	user-select: none !important;
 }
 </style>

@@ -153,13 +153,26 @@ const richtextStyle = (block) => {
 }
 
 const imageStyle = (block) => {
+	const widthPx = Number(block.data?.widthPx) || Number(block.data?.maxWidth) || 0
+	const heightPx = Number(block.data?.heightPx) || 0
 	const widthPercent = Math.min(100, Math.max(10, Number(block.data?.widthPercent) || 100))
-	const maxWidth = block.data?.maxWidth ? `${Number(block.data.maxWidth)}px` : null
-	return {
-		width: `${widthPercent}%`,
-		maxWidth: maxWidth || '100%',
-		height: 'auto',
+	const fit = block.data?.objectFit || 'contain'
+	const style = {
+		maxWidth: '100%',
 	}
+	if (widthPx > 0) {
+		style.width = `${widthPx}px`
+	} else {
+		style.width = `${widthPercent}%`
+		if (block.data?.maxWidth) style.maxWidth = `${Number(block.data.maxWidth)}px`
+	}
+	if (heightPx > 0) {
+		style.height = `${heightPx}px`
+		style.objectFit = fit
+	} else {
+		style.height = 'auto'
+	}
+	return style
 }
 
 const faqAnswerHtml = (answer) => {
