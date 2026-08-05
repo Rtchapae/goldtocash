@@ -76,6 +76,7 @@
 								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('richtext')">Text</button>
 								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('image')">Image</button>
 								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('calculator')">Calculator</button>
+								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('form')">Form</button>
 								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('faq')">FAQ</button>
 							</div>
 
@@ -85,8 +86,10 @@
 
 							<div
 								v-for="(block, index) in form.blocks"
+								:id="`pb-block-${block.id}`"
 								:key="block.id"
-								class="border rounded p-3 mb-3 bg-light"
+								class="border rounded p-3 mb-3 bg-light pb-block-card"
+								:class="{ 'pb-block-card--flash': flashBlockId === block.id }"
 							>
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
 									<span class="badge bg-dark text-uppercase">{{ block.type }}</span>
@@ -115,18 +118,16 @@
 								</template>
 
 								<template v-else-if="block.type === 'richtext'">
-									<div class="btn-group btn-group-sm mb-2">
-										<button type="button" class="btn btn-outline-secondary" @click="execFormat(block.id, 'bold')"><b>B</b></button>
-										<button type="button" class="btn btn-outline-secondary" @click="execFormat(block.id, 'italic')"><i>I</i></button>
-										<button type="button" class="btn btn-outline-secondary" @click="execFormat(block.id, 'underline')"><u>U</u></button>
-									</div>
-									<div
-										:ref="(el) => setEditorRef(block.id, el)"
-										class="form-control pb-rich-editor"
-										contenteditable="true"
-										@blur="onRichBlur(block, $event)"
-										v-html="block.data.html"
-									/>
+									<label class="form-label">Default font for block</label>
+									<select v-model="block.data.fontFamily" class="form-select mb-2" style="max-width: 320px;">
+										<option value="">Montserrat (site default)</option>
+										<option value="Arial, Helvetica, sans-serif">Arial</option>
+										<option value="Georgia, Palatino, serif">Georgia</option>
+										<option value="'Times New Roman', Times, serif">Times New Roman</option>
+										<option value="Verdana, Geneva, sans-serif">Verdana</option>
+										<option value="'Courier New', Courier, monospace">Courier New</option>
+									</select>
+									<BuilderTinyEditor v-model="block.data.html" :height="300" />
 								</template>
 
 								<template v-else-if="block.type === 'image'">
@@ -145,8 +146,46 @@
 											<label class="form-label">Alt text</label>
 											<input v-model="block.data.alt" type="text" class="form-control" />
 										</div>
+										<div class="col-md-4">
+											<label class="form-label">Alignment</label>
+											<select v-model="block.data.align" class="form-select">
+												<option value="center">Center</option>
+												<option value="left">Left</option>
+												<option value="right">Right</option>
+											</select>
+										</div>
+										<div class="col-md-4">
+											<label class="form-label">Width (%)</label>
+											<input
+												v-model.number="block.data.widthPercent"
+												type="number"
+												min="10"
+												max="100"
+												step="5"
+												class="form-control"
+											/>
+										</div>
+										<div class="col-md-4">
+											<label class="form-label">Max width (px, optional)</label>
+											<input
+												v-model.number="block.data.maxWidth"
+												type="number"
+												min="80"
+												max="1600"
+												step="10"
+												class="form-control"
+												placeholder="auto"
+											/>
+										</div>
 										<div v-if="block.data.url" class="col-12">
-											<img :src="resolveAdminAssetUrl(block.data.url)" alt="" class="img-fluid rounded border" style="max-height: 220px;" />
+											<div class="pb-image-preview" :style="imagePreviewStyle(block)">
+												<img
+													:src="resolveAdminAssetUrl(block.data.url)"
+													alt=""
+													class="rounded border"
+													:style="imagePreviewImgStyle(block)"
+												/>
+											</div>
 										</div>
 									</div>
 								</template>
@@ -160,6 +199,16 @@
 									<p class="small text-muted mb-0 mt-2">Embeds the site gold value calculator on the public page.</p>
 								</template>
 
+								<template v-else-if="block.type === 'form'">
+									<label class="form-label">Kit form style</label>
+									<select v-model="block.data.template" class="form-select" style="max-width: 280px;">
+										<option value="modern">Modern</option>
+										<option value="traditional">Traditional</option>
+										<option value="sophisticated">Sophisticated</option>
+									</select>
+									<p class="small text-muted mb-0 mt-2">Embeds the Request Free Kit form (same as blog posts).</p>
+								</template>
+
 								<template v-else-if="block.type === 'faq'">
 									<div class="d-flex justify-content-between align-items-center mb-2">
 										<label class="form-label mb-0">FAQ items</label>
@@ -168,14 +217,15 @@
 									<div
 										v-for="(item, faqIdx) in block.data.items"
 										:key="faqIdx"
-										class="border rounded p-2 mb-2 bg-white"
+										class="border rounded p-2 mb-2 bg-white pb-faq-item"
 									>
 										<div class="d-flex justify-content-between mb-2">
 											<strong class="small">#{{ faqIdx + 1 }}</strong>
 											<button type="button" class="btn btn-sm btn-link text-danger p-0" @click="block.data.items.splice(faqIdx, 1)">Remove</button>
 										</div>
-										<input v-model="item.question" type="text" class="form-control mb-2" placeholder="Question" />
-										<textarea v-model="item.answer" class="form-control" rows="2" placeholder="Answer" />
+										<input v-model="item.question" type="text" class="form-control form-control-sm mb-2" placeholder="Question" />
+										<label class="form-label small mb-1">Answer</label>
+										<BuilderTinyEditor v-model="item.answer" :height="160" compact />
 									</div>
 								</template>
 							</div>
@@ -192,6 +242,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavbarHeader from '@/components/NavbarHeader.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
+import BuilderTinyEditor from '@/components/builder/BuilderTinyEditor.vue'
 import {
 	getBuilderPage,
 	createBuilderPage,
@@ -210,7 +261,7 @@ const isLoading = ref(false)
 const isSaving = ref(false)
 const isImporting = ref(false)
 const slugTouched = ref(false)
-const editorRefs = {}
+const flashBlockId = ref(null)
 
 const isEditMode = computed(() => !!route.params.id)
 const pageId = computed(() => (route.params.id ? Number(route.params.id) : null))
@@ -234,9 +285,16 @@ const newId = () => {
 const emptyBlock = (type) => {
 	const id = newId()
 	if (type === 'heading') return { id, type, data: { level: 2, text: '' } }
-	if (type === 'richtext') return { id, type, data: { html: '<p></p>' } }
-	if (type === 'image') return { id, type, data: { url: '', alt: '' } }
+	if (type === 'richtext') return { id, type, data: { html: '<p></p>', fontFamily: '' } }
+	if (type === 'image') {
+		return {
+			id,
+			type,
+			data: { url: '', alt: '', align: 'center', widthPercent: 100, maxWidth: null },
+		}
+	}
 	if (type === 'calculator') return { id, type, data: { variant: 'default' } }
+	if (type === 'form') return { id, type, data: { template: 'modern' } }
 	if (type === 'faq') {
 		return {
 			id,
@@ -249,8 +307,22 @@ const emptyBlock = (type) => {
 	return { id, type, data: {} }
 }
 
-const addBlock = (type) => {
-	form.value.blocks.push(emptyBlock(type))
+const scrollToBlock = async (blockId) => {
+	await nextTick()
+	await nextTick()
+	const el = document.getElementById(`pb-block-${blockId}`)
+	if (!el) return
+	el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+	flashBlockId.value = blockId
+	window.setTimeout(() => {
+		if (flashBlockId.value === blockId) flashBlockId.value = null
+	}, 1600)
+}
+
+const addBlock = async (type) => {
+	const block = emptyBlock(type)
+	form.value.blocks.push(block)
+	await scrollToBlock(block.id)
 }
 
 const removeBlock = (index) => {
@@ -270,6 +342,21 @@ const addFaqItem = (block) => {
 	block.data.items.push({ question: '', answer: '' })
 }
 
+const imagePreviewStyle = (block) => {
+	const align = block.data?.align || 'center'
+	return { textAlign: align }
+}
+
+const imagePreviewImgStyle = (block) => {
+	const width = Math.min(100, Math.max(10, Number(block.data?.widthPercent) || 100))
+	const maxWidth = block.data?.maxWidth ? `${block.data.maxWidth}px` : '480px'
+	return {
+		width: `${width}%`,
+		maxWidth,
+		height: 'auto',
+	}
+}
+
 const slugify = (value) =>
 	String(value || '')
 		.toLowerCase()
@@ -282,22 +369,6 @@ const maybeSlugFromTitle = () => {
 	if (!form.value.slug) {
 		form.value.slug = slugify(form.value.title)
 	}
-}
-
-const setEditorRef = (id, el) => {
-	if (el) editorRefs[id] = el
-}
-
-const onRichBlur = (block, event) => {
-	block.data.html = event.target.innerHTML
-}
-
-const execFormat = (blockId, command) => {
-	const el = editorRefs[blockId]
-	if (el) el.focus()
-	document.execCommand(command, false, null)
-	const block = form.value.blocks.find((b) => b.id === blockId)
-	if (block && el) block.data.html = el.innerHTML
 }
 
 const onImageUpload = async (block, event) => {
@@ -313,6 +384,49 @@ const onImageUpload = async (block, event) => {
 	}
 }
 
+const normalizeImportedBlocks = (blocks) =>
+	(Array.isArray(blocks) ? blocks : []).map((b) => {
+		if (b.type === 'richtext') {
+			return {
+				...b,
+				data: {
+					fontFamily: b.data?.fontFamily || '',
+					html: b.data?.html || '<p></p>',
+				},
+			}
+		}
+		if (b.type === 'image') {
+			return {
+				...b,
+				data: {
+					url: b.data?.url || '',
+					alt: b.data?.alt || '',
+					align: b.data?.align || 'center',
+					widthPercent: b.data?.widthPercent ?? 100,
+					maxWidth: b.data?.maxWidth ?? null,
+				},
+			}
+		}
+		if (b.type === 'form') {
+			return {
+				...b,
+				data: { template: b.data?.template || 'modern' },
+			}
+		}
+		if (b.type === 'faq') {
+			return {
+				...b,
+				data: {
+					items: (b.data?.items || []).map((it) => ({
+						question: it.question || '',
+						answer: it.answer || '',
+					})),
+				},
+			}
+		}
+		return b
+	})
+
 const onDocxSelected = async (event) => {
 	const file = event.target.files?.[0]
 	event.target.value = ''
@@ -326,10 +440,13 @@ const onDocxSelected = async (event) => {
 		if (data.seo_description) {
 			form.value.seo_description = data.seo_description
 		}
-		form.value.blocks = Array.isArray(data.blocks) ? data.blocks : []
+		form.value.blocks = normalizeImportedBlocks(data.blocks)
 		slugTouched.value = true
 		toast.success('Word document imported — review blocks, then publish')
 		await nextTick()
+		if (form.value.blocks[0]) {
+			await scrollToBlock(form.value.blocks[0].id)
+		}
 	} catch (e) {
 		toast.error(e.message || 'Import failed')
 	} finally {
@@ -383,7 +500,7 @@ const loadPage = async () => {
 			seo_title: data.seo_title || '',
 			seo_description: data.seo_description || '',
 			published: !!data.published,
-			blocks: Array.isArray(data.blocks) ? data.blocks : [],
+			blocks: normalizeImportedBlocks(data.blocks),
 		}
 		slugTouched.value = true
 	} catch (e) {
@@ -397,14 +514,23 @@ onMounted(loadPage)
 </script>
 
 <style scoped>
-.pb-rich-editor {
-	min-height: 120px;
-	background: #fff;
-	overflow: auto;
+.pb-block-card--flash {
+	box-shadow: 0 0 0 3px rgba(195, 158, 61, 0.55);
+	transition: box-shadow 0.3s ease;
 }
-.pb-rich-editor:focus {
-	outline: none;
-	border-color: #86b7fe;
-	box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+
+.pb-image-preview img {
+	max-height: 240px;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+}
+
+.pb-faq-item :deep(.tox-tinymce) {
+	border-radius: 4px;
+}
+
+.pb-faq-item :deep(.tox .tox-edit-area__iframe) {
+	background: #fff;
 }
 </style>

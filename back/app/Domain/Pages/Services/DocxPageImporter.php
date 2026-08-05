@@ -9,6 +9,7 @@ use ZipArchive;
 
 /**
  * Lightweight .docx → ordered content blocks (no PhpWord dependency).
+ * Preserves bold/italic/underline, hyperlinks, and basic run fonts.
  */
 class DocxPageImporter
 {
@@ -48,10 +49,9 @@ class DocxPageImporter
 
             if ($node->localName === 'p') {
                 $style = $this->paragraphStyle($xpath, $node);
-                $html = $this->paragraphHtml($xpath, $node);
+                $html = $this->paragraphHtml($xpath, $node, $relMap);
                 $plain = trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
-                // Images embedded in the paragraph
                 foreach ($this->extractImagesFromParagraph($xpath, $node, $relMap, $zip) as $imageBlock) {
                     $blocks[] = $imageBlock;
                 }
@@ -76,7 +76,10 @@ class DocxPageImporter
                 $blocks[] = [
                     'id' => (string) Str::uuid(),
                     'type' => 'richtext',
-                    'data' => ['html' => $html !== '' ? $html : '<p>' . e($plain) . '</p>'],
+                    'data' => [
+                        'html' => $html !== '' ? $html : '<p>' . e($plain) . '</p>',
+                        'fontFamily' => '',
+                    ],
                 ];
             }
         }
@@ -99,8 +102,6 @@ class DocxPageImporter
     }
 
     /**
-     * Pull SEO meta + collapse FAQ Q/A headings into a faq block; drop bare image-credit URLs.
-     *
      * @param  array<int, array<string, mixed>>  $blocks
      * @return array<int, array<string, mixed>>
      */
@@ -118,7 +119,6 @@ class DocxPageImporter
                 $text = trim(html_entity_decode(strip_tags((string) ($block['data']['html'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
             }
 
-            // Meta Description: heading + next paragraph → SEO field
             if ($type === 'heading' && preg_match('/^meta\s*description:?$/i', $text)) {
                 $next = $blocks[$i + 1] ?? null;
                 if ($next && ($next['type'] ?? '') === 'richtext') {
@@ -128,12 +128,10 @@ class DocxPageImporter
                 continue;
             }
 
-            // Bare URL lines (often image credits from Word)
             if ($type === 'richtext' && preg_match('#^https?://\S+$#i', $text)) {
                 continue;
             }
 
-            // FAQs section → single faq block
             if ($type === 'heading' && preg_match('/^faqs?$/i', $text)) {
                 $items = [];
                 while ($i + 1 < $count) {
@@ -148,7 +146,8 @@ class DocxPageImporter
                     }
                     $answer = '';
                     if ($a && ($a['type'] ?? '') === 'richtext') {
-                        $answer = trim(html_entity_decode(strip_tags((string) ($a['data']['html'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                        // Keep HTML (links/bold) from Word answer paragraphs
+                        $answer = (string) ($a['data']['html'] ?? '');
                         $i += 2;
                     } else {
                         $i += 1;
@@ -171,6 +170,9 @@ class DocxPageImporter
         return $out;
     }
 
+    /**
+     * @return array<string, array{target: string, external: bool}>
+     */
     private function parseRelationships(string $relsXml): array
     {
         $map = [];
@@ -185,50 +187,67 @@ class DocxPageImporter
             }
             $id = $rel->getAttribute('Id');
             $target = $rel->getAttribute('Target');
-            if ($id && $target) {
-                $map[$id] = ltrim(str_replace('\\', '/', $target), '/');
-                if (! str_starts_with($map[$id], 'word/')) {
-                    $map[$id] = 'word/' . $map[$id];
-                }
+            $type = $rel->getAttribute('Type');
+            $mode = $rel->getAttribute('TargetMode');
+            if (! $id || ! $target) {
+                continue;
             }
+            $external = strcasecmp($mode, 'External') === 0 || str_contains($type, '/hyperlink');
+            $path = ltrim(str_replace('\\', '/', $target), '/');
+            if (! $external && ! str_starts_with($path, 'word/')) {
+                $path = 'word/' . $path;
+            }
+            $map[$id] = [
+                'target' => $external ? $target : $path,
+                'external' => $external,
+            ];
         }
         return $map;
     }
 
     private function paragraphStyle(\DOMXPath $xpath, \DOMElement $p): string
     {
-        $nodes = $xpath->query('.//w:pStyle/@w:val', $p);
+        $nodes = $xpath->query('./w:pPr/w:pStyle/@w:val', $p);
         if ($nodes && $nodes->length > 0) {
             return (string) $nodes->item(0)->nodeValue;
         }
         return '';
     }
 
-    private function paragraphHtml(\DOMXPath $xpath, \DOMElement $p): string
+    /**
+     * @param  array<string, array{target: string, external: bool}>  $relMap
+     */
+    private function paragraphHtml(\DOMXPath $xpath, \DOMElement $p, array $relMap): string
     {
         $parts = [];
-        foreach ($xpath->query('.//w:r', $p) as $run) {
-            if (! $run instanceof \DOMElement) {
+        foreach ($p->childNodes as $child) {
+            if (! $child instanceof \DOMElement) {
                 continue;
             }
-            $textNodes = $xpath->query('.//w:t', $run);
-            $text = '';
-            foreach ($textNodes as $t) {
-                $text .= $t->textContent;
-            }
-            if ($text === '') {
+            if ($child->localName === 'hyperlink') {
+                $rid = $child->getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id')
+                    ?: $child->getAttribute('r:id');
+                $inner = $this->runsHtml($xpath, $child);
+                if ($inner === '') {
+                    continue;
+                }
+                $url = '';
+                if ($rid && isset($relMap[$rid]) && $relMap[$rid]['external']) {
+                    $url = $relMap[$rid]['target'];
+                }
+                if ($url !== '' && preg_match('#^https?://#i', $url)) {
+                    $parts[] = '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer">' . $inner . '</a>';
+                } else {
+                    $parts[] = $inner;
+                }
                 continue;
             }
-            $bold = $xpath->query('.//w:b[not(@w:val="0") and not(@w:val="false")]', $run)->length > 0;
-            $italic = $xpath->query('.//w:i[not(@w:val="0") and not(@w:val="false")]', $run)->length > 0;
-            $chunk = e($text);
-            if ($bold) {
-                $chunk = '<strong>' . $chunk . '</strong>';
+            if ($child->localName === 'r') {
+                $chunk = $this->runHtml($xpath, $child);
+                if ($chunk !== '') {
+                    $parts[] = $chunk;
+                }
             }
-            if ($italic) {
-                $chunk = '<em>' . $chunk . '</em>';
-            }
-            $parts[] = $chunk;
         }
         if ($parts === []) {
             return '';
@@ -236,7 +255,77 @@ class DocxPageImporter
         return '<p>' . implode('', $parts) . '</p>';
     }
 
+    private function runsHtml(\DOMXPath $xpath, \DOMElement $parent): string
+    {
+        $parts = [];
+        foreach ($xpath->query('./w:r', $parent) as $run) {
+            if (! $run instanceof \DOMElement) {
+                continue;
+            }
+            $chunk = $this->runHtml($xpath, $run);
+            if ($chunk !== '') {
+                $parts[] = $chunk;
+            }
+        }
+        return implode('', $parts);
+    }
+
+    private function runHtml(\DOMXPath $xpath, \DOMElement $run): string
+    {
+        $textNodes = $xpath->query('.//w:t', $run);
+        $text = '';
+        foreach ($textNodes as $t) {
+            $text .= $t->textContent;
+        }
+        if ($text === '') {
+            return '';
+        }
+
+        $bold = $xpath->query('./w:rPr/w:b[not(@w:val="0") and not(@w:val="false")]', $run)->length > 0;
+        $italic = $xpath->query('./w:rPr/w:i[not(@w:val="0") and not(@w:val="false")]', $run)->length > 0;
+        $underline = $xpath->query('./w:rPr/w:u[not(@w:val="none")]', $run)->length > 0;
+
+        $font = '';
+        $fontNodes = $xpath->query('./w:rPr/w:rFonts/@w:ascii|./w:rPr/w:rFonts/@w:hAnsi', $run);
+        if ($fontNodes && $fontNodes->length > 0) {
+            $font = trim((string) $fontNodes->item(0)->nodeValue);
+        }
+
+        $sizePx = null;
+        $szNodes = $xpath->query('./w:rPr/w:sz/@w:val', $run);
+        if ($szNodes && $szNodes->length > 0) {
+            $halfPoints = (int) $szNodes->item(0)->nodeValue;
+            if ($halfPoints > 0) {
+                $sizePx = max(10, (int) round($halfPoints / 2));
+            }
+        }
+
+        $chunk = e($text);
+        $styles = [];
+        if ($font !== '') {
+            $styles[] = 'font-family:' . e($font);
+        }
+        if ($sizePx !== null) {
+            $styles[] = 'font-size:' . $sizePx . 'px';
+        }
+        if ($styles !== []) {
+            $chunk = '<span style="' . implode(';', $styles) . '">' . $chunk . '</span>';
+        }
+        if ($bold) {
+            $chunk = '<strong>' . $chunk . '</strong>';
+        }
+        if ($italic) {
+            $chunk = '<em>' . $chunk . '</em>';
+        }
+        if ($underline) {
+            $chunk = '<u>' . $chunk . '</u>';
+        }
+
+        return $chunk;
+    }
+
     /**
+     * @param  array<string, array{target: string, external: bool}>  $relMap
      * @return array<int, array<string, mixed>>
      */
     private function extractImagesFromParagraph(\DOMXPath $xpath, \DOMElement $p, array $relMap, ZipArchive $zip): array
@@ -251,7 +340,10 @@ class DocxPageImporter
             if (! $embed || ! isset($relMap[$embed])) {
                 continue;
             }
-            $mediaPath = $relMap[$embed];
+            $mediaPath = $relMap[$embed]['target'];
+            if ($relMap[$embed]['external']) {
+                continue;
+            }
             $binary = $zip->getFromName($mediaPath);
             if ($binary === false) {
                 continue;
@@ -268,6 +360,9 @@ class DocxPageImporter
                 'data' => [
                     'url' => '/storage/' . $name,
                     'alt' => '',
+                    'align' => 'center',
+                    'widthPercent' => 100,
+                    'maxWidth' => null,
                 ],
             ];
         }

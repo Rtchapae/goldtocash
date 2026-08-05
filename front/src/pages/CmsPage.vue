@@ -32,16 +32,19 @@
 							<div
 								v-else-if="block.type === 'richtext'"
 								class="cms-block cms-block--richtext"
+								:style="richtextStyle(block)"
 								v-html="block.data?.html"
 							/>
 
 							<figure
 								v-else-if="block.type === 'image' && block.data?.url"
 								class="cms-block cms-block--image"
+								:class="`cms-block--image-${block.data?.align || 'center'}`"
 							>
 								<img
 									:src="block.data.url"
 									:alt="block.data.alt || page.title"
+									:style="imageStyle(block)"
 									loading="lazy"
 									decoding="async"
 								/>
@@ -50,13 +53,21 @@
 							<div v-else-if="block.type === 'calculator'" class="cms-block cms-block--calculator">
 								<ValueCalculator :variant="calculatorVariant(block)" />
 							</div>
+
+							<div
+								v-else-if="block.type === 'form'"
+								class="cms-block cms-block--form"
+								:data-template="block.data?.template || 'modern'"
+							>
+								<KitForm inline />
+							</div>
 						</template>
 					</div>
 				</div>
 
 				<section
 					v-else-if="segment.type === 'faq'"
-					class="contact-faq"
+					class="contact-faq cms-faq"
 					aria-labelledby="cms-faq-title"
 				>
 					<div class="contact-faq__inner">
@@ -71,9 +82,7 @@
 									<span class="contact-faq__question-text">{{ item.question }}</span>
 									<span class="contact-faq__toggle" aria-hidden="true" />
 								</summary>
-								<div class="contact-faq__answer">
-									<p>{{ item.answer }}</p>
-								</div>
+								<div class="contact-faq__answer" v-html="faqAnswerHtml(item.answer)" />
 							</details>
 						</div>
 					</div>
@@ -92,6 +101,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchBuilderPage } from '@/api/builderPages'
 import seoService from '@/services/seoService'
 import ValueCalculator from '@/components/ValueCalculator.vue'
+import KitForm from '@/components/forms/KitForm.vue'
 import FaqJsonLd from '@/components/seo/FaqJsonLd.vue'
 
 const route = useRoute()
@@ -110,7 +120,6 @@ const showPageTitle = computed(() => {
 	return true
 })
 
-/** Group blocks so FAQ is a full-width section outside .container (no white gap). */
 const segments = computed(() => {
 	const blocks = page.value?.blocks || []
 	const out = []
@@ -138,10 +147,35 @@ const headingTag = (block) => {
 
 const calculatorVariant = (block) => (block.data?.variant === 'tabbed' ? 'tabbed' : 'default')
 
+const richtextStyle = (block) => {
+	const font = block.data?.fontFamily
+	return font ? { fontFamily: font } : {}
+}
+
+const imageStyle = (block) => {
+	const widthPercent = Math.min(100, Math.max(10, Number(block.data?.widthPercent) || 100))
+	const maxWidth = block.data?.maxWidth ? `${Number(block.data.maxWidth)}px` : null
+	return {
+		width: `${widthPercent}%`,
+		maxWidth: maxWidth || '100%',
+		height: 'auto',
+	}
+}
+
+const faqAnswerHtml = (answer) => {
+	const raw = String(answer || '').trim()
+	if (!raw) return ''
+	if (/<[a-z][\s\S]*>/i.test(raw)) return raw
+	return `<p>${raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
+}
+
 const faqItems = (block) =>
 	(block.data?.items || [])
 		.filter((i) => i?.question && i?.answer)
-		.map((i) => ({ question: i.question, answer: i.answer }))
+		.map((i) => ({
+			question: i.question,
+			answer: String(i.answer).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+		}))
 
 const load = async () => {
 	const slug = route.params.slug
@@ -185,7 +219,6 @@ watch(() => route.params.slug, load)
 }
 
 .cms-page .page-content {
-	/* banner (~48px) + fixed navbar (~72px) + breathing room */
 	padding-top: 140px;
 	padding-bottom: 2.5rem;
 }
@@ -214,22 +247,38 @@ watch(() => route.params.slug, load)
 	line-height: 1.65;
 }
 
+.cms-block--richtext :deep(a) {
+	color: #c39e3d;
+	text-decoration: underline;
+}
+
 .cms-block--image {
 	margin: 1.5rem 0;
 }
 
 .cms-block--image img {
-	display: block;
-	max-width: 100%;
-	height: auto;
+	display: inline-block;
 	border-radius: 4px;
+	vertical-align: middle;
 }
 
-.cms-block--calculator {
+.cms-block--image-left {
+	text-align: left;
+}
+
+.cms-block--image-center {
+	text-align: center;
+}
+
+.cms-block--image-right {
+	text-align: right;
+}
+
+.cms-block--calculator,
+.cms-block--form {
 	margin: 2rem 0;
 }
 
-/* Same band as Contact Us — full width, sits flush above benefits/footer */
 .contact-faq {
 	width: 100%;
 	background: #c39e3d;
@@ -253,7 +302,7 @@ watch(() => route.params.slug, load)
 	margin: 0;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 700;
-	font-size: clamp(2rem, 4vw, 48px);
+	font-size: clamp(1.75rem, 3.2vw, 36px);
 	line-height: 1.15;
 	text-align: center;
 	color: #fff9ee;
@@ -264,7 +313,7 @@ watch(() => route.params.slug, load)
 	max-width: 1228px;
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 16px;
 }
 
 .contact-faq__item {
@@ -279,8 +328,8 @@ watch(() => route.params.slug, load)
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	min-height: 80px;
-	padding: 14px 20px;
+	min-height: 64px;
+	padding: 12px 18px;
 	cursor: pointer;
 	list-style: none;
 	box-sizing: border-box;
@@ -288,8 +337,8 @@ watch(() => route.params.slug, load)
 	color: #000;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 700;
-	font-size: clamp(1.125rem, 2vw, 24px);
-	line-height: 1.2;
+	font-size: clamp(1rem, 1.6vw, 18px);
+	line-height: 1.3;
 }
 
 .contact-faq__question::-webkit-details-marker {
@@ -308,8 +357,8 @@ watch(() => route.params.slug, load)
 .contact-faq__toggle {
 	position: relative;
 	flex-shrink: 0;
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
 }
 
 .contact-faq__toggle::before,
@@ -323,13 +372,13 @@ watch(() => route.params.slug, load)
 }
 
 .contact-faq__toggle::before {
-	width: 18px;
-	height: 3px;
+	width: 16px;
+	height: 2px;
 }
 
 .contact-faq__toggle::after {
-	width: 3px;
-	height: 18px;
+	width: 2px;
+	height: 16px;
 }
 
 .contact-faq__item[open] .contact-faq__toggle::before,
@@ -342,18 +391,27 @@ watch(() => route.params.slug, load)
 }
 
 .contact-faq__answer {
-	padding: 16px 20px 20px;
+	padding: 14px 18px 18px;
 	background: #fff;
 	box-sizing: border-box;
-}
-
-.contact-faq__answer p {
-	margin: 0;
 	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	font-weight: 500;
-	font-size: clamp(1rem, 1.8vw, 20px);
-	line-height: 1.4;
+	font-size: clamp(0.9375rem, 1.4vw, 16px);
+	line-height: 1.45;
 	color: #000;
+}
+
+.contact-faq__answer :deep(p) {
+	margin: 0 0 0.65rem;
+}
+
+.contact-faq__answer :deep(p:last-child) {
+	margin-bottom: 0;
+}
+
+.contact-faq__answer :deep(a) {
+	color: #8a6d1f;
+	text-decoration: underline;
 }
 
 @media (max-width: 991.98px) {
@@ -371,8 +429,8 @@ watch(() => route.params.slug, load)
 	}
 
 	.contact-faq__question {
-		min-height: 64px;
-		padding: 14px 16px;
+		min-height: 56px;
+		padding: 12px 14px;
 	}
 }
 </style>
