@@ -2,8 +2,8 @@
  * Load TinyMCE from npm (self-hosted) instead of Tiny Cloud.
  * Avoids monthly API-key quota; same editor UI and plugins.
  */
-import 'tinymce/tinymce'
-import 'tinymce/icons/default'
+import 'tinymce'
+import 'tinymce/icons/default/icons'
 import 'tinymce/themes/silver'
 import 'tinymce/models/dom'
 import 'tinymce/plugins/lists'
