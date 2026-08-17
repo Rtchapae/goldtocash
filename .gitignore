@@ -83,6 +83,9 @@ build/
 # Yarn
 .yarn-integrity
 
+# TinyMCE self-hosted files (copied from node_modules on Vite start)
+front_admin/public/tinymce/
+
 # Composer
 composer.phar
 

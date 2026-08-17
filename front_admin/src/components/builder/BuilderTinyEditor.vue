@@ -1,8 +1,10 @@
 <template>
 	<Editor
-		:key="editorKey"
+		:id="editorDomId"
+		:key="editorDomId"
 		v-model="localHtml"
 		:init="editorInit"
+		:tinymce-script-src="TINYMCE_SCRIPT_SRC"
 	/>
 </template>
 
@@ -10,7 +12,7 @@
 import { computed, ref, watch } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
-import { TINYMCE_LICENSE_KEY } from '@/utils/tinymceSelfHosted'
+import { TINYMCE_LICENSE_KEY, TINYMCE_SCRIPT_SRC, TINYMCE_BASE_URL } from '@/utils/tinymceSelfHosted'
 
 const props = defineProps({
 	modelValue: {
@@ -31,7 +33,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const localHtml = ref(props.modelValue || '')
-const editorKey = computed(() => `${props.compact ? 'c' : 'f'}-${props.height}`)
+const editorDomId = `pb-tiny-${Math.random().toString(36).slice(2, 10)}`
 
 watch(
 	() => props.modelValue,
@@ -62,6 +64,8 @@ const toolbar = computed(() =>
 
 const editorInit = computed(() => ({
 	license_key: TINYMCE_LICENSE_KEY,
+	base_url: TINYMCE_BASE_URL,
+	suffix: '.min',
 	height: props.height,
 	menubar: false,
 	branding: false,
@@ -78,7 +82,7 @@ const editorInit = computed(() => ({
 	relative_urls: false,
 	remove_script_host: false,
 	image_prepend_url: tinymceImagePrependUrl(),
-	skin: false,
+	skin: 'oxide',
 	content_css: false,
 	setup: (editor) => {
 		editor.on('change keyup', () => {

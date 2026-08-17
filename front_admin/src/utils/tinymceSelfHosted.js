@@ -1,16 +1,7 @@
 /**
- * Load TinyMCE from npm (self-hosted) instead of Tiny Cloud.
- * Avoids monthly API-key quota; same editor UI and plugins.
+ * TinyMCE is loaded from /tinymce (copied out of node_modules), not Tiny Cloud.
+ * Same editor UI as before: separate script, skins, plugins, one instance per block.
  */
-import 'tinymce'
-import 'tinymce/icons/default/icons'
-import 'tinymce/themes/silver'
-import 'tinymce/models/dom'
-import 'tinymce/plugins/lists'
-import 'tinymce/plugins/link'
-import 'tinymce/plugins/image'
-import 'tinymce/plugins/table'
-import 'tinymce/plugins/code'
-import 'tinymce/skins/ui/oxide/skin.min.css'
-
 export const TINYMCE_LICENSE_KEY = 'gpl'
+export const TINYMCE_SCRIPT_SRC = '/tinymce/tinymce.min.js'
+export const TINYMCE_BASE_URL = '/tinymce'

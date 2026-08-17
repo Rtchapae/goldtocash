@@ -70,8 +70,10 @@
 		<div class="form-group mb-4">
 			<label for="body" class="form-label fw-semibold mb-2">Post body</label>
 			<Editor
+				id="post-body-editor"
 				v-model="form.body"
 				:init="editorInit"
+				:tinymce-script-src="TINYMCE_SCRIPT_SRC"
 			/>
 		</div>
 
@@ -139,7 +141,7 @@ import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { API_BASE_URL } from '@/api/client'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
-import { TINYMCE_LICENSE_KEY } from '@/utils/tinymceSelfHosted'
+import { TINYMCE_LICENSE_KEY, TINYMCE_SCRIPT_SRC, TINYMCE_BASE_URL } from '@/utils/tinymceSelfHosted'
 
 const props = defineProps({
 	modelValue: {
@@ -248,6 +250,8 @@ function tinymceImagePrependUrl() {
 
 const editorInit = {
 	license_key: TINYMCE_LICENSE_KEY,
+	base_url: TINYMCE_BASE_URL,
+	suffix: '.min',
 	height: 800,
 	menubar: false,
 	plugins: 'code table lists image',
@@ -272,7 +276,7 @@ const editorInit = {
 	relative_urls: false,
 	remove_script_host: false,
 	dialog_type: 'modal',
-	skin: false,
+	skin: 'oxide',
 	content_css: false,
 	images_upload_handler: async (blobInfo, progress) => {
 		return new Promise(async (resolve, reject) => {
