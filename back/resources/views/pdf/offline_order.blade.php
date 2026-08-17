@@ -25,7 +25,7 @@
         <span class="print-label">Full Name: </span>
         <span class="print-underline print-underline-name">{{ $user->name ?? '&nbsp;' }}</span>
         <span class="print-label">Date of Birth: </span>
-        <span class="print-underline print-underline-dob">&nbsp;</span>
+        <span class="print-underline print-underline-dob">{{ $dateOfBirth ?: '&nbsp;' }}</span>
     </p>
 
     <!-- Address + City + State + ZIP -->
@@ -45,9 +45,9 @@
         <span class="print-label">Phone:</span>
         <span class="print-underline print-underline-phone">{{ $user->phone ?? '&nbsp;' }}</span>
         <span class="print-label">Gov. ID #: </span>
-        <span class="print-underline print-underline-govid">&nbsp;</span>
+        <span class="print-underline print-underline-govid">{{ $govIdNumber ?: '&nbsp;' }}</span>
         <span class="print-label">State Issued: </span>
-        <span class="print-underline print-underline-state-issued">&nbsp;</span>
+        <span class="print-underline print-underline-state-issued">{{ $stateIssued ?: '&nbsp;' }}</span>
     </p>
 
     <!-- Transaction Details -->
@@ -83,56 +83,18 @@
 
     <table class="print-items-table">
         <tbody>
+            @for ($row = 0; $row < 5; $row++)
             <tr>
                 <td class="print-item-left">
-                    <span class="print-item-num">1.</span>
-                    <span class="print-item-line"></span>
+                    <span class="print-item-num">{{ $row * 2 + 1 }}.</span>
+                    <span class="print-item-line">{{ $items[$row * 2] ?? '' }}</span>
                 </td>
                 <td class="print-item-right">
-                    <span class="print-item-num">6.</span>
-                    <span class="print-item-line"></span>
+                    <span class="print-item-num">{{ $row * 2 + 2 }}.</span>
+                    <span class="print-item-line">{{ $items[$row * 2 + 1] ?? '' }}</span>
                 </td>
             </tr>
-            <tr>
-                <td class="print-item-left">
-                    <span class="print-item-num">2.</span>
-                    <span class="print-item-line"></span>
-                </td>
-                <td class="print-item-right">
-                    <span class="print-item-num">7.</span>
-                    <span class="print-item-line"></span>
-                </td>
-            </tr>
-            <tr>
-                <td class="print-item-left">
-                    <span class="print-item-num">3.</span>
-                    <span class="print-item-line"></span>
-                </td>
-                <td class="print-item-right">
-                    <span class="print-item-num">8.</span>
-                    <span class="print-item-line"></span>
-                </td>
-            </tr>
-            <tr>
-                <td class="print-item-left">
-                    <span class="print-item-num">4.</span>
-                    <span class="print-item-line"></span>
-                </td>
-                <td class="print-item-right">
-                    <span class="print-item-num">9.</span>
-                    <span class="print-item-line"></span>
-                </td>
-            </tr>
-            <tr>
-                <td class="print-item-left">
-                    <span class="print-item-num">5.</span>
-                    <span class="print-item-line"></span>
-                </td>
-                <td class="print-item-right">
-                    <span class="print-item-num">10.</span>
-                    <span class="print-item-line"></span>
-                </td>
-            </tr>
+            @endfor
         </tbody>
     </table>
 

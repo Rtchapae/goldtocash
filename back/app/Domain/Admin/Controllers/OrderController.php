@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\Domain\Admin\Resources\OrderResource;
 use App\Domain\Admin\Resources\OrderResourceCollection;
 use App\Domain\Admin\Actions\UpdateOrderAction;
+use App\Domain\Orders\Support\OfflineOrderPdfData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -182,12 +183,11 @@ class OrderController extends Controller
 
         $buyerName = Auth::guard('admin')->user()?->name ?? '';
 
-        $pdf = Pdf::loadView('pdf.offline_order', [
-            'order' => $order,
-            'user' => $order->user,
-            'isPortlandBranch' => $order->branch && strtolower($order->branch->name) === 'portland',
-            'buyerName' => $buyerName,
-        ]);
+        $pdf = Pdf::loadView('pdf.offline_order', OfflineOrderPdfData::forOrder(
+            $order,
+            $order->user,
+            $buyerName
+        ));
 
         $pdf->setPaper('letter', 'portrait');
 
@@ -216,12 +216,11 @@ class OrderController extends Controller
 
         $buyerName = Auth::guard('admin')->user()?->name ?? '';
 
-        return view('pdf.offline_order', [
-            'order' => $order,
-            'user' => $order->user,
-            'isPortlandBranch' => $order->branch && strtolower($order->branch->name) === 'portland',
-            'buyerName' => $buyerName,
-        ]);
+        return view('pdf.offline_order', OfflineOrderPdfData::forOrder(
+            $order,
+            $order->user,
+            $buyerName
+        ));
     }
 
     public function pending(ListOrdersRequest $request, ListPendingOffersAction $action): JsonResponse

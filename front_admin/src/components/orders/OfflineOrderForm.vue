@@ -1,6 +1,6 @@
 <template>
 	<div class="offline-order-form">
-		<div v-show="!isPrintMode" class="order-form-edit">
+		<div class="order-form-edit">
 			<div class="row">
 				<div class="col-md-6 mb-3">
 					<label class="form-label">Branch <span class="text-danger">*</span></label>
@@ -27,6 +27,26 @@
 					<label class="form-label">Phone <span class="text-danger">*</span></label>
 					<input v-model="formData.phone" @input="formatPhoneNumber" type="tel" class="form-control" required
 						placeholder="(XXX) XXX-XXXX" maxlength="14" />
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Birth Date</label>
+					<input v-model="formData.date_of_birth" type="date" class="form-control" />
+				</div>
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Government ID</label>
+					<input v-model="formData.government_id_number" type="text" class="form-control"
+						placeholder="Gov. ID #" />
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label class="form-label">State Issued</label>
+					<input v-model="formData.state_issued" type="text" class="form-control"
+						placeholder="State that issued ID" maxlength="100" />
 				</div>
 			</div>
 
@@ -60,18 +80,16 @@
 				</div>
 				<div class="col-md-6 mb-3">
 					<label class="form-label">City</label>
-					<select v-if="formData.state && formData.state !== '__other__' && cities.length > 0"
-						v-model="formData.city" class="form-control">
-						<option value="">Select city</option>
-						<option v-for="city in cities" :key="city" :value="city">
-							{{ city }}
-						</option>
-						<option value="__other__">Other (enter manually)</option>
-					</select>
-					<input v-else v-model="formData.city" type="text" class="form-control" placeholder="Enter city" />
-					<input v-if="formData.city === '__other__'" v-model="formData.city_other" type="text"
-						class="form-control mt-2" placeholder="Enter city"
-						@input="formData.city = formData.city_other" />
+					<input
+						v-model="formData.city"
+						type="text"
+						class="form-control"
+						placeholder="Enter city"
+						list="offline-city-suggestions"
+					/>
+					<datalist id="offline-city-suggestions">
+						<option v-for="city in cities" :key="city" :value="city" />
+					</datalist>
 				</div>
 			</div>
 
@@ -117,19 +135,42 @@
 
 			<div class="row">
 				<div class="col-md-12 mb-3">
-					<label class="form-label">Notes</label>
-					<textarea v-model="formData.notes" class="form-control" rows="3"
-						placeholder="Additional notes"></textarea>
+					<label class="form-label">Items Description</label>
+					<div v-for="(item, index) in formData.items_description" :key="index" class="d-flex mb-2">
+						<input
+							v-model="formData.items_description[index]"
+							type="text"
+							class="form-control me-2"
+							:placeholder="`Item ${index + 1}`"
+						/>
+						<button
+							type="button"
+							class="btn btn-sm btn-outline-danger"
+							@click="removeItem(index)"
+						>
+							<iconify-icon icon="solar:trash-bin-minimalistic-outline" />
+						</button>
+					</div>
+					<button
+						type="button"
+						class="btn btn-sm btn-outline-primary"
+						:disabled="formData.items_description.length >= 10"
+						@click="addItem"
+					>
+						<iconify-icon icon="solar:add-circle-outline" class="me-1" />
+						Add Item
+					</button>
+					<small class="form-text text-muted d-block mt-1">Up to 10 items for the Information Card PDF</small>
 				</div>
 			</div>
 
 			<div class="d-flex gap-3 mt-4">
-				<button class="btn btn-primary" :disabled="!isFormValid || isSubmitting" @click="handleSubmit">
+				<button class="btn btn-primary" :disabled="!isFormValid || isSubmitting" @click="handleSubmit(false)">
 					<span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
 					Create Order
 				</button>
 				<button class="btn btn-outline-secondary" :disabled="!isFormValid || isSubmitting"
-					@click="handleSubmit">
+					@click="handleSubmit(true)">
 					<span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
 					Create & Download PDF
 				</button>
@@ -140,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { getStatesAndCities, getCitiesByState } from '@/api/adminStatesCities'
 import { getCountries } from '@/api/adminCountries'
 import { US_STATES_CODE_NAME } from '@/constants/states'
@@ -168,9 +209,11 @@ const formData = ref({
 	name: '',
 	email: '',
 	phone: '',
+	date_of_birth: '',
+	government_id_number: '',
+	state_issued: '',
 	address: '',
 	city: '',
-	city_other: '',
 	state: '',
 	state_other: '',
 	postal_code: '',
@@ -178,7 +221,7 @@ const formData = ref({
 	country_other: '',
 	amount: null,
 	payment_method: '',
-	notes: ''
+	items_description: []
 })
 
 const paymentMethodOptions = [
@@ -194,6 +237,51 @@ const cities = ref([])
 const countries = ref([])
 const isLoadingCities = ref(false)
 
+const resolveStateCode = (user) => {
+	if (user.state_code && user.state_code.length === 2) {
+		return user.state_code.toUpperCase()
+	}
+	const rawState = user.state || ''
+	if (rawState.length === 2) {
+		return rawState.toUpperCase()
+	}
+	const match = US_STATES_CODE_NAME.find(s => s.name === rawState)
+	return match ? match.code : rawState
+}
+
+const getStateNameByCode = (stateCode) => {
+	const match = states.value.find(s => s.value === stateCode)
+	return match ? match.label : stateCode
+}
+
+const loadCitiesForState = async (stateCode, savedCity = '') => {
+	if (!stateCode || stateCode === '__other__') {
+		cities.value = []
+		return
+	}
+
+	const stateName = getStateNameByCode(stateCode)
+	isLoadingCities.value = true
+	try {
+		const response = await getCitiesByState(stateName)
+		if (response.data && Array.isArray(response.data)) {
+			cities.value = response.data.sort()
+		} else {
+			cities.value = []
+		}
+		if (savedCity) {
+			formData.value.city = savedCity
+		}
+	} catch (error) {
+		console.error('Failed to load cities:', error)
+		cities.value = []
+		if (savedCity) {
+			formData.value.city = savedCity
+		}
+	} finally {
+		isLoadingCities.value = false
+	}
+}
 
 const loadStatesAndCities = async () => {
 	try {
@@ -237,24 +325,8 @@ const onStateChange = async () => {
 		return
 	}
 
-	const selectedState = states.value.find(s => s.value === formData.value.state)
-	const stateName = selectedState ? selectedState.label : formData.value.state
-
-	isLoadingCities.value = true
-	try {
-		const response = await getCitiesByState(stateName)
-		if (response.data && Array.isArray(response.data)) {
-			cities.value = response.data.sort()
-		} else {
-			cities.value = []
-		}
-		formData.value.city = ''
-	} catch (error) {
-		console.error('Failed to load cities:', error)
-		cities.value = []
-	} finally {
-		isLoadingCities.value = false
-	}
+	await loadCitiesForState(formData.value.state)
+	formData.value.city = ''
 }
 
 const onCountryChange = () => {
@@ -269,46 +341,54 @@ const getCountryValue = () => {
 		: formData.value.country
 }
 
+const getStateValue = () => {
+	if (formData.value.state === '__other__') {
+		return formData.value.state_other?.toUpperCase() || ''
+	}
+	return formData.value.state || ''
+}
+
+const addItem = () => {
+	if (formData.value.items_description.length < 10) {
+		formData.value.items_description.push('')
+	}
+}
+
+const removeItem = (index) => {
+	formData.value.items_description.splice(index, 1)
+}
+
+const prefillFromUser = async (user) => {
+	if (!user) return
+
+	const savedCity = user.city || ''
+	const stateCode = resolveStateCode(user)
+
+	formData.value.user_id = user.id
+	formData.value.name = user.name || ''
+	formData.value.email = user.email || ''
+	formData.value.phone = user.phone || ''
+	formData.value.date_of_birth = user.date_of_birth || ''
+	formData.value.government_id_number = user.government_id_number || ''
+	formData.value.state_issued = user.state_issued || ''
+	formData.value.address = user.address || ''
+	formData.value.postal_code = user.zip || user.postal_code || ''
+	formData.value.country = user.country || 'USA'
+	formData.value.state = stateCode
+	formData.value.state_other = ''
+	formData.value.amount = null
+	formData.value.items_description = []
+
+	if (stateCode && stateCode !== '__other__' && stateCode.length === 2) {
+		await loadCitiesForState(stateCode, savedCity)
+	} else {
+		formData.value.city = savedCity
+	}
+}
+
 watch(() => props.selectedUser, async (newUser) => {
 	if (newUser) {
-		const savedCity = newUser.city || ''
-
-		formData.value.user_id = newUser.id
-		formData.value.name = newUser.name || ''
-		formData.value.email = newUser.email || ''
-		const phoneValue = newUser.phone || ''
-		formData.value.phone = phoneValue
-		phoneMaskValue.value = phoneValue
-		formData.value.address = newUser.address || ''
-		formData.value.postal_code = newUser.zip || newUser.postal_code || ''
-		formData.value.country = newUser.country || ''
-
-		formData.value.state = newUser.state || ''
-
-		if (formData.value.state && formData.value.state !== '__other__') {
-			isLoadingCities.value = true
-			try {
-				const response = await getCitiesByState(formData.value.state)
-				if (response.data && Array.isArray(response.data)) {
-					cities.value = response.data.sort()
-				} else {
-					cities.value = []
-				}
-				if (savedCity) {
-					formData.value.city = savedCity
-				}
-			} catch (error) {
-				console.error('Failed to load cities:', error)
-				cities.value = []
-				if (savedCity) {
-					formData.value.city = savedCity
-				}
-			} finally {
-				isLoadingCities.value = false
-			}
-		} else {
-			formData.value.city = savedCity
-		}
+		await prefillFromUser(newUser)
 	}
 }, { immediate: true })
 
@@ -340,11 +420,14 @@ const formatPhoneNumber = (event) => {
 	}
 }
 
-onMounted(() => {
-	loadStatesAndCities()
-	loadCountries()
+onMounted(async () => {
+	await loadStatesAndCities()
+	await loadCountries()
 	if (!formData.value.country) {
 		formData.value.country = 'USA'
+	}
+	if (props.selectedUser) {
+		await prefillFromUser(props.selectedUser)
 	}
 })
 
@@ -352,8 +435,8 @@ const isFormValid = computed(() => {
 	let stateValid = true
 	if (formData.value.state === '__other__') {
 		stateValid = formData.value.state_other && formData.value.state_other.length === 2
-	} else {
-		stateValid = formData.value.state && formData.value.state.length > 0
+	} else if (formData.value.state) {
+		stateValid = formData.value.state.length === 2
 	}
 
 	return !!(
@@ -364,13 +447,26 @@ const isFormValid = computed(() => {
 	)
 })
 
-const handleSubmit = () => {
+const handleSubmit = (printAfterCreate) => {
 	if (!isFormValid.value) return
-	const submitData = { ...formData.value, country: getCountryValue() }
-	delete submitData.country_other
-	emit('submit', { ...submitData, printAfterCreate: true })
-}
 
+	const cleanedItems = formData.value.items_description
+		.map(item => item.trim())
+		.filter(item => item !== '')
+
+	const submitData = {
+		...formData.value,
+		state: getStateValue(),
+		country: getCountryValue(),
+		items_description: cleanedItems,
+		printAfterCreate
+	}
+
+	delete submitData.state_other
+	delete submitData.country_other
+
+	emit('submit', submitData)
+}
 
 </script>
 
