@@ -36,6 +36,50 @@ export const formatDate = (date, format = 'YYYY-MM-DD') => {
 	return `${year}-${month}-${day}`
 }
 
+/** ISO Y-m-d → US MM/DD/YYYY for form display */
+export const formatIsoDateToUS = (iso) => {
+	if (!iso) return ''
+
+	const raw = String(iso).trim()
+	const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+	if (isoMatch) {
+		return `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`
+	}
+
+	if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+		return raw
+	}
+
+	return formatDate(raw, 'MM/DD/YYYY')
+}
+
+/** US MM/DD/YYYY → ISO Y-m-d for API */
+export const parseUSDateToIso = (us) => {
+	if (!us) return null
+
+	const match = String(us).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+	if (!match) return null
+
+	const month = Number(match[1])
+	const day = Number(match[2])
+	const year = Number(match[3])
+
+	if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) {
+		return null
+	}
+
+	const date = new Date(year, month - 1, day)
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day
+	) {
+		return null
+	}
+
+	return `${match[3]}-${match[1]}-${match[2]}`
+}
+
 /**
  * US short date MM-DD-YY (e.g. 08-03-26).
  * Parses Laravel naive `Y-m-d H:i:s` (app timezone) without JS timezone shifting,
