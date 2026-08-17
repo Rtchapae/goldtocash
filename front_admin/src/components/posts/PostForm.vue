@@ -72,7 +72,6 @@
 			<Editor
 				v-model="form.body"
 				:init="editorInit"
-				:api-key="tinymceApiKey"
 			/>
 		</div>
 
@@ -140,6 +139,7 @@ import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { API_BASE_URL } from '@/api/client'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
+import { TINYMCE_LICENSE_KEY } from '@/utils/tinymceSelfHosted'
 
 const props = defineProps({
 	modelValue: {
@@ -246,11 +246,8 @@ function tinymceImagePrependUrl() {
 	}
 }
 
-const tinymceApiKey = computed(() => {
-	return import.meta.env.VITE_TINYMCE_API_KEY
-})
-
 const editorInit = {
+	license_key: TINYMCE_LICENSE_KEY,
 	height: 800,
 	menubar: false,
 	plugins: 'code table lists image',
@@ -275,7 +272,7 @@ const editorInit = {
 	relative_urls: false,
 	remove_script_host: false,
 	dialog_type: 'modal',
-	skin: 'oxide',
+	skin: false,
 	content_css: false,
 	images_upload_handler: async (blobInfo, progress) => {
 		return new Promise(async (resolve, reject) => {

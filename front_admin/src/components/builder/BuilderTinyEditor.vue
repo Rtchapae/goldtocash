@@ -3,7 +3,6 @@
 		:key="editorKey"
 		v-model="localHtml"
 		:init="editorInit"
-		:api-key="tinymceApiKey"
 	/>
 </template>
 
@@ -11,6 +10,7 @@
 import { computed, ref, watch } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
+import { TINYMCE_LICENSE_KEY } from '@/utils/tinymceSelfHosted'
 
 const props = defineProps({
 	modelValue: {
@@ -44,8 +44,6 @@ watch(localHtml, (v) => {
 	emit('update:modelValue', v)
 })
 
-const tinymceApiKey = computed(() => import.meta.env.VITE_TINYMCE_API_KEY || '')
-
 function tinymceImagePrependUrl() {
 	const resolved = resolveAdminAssetUrl('/storage/')
 	if (!resolved || !/^https?:\/\//i.test(resolved)) return ''
@@ -63,6 +61,7 @@ const toolbar = computed(() =>
 )
 
 const editorInit = computed(() => ({
+	license_key: TINYMCE_LICENSE_KEY,
 	height: props.height,
 	menubar: false,
 	branding: false,
@@ -79,7 +78,7 @@ const editorInit = computed(() => ({
 	relative_urls: false,
 	remove_script_host: false,
 	image_prepend_url: tinymceImagePrependUrl(),
-	skin: 'oxide',
+	skin: false,
 	content_css: false,
 	setup: (editor) => {
 		editor.on('change keyup', () => {
