@@ -39,7 +39,7 @@ class UserController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $user = $this->userRepository->findByIdWith($id, ['orders']);
+        $user = $this->userRepository->findByIdWith($id, ['orders', 'latestOfflineOrder']);
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);

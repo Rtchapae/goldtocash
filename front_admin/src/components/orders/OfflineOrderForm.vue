@@ -432,7 +432,9 @@ const prefillFromUser = async (user) => {
 	formData.value.state = stateCode
 	formData.value.state_other = ''
 	formData.value.amount = null
-	formData.value.items_description = []
+	formData.value.items_description = Array.isArray(user.items_description) && user.items_description.length > 0
+		? [...user.items_description]
+		: []
 
 	if (stateCode && stateCode !== '__other__' && stateCode.length === 2) {
 		await loadCitiesForState(stateCode, savedCity)

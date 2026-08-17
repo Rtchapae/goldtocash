@@ -2,6 +2,7 @@
 
 namespace App\Domain\Admin\Resources;
 
+use App\Domain\Orders\Support\OfflineOrderPdfData;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -48,6 +49,9 @@ class UserResource extends JsonResource
             'government_id_number' => $governmentIdParams['idNumber'] ?? $governmentIdParams['id_number'] ?? null,
             'state_issued' => $governmentIdParams['issuer'] ?? null,
             'date_of_birth' => $this->date_of_birth ? (\Carbon\Carbon::parse($this->date_of_birth)->format('Y-m-d')) : null,
+            'items_description' => $this->relationLoaded('latestOfflineOrder') && $this->latestOfflineOrder?->notes
+                ? OfflineOrderPdfData::parseItems($this->latestOfflineOrder->notes)
+                : [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

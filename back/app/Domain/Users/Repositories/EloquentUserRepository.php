@@ -35,6 +35,8 @@ class EloquentUserRepository implements UserRepositoryInterface
                     ->orWhere('email', 'like', $pattern)
                     ->orWhere('phone', 'like', $pattern);
             });
+
+            $query->with('latestOfflineOrder');
         }
 
         return $query->paginate($perPage);
