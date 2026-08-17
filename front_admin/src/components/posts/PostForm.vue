@@ -141,7 +141,10 @@ import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { API_BASE_URL } from '@/api/client'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
-import { TINYMCE_LICENSE_KEY, TINYMCE_SCRIPT_SRC, TINYMCE_BASE_URL } from '@/utils/tinymceSelfHosted'
+
+const TINYMCE_LICENSE_KEY = 'gpl'
+const TINYMCE_SCRIPT_SRC = '/tinymce/tinymce.min.js'
+const TINYMCE_BASE_URL = '/tinymce'
 
 const props = defineProps({
 	modelValue: {
