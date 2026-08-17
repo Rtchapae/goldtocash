@@ -1,15 +1,11 @@
 <template>
-	<div class="pb-tiny-wrap">
-		<Editor
-			:id="editorDomId"
-			:key="editorDomId"
-			v-model="localHtml"
-			license-key="gpl"
-			:inline="false"
-			:tinymce-script-src="TINYMCE_SCRIPT_SRC"
-			:init="editorInit"
-		/>
-	</div>
+	<Editor
+		:id="editorDomId"
+		:key="editorDomId"
+		v-model="localHtml"
+		:init="editorInit"
+		:tinymce-script-src="TINYMCE_SCRIPT_SRC"
+	/>
 </template>
 
 <script setup>
@@ -17,6 +13,7 @@ import { computed, ref, watch } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
 
+const TINYMCE_LICENSE_KEY = 'gpl'
 const TINYMCE_SCRIPT_SRC = '/tinymce/tinymce.min.js'
 const TINYMCE_BASE_URL = '/tinymce'
 
@@ -25,13 +22,9 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
-	editorId: {
-		type: String,
-		default: '',
-	},
 	height: {
 		type: Number,
-		default: 220,
+		default: 280,
 	},
 	/** Compact toolbar for FAQ answers */
 	compact: {
@@ -43,7 +36,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const localHtml = ref(props.modelValue || '')
-const editorDomId = props.editorId || `pb-tiny-${Math.random().toString(36).slice(2, 10)}`
+const editorDomId = `pb-tiny-${Math.random().toString(36).slice(2, 10)}`
 
 watch(
 	() => props.modelValue,
@@ -73,15 +66,12 @@ const toolbar = computed(() =>
 )
 
 const editorInit = computed(() => ({
-	license_key: 'gpl',
+	license_key: TINYMCE_LICENSE_KEY,
 	base_url: TINYMCE_BASE_URL,
 	suffix: '.min',
 	height: props.height,
 	menubar: false,
 	branding: false,
-	promotion: false,
-	inline: false,
-	toolbar_sticky: false,
 	plugins: 'link lists code',
 	toolbar: toolbar.value,
 	font_family_formats:
@@ -104,17 +94,3 @@ const editorInit = computed(() => ({
 	},
 }))
 </script>
-
-<style scoped>
-.pb-tiny-wrap {
-	position: relative;
-	isolation: isolate;
-	max-width: 100%;
-}
-
-.pb-tiny-wrap :deep(.tox-tinymce) {
-	z-index: 1;
-	border: 1px solid #ced4da;
-	border-radius: 4px;
-}
-</style>

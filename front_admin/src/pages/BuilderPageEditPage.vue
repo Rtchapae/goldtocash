@@ -80,22 +80,6 @@
 								<button type="button" class="btn btn-sm btn-outline-dark" @click="addBlock('faq')">FAQ</button>
 							</div>
 
-							<div v-if="form.blocks.length" class="pb-block-nav mb-3">
-								<div
-									v-for="(block, index) in form.blocks"
-									:key="`nav-${block.id}`"
-									class="pb-block-nav__row"
-								>
-									<button type="button" class="btn btn-link btn-sm p-0 text-start pb-block-nav__label" @click="scrollToBlock(block.id)">
-										{{ index + 1 }}. {{ block.type }}
-									</button>
-									<div class="btn-group btn-group-sm">
-										<button type="button" class="btn btn-outline-secondary" :disabled="index === 0" @click="moveBlock(index, -1)">↑</button>
-										<button type="button" class="btn btn-outline-secondary" :disabled="index === form.blocks.length - 1" @click="moveBlock(index, 1)">↓</button>
-									</div>
-								</div>
-							</div>
-
 							<div v-if="!form.blocks.length" class="text-muted border rounded p-4 text-center">
 								No blocks yet. Import a Word doc or add blocks manually.
 							</div>
@@ -143,12 +127,7 @@
 										<option value="Verdana, Geneva, sans-serif">Verdana</option>
 										<option value="'Courier New', Courier, monospace">Courier New</option>
 									</select>
-									<BuilderTinyEditor
-										:key="`text-${block.id}`"
-										:editor-id="`tiny-${block.id}`"
-										v-model="block.data.html"
-										:height="220"
-									/>
+									<BuilderTinyEditor v-model="block.data.html" :height="300" />
 								</template>
 
 								<template v-else-if="block.type === 'image'">
@@ -264,13 +243,7 @@
 										</div>
 										<input v-model="item.question" type="text" class="form-control form-control-sm mb-2" placeholder="Question" />
 										<label class="form-label small mb-1">Answer</label>
-										<BuilderTinyEditor
-											:key="`faq-${block.id}-${faqIdx}`"
-											:editor-id="`tiny-${block.id}-faq-${faqIdx}`"
-											v-model="item.answer"
-											:height="140"
-											compact
-										/>
+										<BuilderTinyEditor v-model="item.answer" :height="160" compact />
 									</div>
 								</template>
 							</div>
@@ -654,39 +627,6 @@ onMounted(loadPage)
 .pb-block-card--flash {
 	box-shadow: 0 0 0 3px rgba(195, 158, 61, 0.55);
 	transition: box-shadow 0.3s ease;
-}
-
-.pb-block-card {
-	position: relative;
-	isolation: isolate;
-}
-
-.pb-block-nav {
-	border: 1px solid #dee2e6;
-	border-radius: 6px;
-	background: #fff;
-	padding: 8px 10px;
-}
-
-.pb-block-nav__row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	padding: 4px 0;
-	border-bottom: 1px solid #f1f1f1;
-}
-
-.pb-block-nav__row:last-child {
-	border-bottom: 0;
-}
-
-.pb-block-nav__label {
-	color: #212529;
-	text-decoration: none;
-	text-transform: uppercase;
-	font-size: 12px;
-	font-weight: 600;
 }
 
 .pb-image-preview {
