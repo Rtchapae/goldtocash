@@ -7,7 +7,7 @@
         <tr>
             <td class="print-header-left">
                 <img src="{{ public_path('images/logo.jpg') }}" alt="Royal Element" class="print-logo-image">
-                <span class="print-logo-text">Royal Element</span>
+                <span class="print-logo-text">Royal<br>Element</span>
             </td>
             <td class="print-header-right">
                 <span class="print-header-card">Information Card</span>

@@ -78,7 +78,7 @@
         }
         .print-logo-text {
             font-size: 28pt;
-            line-height: 1;
+            line-height: 0.95;
             white-space: nowrap;
             display: inline-block;
             vertical-align: middle;
@@ -125,8 +125,8 @@
             white-space: nowrap;
         }
         .print-value {
-            font-size: 13pt;
-            font-weight: 700;
+            font-size: 12pt;
+            font-weight: 600;
             line-height: 1.2;
         }
         .print-underline {
