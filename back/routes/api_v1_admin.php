@@ -48,7 +48,7 @@ Route::prefix('admin')
             Route::get('{id}', [OrderController::class, 'show']);
             Route::put('{id}', [OrderController::class, 'update']);
             Route::get('{id}/files', [OrderController::class, 'getFiles']);
-            Route::get('{id}/files/{filename}', [OrderController::class, 'downloadFile']);
+            Route::get('{id}/files/{filename}', [OrderController::class, 'downloadFile'])->where('filename', '.*');
             Route::get('{id}/pdf', [OrderController::class, 'generatePdf']);
             Route::put('{id}/shipping', [OrderController::class, 'updateShipping']);
         });

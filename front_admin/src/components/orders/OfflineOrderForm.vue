@@ -34,13 +34,13 @@
 				<div class="col-md-6 mb-3">
 					<label class="form-label">Birth Date</label>
 					<input
-						ref="birthDateInputRef"
 						v-model="formData.date_of_birth"
 						type="text"
 						class="form-control"
 						placeholder="MM/DD/YYYY"
 						inputmode="numeric"
 						maxlength="10"
+						@input="formatBirthDate"
 					/>
 				</div>
 				<div class="col-md-6 mb-3">
@@ -189,12 +189,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import IMask from 'imask'
+import { ref, computed, watch, onMounted } from 'vue'
 import { getStatesAndCities, getCitiesByState } from '@/api/adminStatesCities'
 import { getCountries } from '@/api/adminCountries'
 import { US_STATES_CODE_NAME } from '@/constants/states'
-import { formatIsoDateToUS, parseUSDateToIso } from '@/utils/date'
+import { formatIsoDateToUS, parseUSDateToIso, formatBirthDateInput } from '@/utils/date'
 
 const props = defineProps({
 	branches: {
@@ -246,50 +245,13 @@ const states = ref([])
 const cities = ref([])
 const countries = ref([])
 const isLoadingCities = ref(false)
-const birthDateInputRef = ref(null)
-let birthDateMask = null
 
-const setupBirthDateMask = () => {
-	if (!birthDateInputRef.value || birthDateMask) return
-
-	birthDateMask = IMask(birthDateInputRef.value, {
-		mask: Date,
-		pattern: 'm/`d/`Y',
-		blocks: {
-			d: { mask: IMask.MaskedRange, from: 1, to: 31, maxLength: 2 },
-			m: { mask: IMask.MaskedRange, from: 1, to: 12, maxLength: 2 },
-			Y: { mask: IMask.MaskedRange, from: 1900, to: new Date().getFullYear(), maxLength: 4 },
-		},
-		format: (date) => {
-			const day = String(date.getDate()).padStart(2, '0')
-			const month = String(date.getMonth() + 1).padStart(2, '0')
-			const year = date.getFullYear()
-			return `${month}/${day}/${year}`
-		},
-		parse: (str) => {
-			const [month, day, year] = str.split('/')
-			return new Date(Number(year), Number(month) - 1, Number(day))
-		},
-		lazy: false,
-		overwrite: true,
-	})
-
-	if (formData.value.date_of_birth) {
-		birthDateMask.value = formData.value.date_of_birth
-	}
-
-	birthDateMask.on('accept', () => {
-		formData.value.date_of_birth = birthDateMask.value
-	})
+const formatBirthDate = (event) => {
+	formData.value.date_of_birth = formatBirthDateInput(event.target.value)
 }
 
-const setBirthDateDisplay = async (isoOrUs) => {
-	const display = formatIsoDateToUS(isoOrUs)
-	formData.value.date_of_birth = display
-	await nextTick()
-	if (birthDateMask) {
-		birthDateMask.value = display
-	}
+const setBirthDateDisplay = (isoOrUs) => {
+	formData.value.date_of_birth = formatIsoDateToUS(isoOrUs)
 }
 
 const resolveStateCode = (user) => {
@@ -423,7 +385,7 @@ const prefillFromUser = async (user) => {
 	formData.value.name = user.name || ''
 	formData.value.email = user.email || ''
 	formData.value.phone = user.phone || ''
-	await setBirthDateDisplay(user.date_of_birth || '')
+	setBirthDateDisplay(user.date_of_birth || '')
 	formData.value.government_id_number = user.government_id_number || ''
 	formData.value.state_issued = user.state_issued || ''
 	formData.value.address = user.address || ''
@@ -480,19 +442,11 @@ const formatPhoneNumber = (event) => {
 onMounted(async () => {
 	await loadStatesAndCities()
 	await loadCountries()
-	setupBirthDateMask()
 	if (!formData.value.country) {
 		formData.value.country = 'USA'
 	}
 	if (props.selectedUser) {
 		await prefillFromUser(props.selectedUser)
-	}
-})
-
-onBeforeUnmount(() => {
-	if (birthDateMask) {
-		birthDateMask.destroy()
-		birthDateMask = null
 	}
 })
 

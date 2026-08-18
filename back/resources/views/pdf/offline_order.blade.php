@@ -25,7 +25,7 @@
         <span class="print-label">Full Name: </span>
         <span class="print-underline print-underline-name">{{ $user->name ?? '&nbsp;' }}</span>
         <span class="print-label">Date of Birth: </span>
-        <span class="print-underline print-underline-dob">{{ $dateOfBirth ?: '&nbsp;' }}</span>
+        <span class="print-underline print-underline-dob">{!! $dateOfBirth !== '' ? e($dateOfBirth) : '&nbsp;' !!}</span>
     </p>
 
     <!-- Address + City + State + ZIP -->

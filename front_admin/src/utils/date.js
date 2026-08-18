@@ -53,11 +53,17 @@ export const formatIsoDateToUS = (iso) => {
 	return formatDate(raw, 'MM/DD/YYYY')
 }
 
-/** US MM/DD/YYYY → ISO Y-m-d for API */
+/** US MM/DD/YYYY (or ISO) → ISO Y-m-d for API */
 export const parseUSDateToIso = (us) => {
 	if (!us) return null
 
-	const match = String(us).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+	const raw = String(us).trim()
+	const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+	if (isoMatch) {
+		return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`
+	}
+
+	const match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
 	if (!match) return null
 
 	const month = Number(match[1])
@@ -77,7 +83,19 @@ export const parseUSDateToIso = (us) => {
 		return null
 	}
 
-	return `${match[3]}-${match[1]}-${match[2]}`
+	return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+/** Type digits into MM/DD/YYYY without a date-picker mask */
+export const formatBirthDateInput = (raw) => {
+	const digits = String(raw || '').replace(/\D/g, '').substring(0, 8)
+	if (digits.length > 4) {
+		return `${digits.substring(0, 2)}/${digits.substring(2, 4)}/${digits.substring(4)}`
+	}
+	if (digits.length > 2) {
+		return `${digits.substring(0, 2)}/${digits.substring(2)}`
+	}
+	return digits
 }
 
 /**

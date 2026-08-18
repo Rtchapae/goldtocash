@@ -20,6 +20,7 @@ use App\Domain\Orders\Support\OfflineOrderPdfData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -90,6 +91,17 @@ class OrderController extends Controller
         $path = storage_path("app/docs/clients/{$order->user_id}/{$order->id}");
         $files = [];
 
+        if ($order->order_type === 'offline') {
+            try {
+                $this->writeOfflinePdf($order);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to generate offline order PDF for files list', [
+                    'order_id' => $order->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
         if (is_dir($path)) {
             $fileList = scandir($path);
             foreach ($fileList as $file) {
@@ -143,9 +155,16 @@ class OrderController extends Controller
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
         if ($extension === 'pdf') {
-            if (str_contains($filename, 'letter') || str_contains($filename, 'offline_order')) {
+            if (str_contains($filename, 'offline_order')) {
                 return [
-                    'title' => $order->order_type === 'offline' ? "Order #{$order->id} Appraisal Kit" : "Order #{$order->id} Welcome Letter",
+                    'title' => "Order #{$order->id} Information Card",
+                    'type' => 'pdf',
+                    'url_segment' => 'letter'
+                ];
+            }
+            if (str_contains($filename, 'letter')) {
+                return [
+                    'title' => "Order #{$order->id} Welcome Letter",
                     'type' => 'shipping',
                     'url_segment' => 'letter'
                 ];
@@ -180,22 +199,7 @@ class OrderController extends Controller
         }
 
         $order->load(['user', 'branch']);
-
-        $buyerName = Auth::guard('admin')->user()?->name ?? '';
-
-        $pdf = Pdf::loadView('pdf.offline_order', OfflineOrderPdfData::forOrder(
-            $order,
-            $order->user,
-            $buyerName
-        ));
-
-        $pdf->setPaper('letter', 'portrait');
-
-        $path = storage_path("app/docs/clients/{$order->user_id}/{$order->id}");
-        if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-        }
-        file_put_contents($path . "/offline_order.pdf", $pdf->output());
+        $pdf = $this->writeOfflinePdf($order);
 
         return $pdf->download('offline_order_' . $order->id . '.pdf');
     }
@@ -283,6 +287,21 @@ class OrderController extends Controller
     {
         try {
             $result = $this->createOrderAction->execute($request->validated());
+
+            if (($result['order']['order_type'] ?? null) === 'offline' && ! empty($result['order_id'])) {
+                try {
+                    $order = $this->orderRepository->findById((int) $result['order_id']);
+                    if ($order) {
+                        $this->writeOfflinePdf($order);
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to generate offline order PDF after create', [
+                        'order_id' => $result['order_id'] ?? null,
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             return response()->json($result, 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -316,6 +335,35 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function writeOfflinePdf($order)
+    {
+        $order->loadMissing(['user', 'branch']);
+
+        if (! $order->user) {
+            throw new \RuntimeException('Order user not found');
+        }
+
+        $buyerName = Auth::guard('admin')->user()?->name ?? '';
+        $order->user->refresh();
+
+        $pdf = Pdf::loadView('pdf.offline_order', OfflineOrderPdfData::forOrder(
+            $order,
+            $order->user,
+            $buyerName
+        ));
+
+        $pdf->setPaper('letter', 'portrait');
+
+        $path = storage_path("app/docs/clients/{$order->user_id}/{$order->id}");
+        if (! is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path.'/offline_order.pdf', $pdf->output());
+
+        return $pdf;
     }
 }
 

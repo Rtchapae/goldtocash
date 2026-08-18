@@ -26,9 +26,7 @@ class OfflineOrderPdfData
             'user' => $user,
             'buyerName' => $buyerName,
             'isPortlandBranch' => $order->branch && strtolower($order->branch->name) === 'portland',
-            'dateOfBirth' => $user->date_of_birth
-                ? Carbon::parse($user->date_of_birth)->format('m/d/Y')
-                : '',
+            'dateOfBirth' => self::formatDateOfBirth($user->date_of_birth),
             'govIdNumber' => $params['idNumber'] ?? $params['id_number'] ?? '',
             'stateIssued' => $params['issuer'] ?? '',
             'items' => self::parseItems($order->notes),
@@ -70,5 +68,18 @@ class OfflineOrderPdfData
         }
 
         return json_encode($clean, JSON_UNESCAPED_UNICODE);
+    }
+
+    public static function formatDateOfBirth(mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        try {
+            return Carbon::parse($value)->format('m/d/Y');
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }
