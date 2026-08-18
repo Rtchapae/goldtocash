@@ -93,7 +93,7 @@ class OrderController extends Controller
 
         if ($order->order_type === 'offline') {
             try {
-                $this->writeOfflinePdf($order);
+                $this->ensureOfflinePdf($order);
             } catch (\Throwable $e) {
                 Log::warning('Failed to generate offline order PDF for files list', [
                     'order_id' => $order->id,
@@ -199,7 +199,7 @@ class OrderController extends Controller
         }
 
         $order->load(['user', 'branch']);
-        $pdf = $this->writeOfflinePdf($order);
+        $pdf = $this->writeOfflinePdf($order, force: true);
 
         return $pdf->download('offline_order_' . $order->id . '.pdf');
     }
@@ -292,7 +292,7 @@ class OrderController extends Controller
                 try {
                     $order = $this->orderRepository->findById((int) $result['order_id']);
                     if ($order) {
-                        $this->writeOfflinePdf($order);
+                        $this->writeOfflinePdf($order, force: true);
                     }
                 } catch (\Throwable $e) {
                     Log::warning('Failed to generate offline order PDF after create', [
@@ -315,6 +315,18 @@ class OrderController extends Controller
     {
         try {
             $order = $this->updateOrderAction->execute($id, $request->validated());
+
+            if ($order->order_type === 'offline') {
+                try {
+                    $this->writeOfflinePdf($order->fresh(['user', 'branch']), force: true);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to regenerate offline order PDF after update', [
+                        'order_id' => $order->id,
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             return response()->json(new OrderResource($order));
         } catch (\Exception $e) {
             return response()->json([
@@ -337,8 +349,28 @@ class OrderController extends Controller
         }
     }
 
-    private function writeOfflinePdf($order)
+    private function offlinePdfPath($order): string
     {
+        return storage_path("app/docs/clients/{$order->user_id}/{$order->id}/offline_order.pdf");
+    }
+
+    private function ensureOfflinePdf($order): void
+    {
+        if (is_file($this->offlinePdfPath($order))) {
+            return;
+        }
+
+        $this->writeOfflinePdf($order, force: true);
+    }
+
+    private function writeOfflinePdf($order, bool $force = false)
+    {
+        $pdfPath = $this->offlinePdfPath($order);
+
+        if (! $force && is_file($pdfPath)) {
+            return null;
+        }
+
         $order->loadMissing(['user', 'branch']);
 
         if (! $order->user) {
@@ -361,7 +393,7 @@ class OrderController extends Controller
             mkdir($path, 0777, true);
         }
 
-        file_put_contents($path.'/offline_order.pdf', $pdf->output());
+        file_put_contents($pdfPath, $pdf->output());
 
         return $pdf;
     }
