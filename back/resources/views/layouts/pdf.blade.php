@@ -57,36 +57,37 @@
         /* Header */
         .print-header-table {
             width: 100%;
-            margin-top: 1cm;
-            margin-bottom: 2cm;
+            margin-top: 18pt;
+            margin-bottom: 18pt;
             border-collapse: collapse;
         }
         .print-header-left {
             width: 60%;
-            vertical-align: bottom;
+            vertical-align: middle;
         }
         .print-header-right {
             width: 40%;
-            vertical-align: bottom;
+            vertical-align: middle;
             text-align: right;
         }
         .print-logo-image {
-            width: 80pt;
-            height: 80pt;
+            width: 64pt;
+            height: 64pt;
             display: inline-block;
-            vertical-align: bottom;
+            vertical-align: middle;
         }
         .print-logo-text {
-            font-size: 2.0833rem;
-            line-height: 107%;
+            font-size: 28pt;
+            line-height: 1;
             white-space: nowrap;
             display: inline-block;
-            vertical-align: bottom;
-            margin-left: 12pt;
+            vertical-align: middle;
+            margin-left: 10pt;
+            font-weight: 700;
         }
         .print-header-card {
-            font-size: 1.3333rem;
-            line-height: 107%;
+            font-size: 16pt;
+            line-height: 1;
         }
         /* Section Title */
         .print-section-title {
@@ -112,16 +113,21 @@
         .print-field-line-phone {
             margin-top: 0cm;
             margin-right: 0cm;
-            margin-bottom: 53.55pt;
+            margin-bottom: 16pt;
             margin-left: 0.7pt;
             text-indent: 0.45pt;
             line-height: 110%;
             text-align: left;
         }
         .print-label {
-            font-size: 1.1667rem;
+            font-size: 11pt;
             line-height: 147%;
             white-space: nowrap;
+        }
+        .print-value {
+            font-size: 13pt;
+            font-weight: 700;
+            line-height: 1.2;
         }
         .print-underline {
             display: inline-block;
@@ -129,7 +135,7 @@
             min-width: 100pt;
             margin: 0 4pt;
             vertical-align: bottom;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
         }
         .print-underline-inline {
             display: inline-block;
@@ -163,12 +169,12 @@
         .print-underline-seller-date { min-width: 124pt; }
         /* Transaction Details */
         h1.print-transaction-title {
-            margin-top: -1cm;
+            margin-top: 8pt;
             margin-right: 0pt;
             margin-bottom: 7.45pt;
             margin-left: 0pt;
             page-break-after: avoid;
-            font-size: 1.4167rem;
+            font-size: 16pt;
             font-family: "Calibri", sans-serif;
             color: black;
             font-weight: normal;
@@ -209,44 +215,43 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 26.4pt;
+            margin-bottom: 18pt;
         }
         .print-items-table tr td + td {
             padding-left: 12pt;
         }
         .print-items-table td {
-            padding: 0;
+            padding: 0 0 6pt 0;
             vertical-align: bottom;
         }
-        .print-item-left {
-            width: 50%;
-            padding-left: 15.35pt;
-        }
+        .print-item-left,
         .print-item-right {
             width: 50%;
-            padding-left: 15.35pt;
+        }
+        .print-item-row {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
         }
         .print-item-num {
-            font-size: 1.1667rem;
-            line-height: 110%;
-            display: inline-block;
-            margin-right: 2pt;
+            font-size: 11pt;
+            line-height: 1.2;
+            width: 18pt;
+            white-space: nowrap;
             vertical-align: bottom;
-            /*position: relative;*/
-            /*top: 12pt;*/
+            padding: 0 6pt 1px 0;
         }
         .print-item-line {
-            display: inline-block;
             border-bottom: 1px solid #000;
-            width: 100%;
             vertical-align: bottom;
-            padding-bottom: 2px;
+            padding: 0 0 1px 0;
+            width: 100%;
         }
         /* Terms */
         .print-terms {
             margin-top: 16pt;
             margin-right: 2.65pt;
-            margin-bottom: 47.85pt;
+            margin-bottom: 18pt;
             margin-left: 0cm;
             text-align: justify;
             text-justify: inter-ideograph;
@@ -255,25 +260,6 @@
         }
         .no-page-break {
             page-break-inside: avoid;
-        }
-        /* Thumbprint */
-        .print-thumbprint {
-            margin-top: 16pt;
-            margin-right: 0cm;
-            margin-bottom: 0cm;
-            margin-left: 216.5pt;
-            text-align: right;
-        }
-        .print-thumbprint span {
-            font-size: 1.0833rem;
-            line-height: 107%;
-        }
-        .print-thumbprint-box {
-            width: 120pt;
-            height: 120pt;
-            border: 1px solid #000;
-            margin: 8pt 0 0 auto;
-            background: white;
         }
     </style>
 </head>
