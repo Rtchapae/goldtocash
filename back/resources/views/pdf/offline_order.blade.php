@@ -117,7 +117,7 @@
     <!-- Buyer Name + Signature -->
     <p class="MsoNormal print-field-line">
         <span class="print-label">Buyer Name: </span>
-        <span class="print-underline print-underline-buyer print-value">{{ $buyerName ?: '&nbsp;' }}</span>
+        <span class="print-underline print-underline-buyer print-value">&nbsp;</span>
         <span class="print-label">Signature: </span>
         <span class="print-underline print-underline-signature">&nbsp;</span>
     </p>
