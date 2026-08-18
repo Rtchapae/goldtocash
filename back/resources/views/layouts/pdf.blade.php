@@ -97,8 +97,9 @@
             margin-left: 0.95pt;
         }
         .print-section-title-text {
-            font-size: 1.3333rem;
-            line-height: 107%;
+            font-size: 18pt;
+            font-weight: 700;
+            line-height: 1.1;
         }
         /* Field Lines */
         .print-field-line {
@@ -174,14 +175,15 @@
             margin-bottom: 7.45pt;
             margin-left: 0pt;
             page-break-after: avoid;
-            font-size: 16pt;
+            font-size: 18pt;
             font-family: "Calibri", sans-serif;
             color: black;
-            font-weight: normal;
+            font-weight: 700;
             width: 100%;
         }
         .print-transaction-title span:first-child {
-            font-size: 1.4167rem;
+            font-size: 18pt;
+            font-weight: 700;
         }
         .print-transaction-no {
             font-size: 1.1667rem;
@@ -208,8 +210,9 @@
             text-indent: -0.5pt;
         }
         .print-items-title span {
-            font-size: 1.0833rem;
-            line-height: 107%;
+            font-size: 18pt;
+            font-weight: 700;
+            line-height: 1.1;
         }
         .print-items-table {
             width: 100%;
