@@ -162,14 +162,4 @@ onMounted(async () => {
 	gap: 10px 28px;
 	margin-bottom: 8px;
 }
-
-.footer-nav--resources a {
-	font-size: 14px;
-	line-height: 20px;
-	color: rgba(255, 255, 255, 0.78);
-}
-
-.footer-nav--resources a:hover {
-	color: #fff;
-}
 </style>
