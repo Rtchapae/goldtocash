@@ -102,9 +102,8 @@
 }
 
 .nav-dropdown-menu.mobile.open {
-    max-height: 80vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    max-height: none;
+    overflow: visible;
 }
 
 .nav-dropdown-menu.mobile a {
@@ -134,16 +133,32 @@
     transform: translateY(-50%) rotate(-180deg);
 }
 
+.nav-dropdown-menu.mobile .has-submenu {
+    position: static;
+}
+
 .nav-submenu.mobile {
-    max-height: 0;
-    overflow: hidden;
+    position: static;
+    left: auto;
+    top: auto;
+    display: none;
+    max-height: none;
+    overflow: visible;
     list-style: none;
-    padding: 0;
+    padding: 0 0 0.25rem;
     margin: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    min-width: 0;
+    width: 100%;
 }
 
 .nav-submenu.mobile.open {
-    max-height: 70vh;
+    display: block;
 }
 
 .nav-submenu.mobile a {
