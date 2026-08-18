@@ -36,8 +36,9 @@
 								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openDesktop[menu.key] }" aria-hidden="true"></span>
 							</a>
 							<ul :id="`${menu.key}-dropdown-desktop`" class="nav-dropdown-menu desktop" :class="{ open: openDesktop[menu.key] }">
-								<li v-for="item in menu.desktopItems" :key="item.href">
-									<a :href="item.href">{{ item.label }}</a>
+								<li v-for="item in menu.desktopItems" :key="`${item.href || ''}-${item.label}`">
+									<span v-if="item.isHeader" class="nav-dropdown-heading">{{ item.label }}</span>
+									<a v-else :href="item.href">{{ item.label }}</a>
 								</li>
 							</ul>
 						</li>
@@ -47,8 +48,9 @@
 								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openMobile[menu.key] }" aria-hidden="true"></span>
 							</a>
 							<ul :id="`${menu.key}-dropdown-mobile`" class="nav-dropdown-menu mobile" :class="{ open: openMobile[menu.key] }">
-								<li v-for="item in menu.mobileItems" :key="item.href">
-									<a :href="item.href">{{ item.label }}</a>
+								<li v-for="item in menu.mobileItems" :key="`${item.href || ''}-${item.label}`">
+									<span v-if="item.isHeader" class="nav-dropdown-heading">{{ item.label }}</span>
+									<a v-else :href="item.href">{{ item.label }}</a>
 								</li>
 							</ul>
 						</li>
@@ -84,6 +86,7 @@
 
 <script setup>
 import { ref, reactive, inject } from 'vue'
+import { whatWeBuyNavItems } from '@/constants/whatWeBuyNav'
 
 const isMenuOpen = ref(false)
 
@@ -118,24 +121,8 @@ const menus = [
 			key: 'wwb',
 			label: 'What We Buy',
 			href: '/what-we-buy',
-			desktopItems: [
-				{ label: 'What We Buy', href: '/what-we-buy' },
-				{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-				{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-				{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-				{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-				{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-				{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-			],
-			mobileItems: [
-				{ label: 'What We Buy', href: '/what-we-buy' },
-				{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-				{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-				{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-				{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-				{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-				{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-			]
+			desktopItems: whatWeBuyNavItems,
+			mobileItems: whatWeBuyNavItems,
 		},
 		{
 			key: 'gcc',

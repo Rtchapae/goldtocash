@@ -53,6 +53,13 @@
 						<li class="nav-item-footer">
 							<a href="/contact-us">Contact Us</a>
 						</li>
+						<li
+							v-for="link in footerResourceLinks"
+							:key="link.href"
+							class="nav-item-footer"
+						>
+							<a :href="link.href">{{ link.label }}</a>
+						</li>
 					</ul>
 					<ul class="legal">
 						<li>
@@ -68,22 +75,6 @@
 							<a href="/privacy-policy">Privacy Policy</a>
 						</li>
 					</ul>
-				</div>
-				<div class="col-12 footer-seo-links">
-					<div class="row justify-content-center">
-						<div
-							v-for="group in footerSeoGroups"
-							:key="group.title"
-							class="col-12 col-sm-6 col-lg-4 footer-seo-column"
-						>
-							<h3 class="footer-seo-title">{{ group.title }}</h3>
-							<ul class="footer-seo-list">
-								<li v-for="link in group.links" :key="link.href">
-									<a :href="link.href">{{ link.label }}</a>
-								</li>
-							</ul>
-						</div>
-					</div>
 				</div>
 				<div class="col-12">
 					<div class="social-links">
@@ -140,47 +131,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { fetchPosts } from '@/api/posts'
+import { footerResourceLinks } from '@/constants/whatWeBuyNav'
 
 const sellArticles = ref([])
 const currentYear = new Date().getFullYear()
-
-const footerSeoGroups = [
-	{
-		title: 'By Jewelry Type',
-		links: [
-			{ label: 'Sell Gold Necklaces', href: '/sell-gold-necklaces' },
-			{ label: 'Sell Gold Bracelets', href: '/sell-gold-bracelets' },
-			{ label: 'Sell Gold Earrings', href: '/sell-gold-earrings' },
-			{ label: 'Sell Gold Chains', href: '/sell-gold-chains' },
-			{ label: 'Sell Gold Charms', href: '/sell-gold-charms' },
-			{ label: 'Sell Scrap Gold', href: '/sell-scrap-gold' },
-			{ label: 'Sell Gold Jewelry', href: '/sell-gold-jewelry-online' },
-		],
-	},
-	{
-		title: 'By Gold Karat',
-		links: [
-			{ label: 'Sell 10K Gold', href: '/sell-10k-gold' },
-			{ label: 'Sell 14K Gold', href: '/sell-14k-gold' },
-			{ label: 'Sell 18K Gold', href: '/sell-18k-gold' },
-			{ label: 'Sell 22K Gold', href: '/sell-22k-gold' },
-			{ label: 'Sell 24K Gold', href: '/sell-24k-gold' },
-		],
-	},
-	{
-		title: 'Resources',
-		links: [
-			{ label: 'How to Sell Gold', href: '/how-sell-gold' },
-			{ label: 'Free Appraisal Kit', href: '/free-appraisal-kit' },
-			{ label: 'Track My Package', href: '/track-my-package' },
-			{ label: 'Safety & Security', href: '/safety-and-security' },
-			{ label: 'FAQs', href: '/gold-selling-faq' },
-			{ label: 'Reviews', href: '/reviews' },
-			{ label: 'Where to Sell Gold', href: '/where-to-sell-gold' },
-			{ label: 'Sell Placer Gold', href: '/sell-placer-gold' },
-		],
-	},
-]
 
 onMounted(async () => {
 	try {
@@ -201,57 +155,5 @@ onMounted(async () => {
 	font-style: normal;
 	font-weight: 500;
 	line-height: 24px;
-}
-
-.footer-seo-links {
-	margin: 24px 0 16px;
-}
-
-.footer-seo-column {
-	margin-bottom: 24px;
-	text-align: left;
-}
-
-.footer-seo-title {
-	color: #fff;
-	font-family: Montserrat, sans-serif;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 20px;
-	margin: 0 0 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-}
-
-.footer-seo-list {
-	margin: 0;
-	padding: 0;
-	text-align: left;
-}
-
-.footer-seo-list li {
-	display: block;
-	margin: 0 0 8px;
-}
-
-.footer-seo-list li a {
-	margin: 0;
-	color: rgba(255, 255, 255, 0.75);
-	font-size: 14px;
-	line-height: 20px;
-}
-
-.footer-seo-list li a:hover {
-	color: #fff;
-}
-
-@media screen and (max-width: 575px) {
-	.footer-seo-column {
-		text-align: center;
-	}
-
-	.footer-seo-list {
-		text-align: center;
-	}
 }
 </style>
