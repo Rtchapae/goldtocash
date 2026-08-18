@@ -31,33 +31,13 @@
 					</p>
 				</div>
 				<div class="col-12 d-none d-md-block">
-					<ul>
-						<li class="nav-item">
-							<a href="/">Home</a>
+					<ul class="footer-nav">
+						<li v-for="link in footerMainLinks" :key="link.href" class="nav-item-footer">
+							<a :href="link.href">{{ link.label }}</a>
 						</li>
-						<li class="nav-item-footer">
-							<a href="/how-sell-gold">How to Sell Gold</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/what-we-pay">What We Pay</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/what-we-buy">What We Buy</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/what-sets-apart">Why Us</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/faq">FAQ's</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/contact-us">Contact Us</a>
-						</li>
-						<li
-							v-for="link in footerResourceLinks"
-							:key="link.href"
-							class="nav-item-footer"
-						>
+					</ul>
+					<ul class="footer-nav footer-nav--resources">
+						<li v-for="link in footerResourceLinks" :key="link.href" class="nav-item-footer">
 							<a :href="link.href">{{ link.label }}</a>
 						</li>
 					</ul>
@@ -131,7 +111,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { fetchPosts } from '@/api/posts'
-import { footerResourceLinks } from '@/constants/whatWeBuyNav'
+import { footerMainLinks, footerResourceLinks } from '@/constants/whatWeBuyNav'
 
 const sellArticles = ref([])
 const currentYear = new Date().getFullYear()
@@ -155,5 +135,41 @@ onMounted(async () => {
 	font-style: normal;
 	font-weight: 500;
 	line-height: 24px;
+}
+
+.footer-nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 12px 36px;
+	max-width: 920px;
+	margin: 0 auto 20px;
+	padding: 0;
+	text-align: center;
+}
+
+.footer-nav li {
+	display: inline-block;
+}
+
+.footer-nav li a {
+	margin: 0;
+	white-space: nowrap;
+}
+
+.footer-nav--resources {
+	max-width: 980px;
+	gap: 10px 28px;
+	margin-bottom: 8px;
+}
+
+.footer-nav--resources a {
+	font-size: 14px;
+	line-height: 20px;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+.footer-nav--resources a:hover {
+	color: #fff;
 }
 </style>

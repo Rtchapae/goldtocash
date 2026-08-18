@@ -49,24 +49,24 @@
 							{{ menu.label }}
 							<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openDesktop[menu.key] }" aria-hidden="true"></span>
 						</a>
-						<ul :id="`${menu.key}-dropdown-desktop`" class="nav-dropdown-menu desktop" :class="{ open: openDesktop[menu.key] }">
-							<li v-for="item in menu.desktopItems" :key="`${item.href || ''}-${item.label}`">
-								<span v-if="item.isHeader" class="nav-dropdown-heading">{{ item.label }}</span>
-								<a v-else :href="item.href">{{ item.label }}</a>
-							</li>
-						</ul>
+						<NavDropdownItems
+							:id="`${menu.key}-dropdown-desktop`"
+							variant="desktop"
+							:items="menu.desktopItems"
+							:open="openDesktop[menu.key]"
+						/>
 					</li>
 					<li class="nav-item d-lg-none">
 						<a data-toggle="nav-dropdown-menu-mobile" @click.prevent="openMobile[menu.key] = !openMobile[menu.key]">
 							{{ menu.label }}
 							<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openMobile[menu.key] }" aria-hidden="true"></span>
 						</a>
-						<ul :id="`${menu.key}-dropdown-mobile`" class="nav-dropdown-menu mobile" :class="{ open: openMobile[menu.key] }">
-							<li v-for="item in menu.mobileItems" :key="`${item.href || ''}-${item.label}`">
-								<span v-if="item.isHeader" class="nav-dropdown-heading">{{ item.label }}</span>
-								<a v-else :href="item.href">{{ item.label }}</a>
-							</li>
-						</ul>
+						<NavDropdownItems
+							:id="`${menu.key}-dropdown-mobile`"
+							variant="mobile"
+							:items="menu.mobileItems"
+							:open="openMobile[menu.key]"
+						/>
 					</li>
 				</template>
 				<li class="nav-item d-none d-lg-inline-block">
@@ -105,6 +105,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, computed, inject, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import NavDropdownItems from '@/components/NavDropdownItems.vue'
 import { whatWeBuyNavItems } from '@/constants/whatWeBuyNav'
 
 const isMenuOpen = ref(false)
