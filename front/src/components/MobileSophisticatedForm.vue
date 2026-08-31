@@ -5,45 +5,37 @@
 			name="kit-form"
 			class="standard-form"
 			id="mobile-june-2023-form"
+			novalidate
 			@submit.prevent="handleSubmit"
 		>
-			<h2 class="mobile-form-title">
-				Request Free Kit
-				<br />
-				<span class="mobile-form-bonus">Get 10% Bonus</span>
-			</h2>
+			<h2 class="mobile-form-title">Sell Gold Jewelry Online for Cash</h2>
+			<p class="mobile-form-subtitle">Best Price Guaranteed!</p>
 
-			<div class="row">
-				<div class="col-6">
-					<div class="control-group form-group">
-						<input
-							v-model="firstName"
-							type="text"
-							class="form-control"
-							id="mobile-first-name"
-							name="first_name"
-							required
-							data-validation-required-message="Please enter your first name."
-						/>
-						<label for="mobile-first-name">First Name</label>
-						<p class="help-block"></p>
-					</div>
-				</div>
-				<div class="col-6">
-					<div class="control-group form-group">
-						<input
-							v-model="lastName"
-							type="text"
-							class="form-control"
-							id="mobile-last-name"
-							name="last_name"
-							required
-							data-validation-required-message="Please enter your last name."
-						/>
-						<label for="mobile-last-name">Last Name</label>
-						<p class="help-block"></p>
-					</div>
-				</div>
+			<div class="control-group form-group">
+				<input
+					v-model="firstName"
+					type="text"
+					class="form-control"
+					id="mobile-first-name"
+					name="first_name"
+					required
+					data-validation-required-message="Please enter your first name."
+				/>
+				<label for="mobile-first-name" :class="{ hasValue: !!firstName }">First Name</label>
+				<p class="help-block"></p>
+			</div>
+			<div class="control-group form-group">
+				<input
+					v-model="lastName"
+					type="text"
+					class="form-control"
+					id="mobile-last-name"
+					name="last_name"
+					required
+					data-validation-required-message="Please enter your last name."
+				/>
+				<label for="mobile-last-name" :class="{ hasValue: !!lastName }">Last Name</label>
+				<p class="help-block"></p>
 			</div>
 
 			<div class="control-group form-group">
@@ -56,7 +48,7 @@
 					required
 					data-validation-required-message="Please enter your email address."
 				/>
-				<label for="mobile-email">Email</label>
+				<label for="mobile-email" :class="{ hasValue: !!email }">Email</label>
 			</div>
 
 			<div class="control-group form-group">
@@ -69,22 +61,22 @@
 					required
 					data-validation-required-message="Please enter your phone number."
 				/>
-				<label for="mobile-phone">Phone</label>
+				<label for="mobile-phone" :class="{ hasValue: !!phoneValue }">Phone</label>
 			</div>
 
-			<div class="control-group form-group">
+			<div class="control-group form-group address-input-wrap">
 				<input
-					v-model="address"
+					ref="addressInputRef"
+					v-model="fullAddress"
 					type="text"
 					class="form-control pac-target-input"
 					id="mobile-address"
-					name="address"
 					required
 					data-validation-required-message="Please enter your address."
-					placeholder=""
-					autocomplete="off"
+					placeholder=" "
+					autocomplete="address-line1"
 				/>
-				<label for="mobile-address">Address</label>
+				<label for="mobile-address" :class="{ hasValue: !!fullAddress }">Address</label>
 			</div>
 
 			<div class="control-group form-group">
@@ -94,52 +86,16 @@
 					class="form-control"
 					id="mobile-address2"
 					name="address2"
+					autocomplete="address-line2"
+					placeholder=" "
 				/>
-				<label for="mobile-address2">Apartment, Suite</label>
+				<label for="mobile-address2" :class="{ hasValue: !!address2 }">Apt / Unit</label>
 			</div>
 
-			<div class="control-group form-group">
-				<input
-					v-model="city"
-					type="text"
-					class="form-control"
-					id="mobile-city"
-					name="city"
-					required
-					data-validation-required-message="Please enter your city."
-				/>
-				<label for="mobile-city">City</label>
-			</div>
-
-			<div class="row">
-				<div class="col-6">
-					<div class="control-group form-group">
-						<select v-model="state" name="state" id="mobile-state" required>
-							<option value="" disabled hidden></option>
-							<option v-for="s in states" :key="s.value" :value="s.value">
-								{{ s.label }}
-							</option>
-						</select>
-						<label for="mobile-state">State</label>
-					</div>
-				</div>
-				<div class="col-6">
-					<div class="control-group form-group">
-						<input
-							v-model="zip"
-							type="text"
-							pattern="[0-9]{5}"
-							class="form-control"
-							id="mobile-zip-code"
-							name="zip"
-							required
-							data-validation-required-message="Please enter your zip code."
-						/>
-						<label for="mobile-zip-code">Zip Code</label>
-					</div>
-				</div>
-			</div>
-
+			<input type="hidden" name="address" :value="address || fullAddress" />
+			<input type="hidden" name="city" :value="city" />
+			<input type="hidden" name="state" :value="state" />
+			<input type="hidden" name="zip" :value="zip" />
 			<input type="hidden" name="country" value="USA" />
 
 			<div v-if="showVerification" id="phone-verify" class="phone-verify-block">
@@ -149,17 +105,14 @@
 					</label>
 					<div class="verification-code-container d-flex">
 						<input
-							v-for="(_, i) in 4"
-							:key="i"
 							type="text"
-							:name="`code${i + 1}`"
-							class="form-control verification-code-input"
-							maxlength="1"
+							name="verification_code"
+							class="form-control verification-code-input verification-code-single"
+							maxlength="4"
 							autocomplete="off"
 							inputmode="numeric"
-							:ref="(el) => setCodeRef(el, i)"
-							@input="onCodeInput($event, i)"
-							@keydown.backspace="onCodeBackspace($event, i)"
+							placeholder="0000"
+							v-model="verificationCode"
 						/>
 						<button
 							id="mobile-resendCodeButton"
@@ -214,37 +167,66 @@
 		</form>
 
 		<p class="free-shipping-text">
-			<img src="/images/trustpilot_form.svg" class="mr-2" alt="" />
+			<img src="/images/icon-truck.svg" class="mr-2 free-shipping-truck-icon" alt="" aria-hidden="true" />
 			Free &amp; insured shipping
 			<b>up to $100,000*</b>
 		</p>
-		<div class="text-center trustpilot-block">
-			<img src="/images/trustpilot-horizontal-green-black-text.png" alt="Trustpilot" />
+		<!-- Trust Pilot Micro Star — Figma 2704-1226 (Frame 515: star + Trustpilot) -->
+		<div class="trustpilot-block trustpilot-micro">
+			<span class="trustpilot-micro-excellent">Excellent</span>
+			<img src="/images/trustpilot-stars-green.svg" alt="" class="trustpilot-micro-stars" width="107" height="20" />
+			<span class="trustpilot-micro-brand-wrap">
+				<svg class="trustpilot-micro-star-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+					<path d="M7 0L8.5 5L14 5.5L9.5 9L11 14L7 11L3 14L4.5 9L0 5.5L5.5 5L7 0Z" fill="#11BA69"/>
+				</svg>
+				<span class="trustpilot-micro-brand">Trustpilot</span>
+			</span>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { US_STATES } from '@/constants/states'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 import { useKitForm } from '@/composables/useKitForm'
 import { usePhoneMask } from '@/composables/usePhoneMask'
+import { useGooglePlacesAddress } from '@/composables/useGooglePlacesAddress'
 
 const formRef = ref(null)
 const { isLoading, submitForm } = useKitForm()
-const { phoneInputRef, setupMask } = usePhoneMask()
+const { phoneValue, phoneInputRef, setupMask } = usePhoneMask()
+const addressInputRef = ref(null)
+
+useGooglePlacesAddress({
+	inputRef: addressInputRef,
+	inputId: 'mobile-address',
+	onPlaceSelect: (place, addr) => {
+		fullAddress.value = addr.fullAddress || addr.street || ''
+		address.value = addr.street || addr.fullAddress || ''
+		address2.value = addr.address2 || ''
+		city.value = addr.city || ''
+		state.value = addr.state || ''
+		const parsedZip = addr.zip || addr.fullAddress?.match(/\b(\d{5})(?:-\d{4})?/)?.[1] || ''
+		zip.value = parsedZip
+	}
+})
 
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const fullAddress = ref('')
 const address = ref('')
 const address2 = ref('')
 const city = ref('')
 const state = ref('')
 const zip = ref('')
 
-const states = US_STATES
+watch(fullAddress, (val) => {
+	if (!zip.value && val) {
+		const m = val.match(/\b(\d{5})(?:-\d{4})?/)
+		if (m) zip.value = m[1]
+	}
+})
 
 const showVerification = ref(false)
 const resendCountdown = ref(0)
@@ -266,25 +248,7 @@ const submitButtonLabel = computed(() => {
 		: KIT_FORM_TEXTS.BUTTON_REQUEST_KIT_MOBILE
 })
 
-const codeInputRefs = ref([])
-const setCodeRef = (el, index) => {
-	if (el) codeInputRefs.value[index] = el
-}
-
-const onCodeInput = (e, index) => {
-	const input = e.target
-	const value = input.value.replace(/\D/g, '').slice(0, 1)
-	input.value = value
-	if (value && index < 3 && codeInputRefs.value[index + 1]) {
-		codeInputRefs.value[index + 1].focus()
-	}
-}
-
-const onCodeBackspace = (e, index) => {
-	if (e.key === 'Backspace' && !e.target.value && index > 0 && codeInputRefs.value[index - 1]) {
-		codeInputRefs.value[index - 1].focus()
-	}
-}
+const verificationCode = ref('')
 
 function getFormData() {
 	const form = formRef.value
@@ -373,19 +337,17 @@ async function handleSubmit() {
 
 	const data = getFormData()
 	if (!data) return
+	console.log('[MobileSophisticatedForm main] submit data:', { ...data })
 
 	if (showVerification.value) {
-		const code1 = (form.querySelector('[name="code1"]')?.value || '').trim()
-		const code2 = (form.querySelector('[name="code2"]')?.value || '').trim()
-		const code3 = (form.querySelector('[name="code3"]')?.value || '').trim()
-		const code4 = (form.querySelector('[name="code4"]')?.value || '').trim()
+		const code = (verificationCode.value || form.querySelector('[name="verification_code"]')?.value || '').trim()
 
 		if (!isCreateAccountMode.value) {
-			if (!code1 || !code2 || !code3 || !code4) {
+			if (!code || code.length !== 4) {
 				verificationMessage.value = KIT_FORM_TEXTS.VERIFICATION_FILL_ALL
 				return
 			}
-			data.verification_code = `${code1}${code2}${code3}${code4}`
+			data.verification_code = code
 		} else {
 			data.allow_unverified = true
 		}
@@ -472,17 +434,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* .mobile-form-title layout/font overridden in _main_page.scss per Figma 2704-1200 */
 .mobile-form-title {
-	text-align: center;
-	margin-bottom: 30px;
-}
-
-.mobile-form-bonus {
-	color: var(--primary);
+	margin-bottom: 24px;
 }
 
 .register-submit-btn {
-	border-radius: 25px;
+	border-radius: 4px;
 }
 
 .free-shipping-text {
@@ -496,7 +454,12 @@ onUnmounted(() => {
 
 .free-shipping-text img {
 	width: 1em;
-	filter: invert(0.4);
+}
+
+.free-shipping-text .free-shipping-truck-icon {
+	width: 1em;
+	height: 1em;
+	vertical-align: -0.15em;
 }
 
 .trustpilot-block {
@@ -506,6 +469,43 @@ onUnmounted(() => {
 
 .trustpilot-block img {
 	width: 100%;
+}
+
+/* Trust Pilot Micro Star — Figma 2704-1226 */
+.trustpilot-micro {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 13px;
+	text-align: center;
+}
+
+.trustpilot-micro-excellent,
+.trustpilot-micro-brand {
+	font-family: Roboto, sans-serif;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 2.17;
+	color: #000;
+}
+
+.trustpilot-micro-brand-wrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+}
+
+.trustpilot-micro-star-icon {
+	flex-shrink: 0;
+}
+
+.trustpilot-micro-stars {
+	width: 107px;
+	height: 20px;
+	flex-shrink: 0;
 }
 
 .phone-verify-block {
@@ -529,6 +529,11 @@ onUnmounted(() => {
 	flex-wrap: wrap;
 	margin-top: 8px;
 	margin-bottom: 8px;
+}
+
+.verification-code-single {
+	width: 120px;
+	min-width: 120px;
 }
 
 .verification-code-input {

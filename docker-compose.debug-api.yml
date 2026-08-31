@@ -1,0 +1,82 @@
+# Minimal stack: MySQL + Redis + Laravel (php-fpm) + tiny nginx with /api only.
+# Requires Docker Desktop (Linux engine) running — otherwise nothing listens on :8888.
+# API: http://127.0.0.1:8888/api/v1/...   Health: http://127.0.0.1:8888/health   Laravel: /up
+#
+# Run from repo root:
+#   docker compose -f docker-compose.debug-api.yml up -d --build
+# Or:  .\scripts\start-debug-api.ps1
+#
+name: goldtocash-debug-api
+
+networks:
+    gtc_dbg:
+        driver: bridge
+
+services:
+    mysql:
+        image: mysql:8.0
+        container_name: gtc_dbg_mysql
+        env_file:
+            - docker.debug.env
+        volumes:
+            - ./data/mysql-debug:/var/lib/mysql
+            # For this debug stack we rely on Laravel migrations + seeders.
+            # Mounting init SQL here can create tables upfront and then migrations may fail.
+        networks:
+            - gtc_dbg
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+    redis:
+        image: redis:7-alpine
+        container_name: gtc_dbg_redis
+        networks:
+            - gtc_dbg
+
+    backend:
+        build:
+            context: ./back
+            dockerfile: ./Dockerfile
+            target: production
+        container_name: gtc_dbg_backend
+        env_file:
+            - docker.debug.env
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        expose:
+            - "9000"
+        networks:
+            - gtc_dbg
+        volumes:
+            - ./back/app:/var/www/html/app
+            - ./back/bootstrap:/var/www/html/bootstrap
+            - ./back/config:/var/www/html/config
+            - ./back/database:/var/www/html/database
+            - ./back/resources:/var/www/html/resources
+            - ./back/routes:/var/www/html/routes
+            - ./back/public:/var/www/html/public
+            - ./back/storage:/var/www/html/storage
+            - ./back/artisan:/var/www/html/artisan
+            - ./back/composer.json:/var/www/html/composer.json
+            - ./back/composer.lock:/var/www/html/composer.lock
+        command: ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+    nginx_api:
+        image: nginx:alpine
+        container_name: gtc_dbg_nginx_api
+        depends_on:
+            - backend
+        ports:
+            - "8888:80"
+        volumes:
+            - ./back/public:/var/www/html/public:ro
+            - ./back/storage:/var/www/html/storage:ro
+            - ./docker/nginx-debug-api.conf:/etc/nginx/nginx.conf:ro
+        networks:
+            - gtc_dbg

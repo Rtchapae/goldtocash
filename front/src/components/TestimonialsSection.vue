@@ -1,7 +1,15 @@
 <template>
-	<section class="section-testimonials">
+	<section
+		class="section-testimonials"
+		:class="{ 'section-testimonials--compact-top': !showCalculator }"
+	>
 		<div class="section-testimonials-container">
-			<h1 class="testimonial-header">Customers like you
+			<!-- Desktop/tablet: calculator above testimonial heading -->
+			<div v-if="showCalculator" class="d-none d-md-block testimonial-section__calculator">
+				<GoldCalculator :show-heading="false" />
+			</div>
+			<h2 v-if="heading" class="testimonial-header testimonial-header--custom">{{ heading }}</h2>
+			<h1 v-else class="testimonial-header">Customers like you
 				<br>talk about
 				<span style="color:var(--primary)">Gold to Cash</span>
 			</h1>
@@ -62,21 +70,35 @@
 
 <script setup>
 import { ref } from 'vue'
+import GoldCalculator from '@/components/GoldCalculator.vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
+defineProps({
+	/** Optional custom H2 title (e.g. landing pages). */
+	heading: {
+		type: String,
+		default: '',
+	},
+	/** Hide the calculator strip above testimonials. */
+	showCalculator: {
+		type: Boolean,
+		default: true,
+	},
+})
+
 const modules = [Navigation, Pagination]
 
 const navigation = {
-	prevEl: '.swiper-prev-btn',
-	nextEl: '.swiper-next-btn'
+	prevEl: '.section-testimonials .swiper-prev-btn',
+	nextEl: '.section-testimonials .swiper-next-btn'
 }
 
 const pagination = {
-	el: '.testimonial-swiper-pagination',
+	el: '.section-testimonials .testimonial-swiper-pagination',
 	clickable: true
 }
 
@@ -148,4 +170,72 @@ function handleThumbnailClick(index) {
 }
 </script>
 
+<style scoped>
+.testimonial-section__calculator {
+	margin-bottom: 1.5rem;
+}
+.testimonial-section__calculator :deep(.section-calculator) {
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Desktop/tablet: prevent margin-collapsing between calculator and heading by using padding on the header.
+   establishes a new block formatting context so inner margins stay contained. */
+.section-testimonials-container {
+	display: flow-root;
+}
+
+.testimonial-header--custom {
+	margin: 0;
+	padding: 0;
+	font-family: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-weight: 700;
+	font-style: normal;
+	font-size: 48px;
+	line-height: 56px;
+	letter-spacing: 0;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.section-testimonials--compact-top {
+	padding-top: 80px;
+}
+
+.section-testimonials--compact-top .testimonial-header {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+@media (max-width: 767.98px) {
+	.testimonial-header--custom {
+		font-size: clamp(1.75rem, 7vw, 48px);
+		line-height: 1.2;
+	}
+
+	.section-testimonials--compact-top {
+		padding-top: 56px;
+	}
+}
+
+@media (min-width: 768px) {
+	.testimonial-section__calculator {
+		margin-bottom: 0;
+	}
+
+	/* Extra top space only when calculator strip is present above the heading */
+	.section-testimonials:not(.section-testimonials--compact-top) .testimonial-header {
+		margin-top: 0;
+		padding-top: clamp(4.5rem, 8vw, 7rem);
+	}
+}
+
+@media (min-width: 992px) {
+	.section-testimonials:not(.section-testimonials--compact-top) .testimonial-header {
+		padding-top: clamp(6rem, 10vw, 9.5rem);
+	}
+}
+</style>
 

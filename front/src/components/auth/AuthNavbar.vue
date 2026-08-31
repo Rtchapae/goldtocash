@@ -24,7 +24,7 @@
 						Request Free Kit
 					</button>
 					<li class="nav-item">
-						<a href="/how-it-works">How It Works</a>
+						<a href="/how-sell-gold">How to Sell Gold</a>
 					</li>
 					<!-- Dropdown menus (data-driven) -->
 					<template v-for="menu in menus" :key="menu.key">
@@ -33,31 +33,30 @@
 							@mouseleave="openDesktop[menu.key] = false">
 							<a :href="menu.href">
 								{{ menu.label }}
-								<i data-element="nav-dropdown-caret" class="fas ml-1" :class="openDesktop[menu.key] ? 'fa-angle-up' : 'fa-angle-down'"></i>
+								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openDesktop[menu.key] }" aria-hidden="true"></span>
 							</a>
-							<ul :id="`${menu.key}-dropdown-desktop`" class="nav-dropdown-menu desktop" :class="{ open: openDesktop[menu.key] }">
-								<li v-for="item in menu.desktopItems" :key="item.href">
-									<a :href="item.href">{{ item.label }}</a>
-								</li>
-							</ul>
+							<NavDropdownItems
+								:id="`${menu.key}-dropdown-desktop`"
+								variant="desktop"
+								:items="menu.desktopItems"
+								:open="openDesktop[menu.key]"
+							/>
 						</li>
 						<li class="nav-item d-lg-none">
 							<a @click.prevent="openMobile[menu.key] = !openMobile[menu.key]">
 								{{ menu.label }}
-								<i data-element="nav-dropdown-caret" class="fas ml-1" :class="openMobile[menu.key] ? 'fa-angle-up' : 'fa-angle-down'"></i>
+								<span class="nav-caret ml-1" :class="{ 'nav-caret--up': openMobile[menu.key] }" aria-hidden="true"></span>
 							</a>
-							<ul :id="`${menu.key}-dropdown-mobile`" class="nav-dropdown-menu mobile" :class="{ open: openMobile[menu.key] }">
-								<li v-for="item in menu.mobileItems" :key="item.href">
-									<a :href="item.href">{{ item.label }}</a>
-								</li>
-							</ul>
+							<NavDropdownItems
+								:id="`${menu.key}-dropdown-mobile`"
+								variant="mobile"
+								:items="menu.mobileItems"
+								:open="openMobile[menu.key]"
+							/>
 						</li>
 					</template>
-					<li class="nav-item">
-						<a href="/gold-calculator">Gold Calculator</a>
-					</li>
 					<li class="nav-item d-none d-lg-inline-block">
-						<a href="/why-us">Why Us</a>
+						<a href="/what-sets-apart">Why Us</a>
 					</li>
 					<li class="nav-item d-none d-xl-inline-block">
 						<a href="/faq">FAQ's</a>
@@ -87,6 +86,8 @@
 
 <script setup>
 import { ref, reactive, inject } from 'vue'
+import NavDropdownItems from '@/components/NavDropdownItems.vue'
+import { whatWeBuyNavItems } from '@/constants/whatWeBuyNav'
 
 const isMenuOpen = ref(false)
 
@@ -96,39 +97,53 @@ const menus = [
 		label: 'What We Pay',
 		href: '/what-we-pay',
 		desktopItems: [
-			{ label: 'Cash for Gold', href: '/cash-for-gold' }
+			{ label: 'Cash for Gold', href: '/cash-for-gold' },
+			{ label: 'Free Gold Appraisal with Insured Shipping', href: '/free-gold-appraisal-insured-shipping' },
+			{ label: 'Scrap Gold Buyer Online', href: '/scrap-gold-buyer-online' },
+			{ label: 'Online Gold Jewelry Buyer in the USA', href: '/online-gold-jewelry-buyer-usa' },
+			{ label: 'Best Place to Sell Gold Online in the USA', href: '/best-place-sell-gold' },
+			{ label: 'Gold Buyer Online', href: '/gold-buyer-online' },
+			{ label: 'How to Sell Gold', href: '/how-sell-gold' },
+			{ label: 'How to Sell Gold Jewelry Online in the USA', href: '/how-sell-gold-jewelry-online-usa' }
 		],
 		mobileItems: [
 			{ label: 'What We Pay', href: '/what-we-pay' },
-			{ label: 'Cash for Gold', href: '/cash-for-gold' }
+			{ label: 'Cash for Gold', href: '/cash-for-gold' },
+			{ label: 'Free Gold Appraisal with Insured Shipping', href: '/free-gold-appraisal-insured-shipping' },
+			{ label: 'Scrap Gold Buyer Online', href: '/scrap-gold-buyer-online' },
+			{ label: 'Online Gold Jewelry Buyer in the USA', href: '/online-gold-jewelry-buyer-usa' },
+			{ label: 'Best Place to Sell Gold Online in the USA', href: '/best-place-sell-gold' },
+			{ label: 'Gold Buyer Online', href: '/gold-buyer-online' },
+			{ label: 'How to Sell Gold', href: '/how-sell-gold' },
+			{ label: 'How to Sell Gold Jewelry Online in the USA', href: '/how-sell-gold-jewelry-online-usa' }
 		]
 	},
-	{
-		key: 'wwb',
-		label: 'What We Buy',
-		href: '/what-we-buy',
-		desktopItems: [
-			{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-			{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-			{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-			{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-			{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-			{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-		],
-		mobileItems: [
-			{ label: 'What We Buy', href: '/what-we-buy' },
-			{ label: 'Sell Luxury Watches', href: '/sell-luxury-watches' },
-			{ label: 'Sell Your Gold Jewelry', href: '/sell-gold-jewelry' },
-			{ label: 'Sell Your Gold Coins', href: '/sell-gold-coins' },
-			{ label: 'Sell Your Gold Rings', href: '/sell-gold-rings' },
-			{ label: 'Sell Engagement Rings', href: '/sell-engagement-ring' },
-			{ label: 'Sell Wedding Band', href: '/sell-wedding-band' }
-		]
-	}
+		{
+			key: 'wwb',
+			label: 'What We Buy',
+			href: '/what-we-buy',
+			desktopItems: whatWeBuyNavItems,
+			mobileItems: whatWeBuyNavItems,
+		},
+		{
+			key: 'gcc',
+			label: 'Gold Calculator',
+			href: '/gold-calculator',
+			desktopItems: [
+				{ label: 'Gold Calculator', href: '/gold-calculator' },
+				{ label: 'Scrap Gold Calculator', href: '/scrap-gold-calculator' },
+				{ label: 'Dental Gold Calculator', href: '/dental-gold-calculator' }
+			],
+			mobileItems: [
+				{ label: 'Gold Calculator', href: '/gold-calculator' },
+				{ label: 'Scrap Gold Calculator', href: '/scrap-gold-calculator' },
+				{ label: 'Dental Gold Calculator', href: '/dental-gold-calculator' }
+			]
+		}
 ]
 
-const openDesktop = reactive({ wwp: false, wwb: false })
-const openMobile = reactive({ wwp: false, wwb: false })
+const openDesktop = reactive({ wwp: false, wwb: false, gcc: false })
+const openMobile = reactive({ wwp: false, wwb: false, gcc: false })
 
 const mobileLinks = [
 	{ label: 'Gold Info', href: '/gold-info' },
@@ -143,9 +158,18 @@ const openKitModal = inject('openKitModal', null)
 .nav-item-dropdown {
 	position: relative;
 }
-
-.nav-dropdown-menu.mobile {
-	list-style-type: disc;
+.nav-caret {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid currentColor;
+	vertical-align: middle;
+	transition: transform 0.2s;
+}
+.nav-caret--up {
+	transform: rotate(-180deg);
 }
 </style>
 

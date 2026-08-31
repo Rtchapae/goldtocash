@@ -16,6 +16,8 @@ export function useErrorHandler() {
 			message = 'Please check your input and try again.'
 		} else if (error?.status === 429) {
 			message = 'Too many requests. Please wait a moment and try again.'
+		} else if (error?.status === 502 || error?.status === 503) {
+			message = 'API is unreachable. Start the debug stack (port 8888) or check Docker.'
 		} else if (error?.status === 500) {
 			message = 'Server error. Please try again later.'
 		} else if (error?.message) {

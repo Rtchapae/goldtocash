@@ -24,8 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('order:check_sent_offer')->everyMinute();
-        $schedule->command('order:check_accepted_offer')->everyMinute();
+        $schedule->command('orders:check-sent-offers')->everyMinute();
+        $schedule->command('orders:check-accepted-offers')->everyMinute();
 
         // redundant since implementing customer.io
         // $schedule->command('order:checking_ordering_day')->everyMinute();

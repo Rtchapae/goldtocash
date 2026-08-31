@@ -23,6 +23,10 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<p v-if="orderCreatedLabel" class="text-muted small mb-3">
+						<strong>Order created:</strong>
+						<span class="text-monospace ms-1">{{ orderCreatedLabel }}</span>
+					</p>
 					<table class="table table-striped">
 						<tbody>
 							<tr v-if="!hasHistory">
@@ -64,6 +68,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { formatDateMMDDYY, formatTimeOnly } from '@/utils/date'
 
 const props = defineProps({
 	show: {
@@ -73,6 +78,11 @@ const props = defineProps({
 	history: {
 		type: Array,
 		default: () => []
+	},
+	/** Raw `created_at` / `date_created` from order row (ISO or `Y-m-d H:i:s`). */
+	orderCreatedAt: {
+		type: String,
+		default: ''
 	}
 })
 
@@ -85,6 +95,20 @@ const close = () => {
 const hasHistory = computed(
 	() => Array.isArray(props.history) && props.history.length > 0
 )
+
+const orderCreatedLabel = computed(() => {
+	const raw = props.orderCreatedAt
+	if (raw === null || raw === undefined || raw === '') {
+		return ''
+	}
+	const s = String(raw)
+	const d = formatDateMMDDYY(s)
+	const t = formatTimeOnly(s)
+	if (!d && !t) {
+		return ''
+	}
+	return t ? `${d} · ${t}` : d
+})
 
 const formatDateTime = (dateTime) => {
 	if (!dateTime) return ''

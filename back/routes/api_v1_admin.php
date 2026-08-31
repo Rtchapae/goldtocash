@@ -48,7 +48,7 @@ Route::prefix('admin')
             Route::get('{id}', [OrderController::class, 'show']);
             Route::put('{id}', [OrderController::class, 'update']);
             Route::get('{id}/files', [OrderController::class, 'getFiles']);
-            Route::get('{id}/files/{filename}', [OrderController::class, 'downloadFile']);
+            Route::get('{id}/files/{filename}', [OrderController::class, 'downloadFile'])->where('filename', '.*');
             Route::get('{id}/pdf', [OrderController::class, 'generatePdf']);
             Route::put('{id}/shipping', [OrderController::class, 'updateShipping']);
         });
@@ -113,9 +113,21 @@ Route::prefix('admin')
             Route::get('/', [PostController::class, 'index']);
             Route::post('/', [PostController::class, 'store']);
             Route::post('upload-image', [PostController::class, 'uploadImage']);
-            Route::get('{id}', [PostController::class, 'show']);
-            Route::put('{id}', [PostController::class, 'update']);
-            Route::delete('{id}', [PostController::class, 'destroy']);
+            Route::get('{id}', [PostController::class, 'show'])->whereNumber('id');
+            Route::put('{id}', [PostController::class, 'update'])->whereNumber('id');
+            // Multipart: PHP often omits files on PUT — POST with numeric id only (never matches "upload-image").
+            Route::post('{id}', [PostController::class, 'update'])->whereNumber('id');
+            Route::delete('{id}', [PostController::class, 'destroy'])->whereNumber('id');
+        });
+
+        Route::prefix('builder-pages')->group(function (): void {
+            Route::get('/', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'index']);
+            Route::post('/', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'store']);
+            Route::post('upload-image', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'uploadImage']);
+            Route::post('import-docx', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'importDocx']);
+            Route::get('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'show'])->whereNumber('id');
+            Route::put('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'update'])->whereNumber('id');
+            Route::delete('{id}', [\App\Domain\Admin\Controllers\BuilderPageController::class, 'destroy'])->whereNumber('id');
         });
 
     });

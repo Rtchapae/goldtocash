@@ -9,18 +9,29 @@
 					<div class="card">
 						<div class="card-body orders-card-body">
 							<div class="pb-3">
-								<div class="panel d-flex align-items-start flex-wrap gap-3">
+								<div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+									<div class="name-search-wrapper flex-grow-1" style="max-width: 420px;">
+										<form class="d-flex" @submit.prevent="handleTitleSearch">
+											<input
+												v-model="titleSearchInput"
+												type="search"
+												class="form-control"
+												placeholder="Search by title..."
+												@input="debouncedTitleSearch"
+											/>
+											<button
+												v-if="titleSearchInput"
+												type="button"
+												class="btn btn-sm btn-outline-secondary ms-2"
+												@click="clearTitleSearch"
+											>
+												Clear
+											</button>
+										</form>
+									</div>
 									<router-link to="/posts/create" class="btn btn-primary">
 										New post
 									</router-link>
-									<PeriodFilter
-										v-model="currentPeriod"
-										:from="fromDate"
-										:to="toDate"
-										@update:from="fromDate = $event"
-										@update:to="toDate = $event"
-										@change="handlePeriodChange"
-									/>
 								</div>
 							</div>
 
@@ -116,14 +127,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import NavbarHeader from '@/components/NavbarHeader.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import UITable from '@/components/ui/UITable.vue'
-import PeriodFilter from '@/components/filters/PeriodFilter.vue'
 import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal.vue'
 import { fetchPosts, deletePost } from '@/api/posts'
-import { PAGE_SIZE_OPTIONS, DEFAULT_PER_PAGE, DEFAULT_PAGE, DEFAULT_PERIOD, DEFAULT_SORT_DIR } from '@/config/orders'
+import { PAGE_SIZE_OPTIONS, DEFAULT_PER_PAGE, DEFAULT_PAGE, SEARCH_DEBOUNCE_DELAY } from '@/config/orders'
 import { formatDate } from '@/utils/date'
 import { useToast } from '@/composables/useToast'
 
@@ -145,11 +155,19 @@ const perPage = ref(DEFAULT_PER_PAGE)
 const totalItems = ref(0)
 const lastPage = ref(1)
 
-const currentPeriod = ref(DEFAULT_PERIOD)
-const fromDate = ref(null)
-const toDate = ref(null)
+/** UI column key -> API `order-by` (ListPostsRequest allowed values) */
+const ORDER_BY_API = {
+	id: 'id',
+	title: 'title',
+	date_created: 'created_at',
+	published: 'active',
+}
 
-const orderBy = ref('id')
+const titleSearchInput = ref('')
+const titleSearch = ref('')
+let titleSearchDebounceId = null
+
+const orderBy = ref('date_created')
 const orderDir = ref('desc')
 
 const postColumns = [
@@ -167,16 +185,14 @@ const loadPosts = async () => {
 		const params = {
 			page: currentPage.value,
 			per_page: perPage.value,
-			period: currentPeriod.value,
 		}
 
-		if (currentPeriod.value === 'custom' && fromDate.value && toDate.value) {
-			params.from = fromDate.value
-			params.to = toDate.value
+		if (titleSearch.value) {
+			params.search = titleSearch.value
 		}
 
 		if (orderBy.value) {
-			params['order-by'] = orderBy.value
+			params['order-by'] = ORDER_BY_API[orderBy.value] || orderBy.value
 			params['order-dir'] = orderDir.value
 		}
 
@@ -205,10 +221,30 @@ const loadPosts = async () => {
 	}
 }
 
-const handlePeriodChange = ({ period, from, to }) => {
-	currentPeriod.value = period
-	fromDate.value = from
-	toDate.value = to
+const handleTitleSearch = () => {
+	titleSearch.value = titleSearchInput.value.trim()
+	currentPage.value = 1
+	loadPosts()
+}
+
+const debouncedTitleSearch = () => {
+	if (titleSearchDebounceId) {
+		clearTimeout(titleSearchDebounceId)
+	}
+	titleSearchDebounceId = setTimeout(() => {
+		titleSearchDebounceId = null
+		const next = titleSearchInput.value.trim()
+		if (next !== titleSearch.value) {
+			titleSearch.value = next
+			currentPage.value = 1
+			loadPosts()
+		}
+	}, SEARCH_DEBOUNCE_DELAY)
+}
+
+const clearTitleSearch = () => {
+	titleSearchInput.value = ''
+	titleSearch.value = ''
 	currentPage.value = 1
 	loadPosts()
 }
@@ -218,8 +254,9 @@ const handleSort = (column) => {
 		orderDir.value = orderDir.value === 'asc' ? 'desc' : 'asc'
 	} else {
 		orderBy.value = column
-		orderDir.value = 'asc'
+		orderDir.value = column === 'title' ? 'asc' : 'desc'
 	}
+	currentPage.value = 1
 	loadPosts()
 }
 
@@ -301,5 +338,12 @@ const handleDeleteConfirm = async () => {
 
 onMounted(() => {
 	loadPosts()
+})
+
+onBeforeUnmount(() => {
+	if (titleSearchDebounceId) {
+		clearTimeout(titleSearchDebounceId)
+		titleSearchDebounceId = null
+	}
 })
 </script>

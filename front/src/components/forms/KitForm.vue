@@ -1,14 +1,12 @@
 <template>
 	<div>
-		<!-- Mobile version -->
-		<div :class="mobileWrapperClass">
+		<!-- Mobile version (v-if: one address field in DOM — avoids Places on hidden input) -->
+		<div v-if="kitViewport === 'mobile'" :class="mobileWrapperClass">
 			<div class="kit-form">
 				<form :name="mobileFormName" :id="mobileFormId" class="standard-form" @submit.prevent="handleSubmit">
 					<input type="hidden" name="_token" value="">
 					<h2 class="kit-form-title">
 						{{ KIT_FORM_TEXTS.TITLE }}
-						<br />
-						<span class="kit-form-bonus">{{ KIT_FORM_TEXTS.BONUS }}</span>
 					</h2>
 				<FormContent
 					:is-mobile="true"
@@ -53,12 +51,16 @@
 			</div>
 		</div>
 		<!-- Desktop version -->
-		<form :name="desktopFormName" :id="desktopFormId" :class="desktopFormClass" @submit.prevent="handleSubmit">
+		<form
+			v-if="kitViewport === 'desktop'"
+			:name="desktopFormName"
+			:id="desktopFormId"
+			:class="desktopFormClass"
+			@submit.prevent="handleSubmit"
+		>
 			<input type="hidden" name="_token" value="">
 			<h3>
 				{{ KIT_FORM_TEXTS.TITLE }}
-				<br />
-				<span>{{ KIT_FORM_TEXTS.BONUS }}</span>
 			</h3>
 			<FormContent
 				:is-mobile="false"
@@ -97,9 +99,10 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, onBeforeUnmount, onUnmounted, ref } from 'vue'
 import FormContent from './KitFormContent.vue'
 import { useKitForm } from '@/composables/useKitForm'
+import { buildKitPayload } from '@/api/kitRegistration'
 import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 
 const props = defineProps({
@@ -128,9 +131,40 @@ const mobileWrapperClass = computed(() => {
 
 const desktopFormClass = computed(() => {
 	if (props.inline) {
-		return 'standard-form d-none d-lg-block'
+		return 'standard-form'
 	}
-	return 'standard-form d-none d-lg-block'
+	return 'standard-form'
+})
+
+/** Only mount one kit form variant so Google Places binds to the visible address input. */
+const kitViewport = ref(props.mobile === true ? 'mobile' : 'desktop')
+
+function updateKitViewport() {
+	if (typeof window === 'undefined') return
+	if (props.mobile === true) {
+		kitViewport.value = 'mobile'
+		return
+	}
+	if (props.mobile === false) {
+		kitViewport.value = 'desktop'
+		return
+	}
+	kitViewport.value = window.innerWidth >= 992 ? 'desktop' : 'mobile'
+}
+
+onBeforeMount(() => {
+	updateKitViewport()
+})
+
+onMounted(() => {
+	updateKitViewport()
+	window.addEventListener('resize', updateKitViewport)
+})
+
+onBeforeUnmount(() => {
+	if (typeof window !== 'undefined') {
+		window.removeEventListener('resize', updateKitViewport)
+	}
 })
 
 const mobileFormName = KIT_FORM_TEXTS.FORM_MOBILE_NAME
@@ -215,7 +249,7 @@ const handleResendCode = async () => {
 		const cityValue = formData.get('city_other') || formData.get('city') || ''
 		const countryValue = formData.get('country_other') || formData.get('country') || KIT_FORM_TEXTS.DEFAULT_COUNTRY
 		
-		const data = {
+		const data = buildKitPayload({
 			first_name: formData.get('first_name'),
 			last_name: formData.get('last_name'),
 			email: formData.get('email'),
@@ -226,7 +260,9 @@ const handleResendCode = async () => {
 			state: formData.get('state'),
 			zip: formData.get('zip'),
 			country: countryValue,
-		}
+			street: formData.get('street'),
+			fullAddress: formData.get('fullAddress'),
+		})
 
 		const response = await submitForm(data)
 		
@@ -285,17 +321,13 @@ const handleSubmit = async (event) => {
 				allow_unverified: true,
 			}
 		} else {
-			const code1 = (formData.get('code1') || '').toString().trim()
-			const code2 = (formData.get('code2') || '').toString().trim()
-			const code3 = (formData.get('code3') || '').toString().trim()
-			const code4 = (formData.get('code4') || '').toString().trim()
+			const enteredCode = (formData.get('verification_code') || '').toString().trim()
 
-			if (!code1 || !code2 || !code3 || !code4) {
+			if (!enteredCode || enteredCode.length !== 4) {
 				verificationMessage.value = KIT_FORM_TEXTS.VERIFICATION_FILL_ALL
 				return
 			}
 
-			const enteredCode = `${code1}${code2}${code3}${code4}`
 			data = {
 				...baseData,
 				verification_code: enteredCode,
@@ -305,7 +337,8 @@ const handleSubmit = async (event) => {
 		isVerificationLoading.value = true
 
 		try {
-			const response = await submitForm(data)
+			console.log('[KitForm modal] submit data:', { ...data })
+			const response = await submitForm(buildKitPayload(data))
 			
 		if (response?.requires_verification) {
 			verificationMessage.value = response?.message || KIT_FORM_TEXTS.VERIFICATION_INVALID_CODE
@@ -337,7 +370,7 @@ const handleSubmit = async (event) => {
 		const cityValue = formData.get('city_other') || formData.get('city') || ''
 		const countryValue = formData.get('country_other') || formData.get('country') || KIT_FORM_TEXTS.DEFAULT_COUNTRY
 		
-		const data = {
+		const data = buildKitPayload({
 			first_name: formData.get('first_name'),
 			last_name: formData.get('last_name'),
 			email: formData.get('email'),
@@ -348,8 +381,11 @@ const handleSubmit = async (event) => {
 			state: formData.get('state'),
 			zip: formData.get('zip'),
 			country: countryValue,
-		}
+			street: formData.get('street'),
+			fullAddress: formData.get('fullAddress'),
+		})
 
+		console.log('[KitForm modal] submit data:', { ...data })
 		const response = await submitForm(data)
 
 		if (response?.requires_verification) {
@@ -400,10 +436,6 @@ onUnmounted(() => {
 .kit-form-title {
 	text-align: center;
 	margin-bottom: 30px;
-}
-
-.kit-form-bonus {
-	color: var(--primary);
 }
 
 .kit-form-submit-btn {

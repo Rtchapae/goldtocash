@@ -6,6 +6,7 @@ use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Enums\OrderType;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\UserRepositoryInterface;
+use App\Domain\Sms\Models\SentMessage;
 use App\Domain\Sms\Services\Providers\TwilioProvider;
 use App\Domain\Sms\Services\SmsUtils;
 use App\Domain\Users\Models\VerificationCode;
@@ -24,6 +25,7 @@ class KitRegistrationService
         private readonly UserRepositoryInterface $userRepository,
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly FedexService $fedexService,
+        private readonly KitAttributionService $kitAttributionService,
     ) {
     }
 
@@ -67,41 +69,39 @@ class KitRegistrationService
                     $label = $labelData['label'];
                     $fedexOrder = $labelData['fedex_order'];
 
-                    $order = $this->orderRepository->create([
-                        'user_id' => $user->id,
-                        'status' => OrderStatus::KIT_REQUESTED->value,
-                        'order_type' => OrderType::ONLINE->value,
-                        'welcome' => true,
-                        'send_label' => false,
-                        'description' => json_encode($fedexOrder),
-                    ]);
+                    $order = $this->orderRepository->create(array_merge(
+                        $this->baseKitOrderPayload($user->id, $validated),
+                        [
+                            'description' => json_encode($fedexOrder),
+                        ]
+                    ));
 
                     $this->saveShippingLabel($order, $label);
-
-                    $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
                 } else {
-                    $order = $this->orderRepository->create([
-                        'user_id' => $user->id,
-                        'status' => OrderStatus::KIT_REQUESTED->value,
-                        'order_type' => OrderType::ONLINE->value,
-                        'welcome' => true,
-                        'send_label' => false,
-                    ]);
+                    $order = $this->orderRepository->create(
+                        $this->baseKitOrderPayload($user->id, $validated)
+                    );
                 }
 
-                try {
-                    $this->orderRepository->sendKitRequestEmail($user, $order);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send kit request email for existing user', [
-                        'user_id' => $user->id,
-                        'order_id' => $order->id,
-                        'error' => $e->getMessage(),
-                    ]);
+                $this->kitAttributionService->recordMarketingTrace($user, $validated);
+
+                $this->orderRepository->sendKitRequestEmail($user, $order);
+
+                if ($this->hasFedexCredentials() && isset($track_number, $label)) {
+                    try {
+                        $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to generate welcome letter for existing user', [
+                            'user_id' => $user->id,
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
 
                 return [
                     'status' => true,
-                    'message' => $wasAlreadyAuthenticated ? 'Kit created successfully.' : 'Kit created successfully. Confirmation sent to your email.',
+                    'message' => 'Kit created successfully.',
                     'order_id' => $order->id,
                     'user_id' => $user->id,
                     'user' => $user,
@@ -152,6 +152,7 @@ class KitRegistrationService
             }
         }
 
+        $smsVerified = false;
         if (!$allowUnverified) {
             $isCodeValid = $this->verifyPhoneCode($phone, $verificationCode);
 
@@ -162,6 +163,7 @@ class KitRegistrationService
                     'message' => 'Invalid verification code. Please check that your phone number is correct and try again.',
                 ];
             }
+            $smsVerified = true;
         }
 
         $userPassPlain = Str::random(10);
@@ -179,6 +181,7 @@ class KitRegistrationService
             'zip' => $validated['zip'],
             'country' => $validated['country'] ?? 'USA',
             'password' => Hash::make($userPassPlain),
+            'verify' => $smsVerified ? 1 : 0,
         ]);
 
         if ($this->hasFedexCredentials()) {
@@ -204,14 +207,12 @@ class KitRegistrationService
             $label = $labelData['label'];
             $fedexOrder = $labelData['fedex_order'];
 
-            $order = $this->orderRepository->create([
-                'user_id' => $user->id,
-                'status' => OrderStatus::KIT_REQUESTED->value,
-                'order_type' => OrderType::ONLINE->value,
-                'welcome' => true,
-                'send_label' => false,
-                'description' => json_encode($fedexOrder),
-            ]);
+            $order = $this->orderRepository->create(array_merge(
+                $this->baseKitOrderPayload($user->id, $validated),
+                [
+                    'description' => json_encode($fedexOrder),
+                ]
+            ));
 
             try {
                 $this->saveShippingLabel($order, $label);
@@ -222,16 +223,26 @@ class KitRegistrationService
                     'trace' => $e->getTraceAsString()
                 ]);
             }
-
-            $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
         } else {
-            $order = $this->orderRepository->create([
-                'user_id' => $user->id,
-                'status' => OrderStatus::KIT_REQUESTED->value,
-                'order_type' => OrderType::ONLINE->value,
-                'welcome' => true,
-                'send_label' => false,
-            ]);
+            $order = $this->orderRepository->create(
+                $this->baseKitOrderPayload($user->id, $validated)
+            );
+        }
+
+        $this->kitAttributionService->recordMarketingTrace($user, $validated);
+
+        $this->orderRepository->sendKitRequestEmail($user, $order);
+
+        if (isset($track_number, $label)) {
+            try {
+                $this->generateWelcomeLetterPdf($user, $order, $track_number, $label);
+            } catch (\Exception $e) {
+                Log::error('Failed to generate welcome letter for new user', [
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         /** @var \PHPOpenSourceSaver\JWTAuth\JWTGuard $guard */
@@ -239,8 +250,6 @@ class KitRegistrationService
         $token = $guard->login($user);
 
         $this->userRepository->sendPasswordEmail($user, $userPassPlain);
-
-        $this->orderRepository->sendKitRequestEmail($user, $order);
 
         return [
             'status' => true,
@@ -272,6 +281,7 @@ class KitRegistrationService
             $message = "Your verification code is: $code";
             $twilioPhone = preg_replace('/^\+?1?/', '', $normalizedPhone);
             $result = $twilioProvider->send($from, $twilioPhone, $message);
+            SentMessage::storeDto($result);
 
             if ($result->getStatus() === 'failed') {
                 $details = $result->getDetails();
@@ -489,6 +499,27 @@ class KitRegistrationService
         }
 
         return '+1' . $digits;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function baseKitOrderPayload(int $userId, array $validated): array
+    {
+        $data = [
+            'user_id' => $userId,
+            'status' => OrderStatus::KIT_REQUESTED->value,
+            'order_type' => OrderType::ONLINE->value,
+            'welcome' => true,
+            'send_label' => false,
+        ];
+
+        $url = $this->kitAttributionService->extractSubmissionUrl($validated);
+        if ($url !== null) {
+            $data['submission_url'] = $url;
+        }
+
+        return $data;
     }
 }
 

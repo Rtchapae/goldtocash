@@ -13,7 +13,8 @@ class UpdateSeoPageRequest extends FormRequest
 
     public function rules(): array
     {
-        $seoPageId = $this->route('seoPage');
+        // Route is PUT seo-pages/{id} — must match param name or unique ignores current row → 422
+        $seoPageId = $this->route('id');
 
         return [
             'route_name' => ['required', 'string', 'max:255', 'unique:seo_pages,route_name,' . $seoPageId],

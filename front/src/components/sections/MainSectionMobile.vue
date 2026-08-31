@@ -1,66 +1,56 @@
 <template>
     <div>
-        <div>
-            <img src="/images/gold-over-cash.png" class="img-full">
-        </div>
         <div class="">
             <MobileSophisticatedForm />
         </div>
-        <div class="mt-5 px-3">
+        <LazyBelowFold :min-height="80" class="mt-5 px-3">
             <AsSeenIn />
-        </div>
+        </LazyBelowFold>
         <div class="mt-5 px-3">
             <div class="text-center">
-                <img src="/images/fedex-small-icon.svg" class="fedex-img">
+                <img src="/images/fedex-small-icon.svg" class="fedex-img" alt="" loading="lazy">
                 <p class="mt-3">Free &amp; Insured shipping up to $100,000*</p>
             </div>
         </div>
-        <div class="mt-5 px-3">
+        <LazyBelowFold :min-height="200" class="mt-5 px-3">
             <MobileBbbSection />
-        </div>
-        <div class="mt-5 px-3">
+        </LazyBelowFold>
+        <LazyBelowFold :min-height="480" class="mt-5 px-3">
             <MobileSellReasons />
-        </div>
-        <div id="mobile-testimonial">
+        </LazyBelowFold>
+        <LazyBelowFold id="mobile-testimonial" :min-height="360">
+            <h2 class="mobile-testimonial-heading">
+                Customers like<br>
+                you talk about<br>
+                <span class="mobile-testimonial-heading-accent">Gold to Cash</span>
+            </h2>
             <TestimonialsSection />
             <div class="p-3">
-                <button type="button" class="btn btn-green btn-kit w-100 mt-3">
+                <button type="button" class="btn btn-green btn-kit w-100 mt-3" @click="scrollToTop">
                     Get My Free Kit
                 </button>
             </div>
-        </div>
-        <div class="p-3 mt-5 muted-bg">
+        </LazyBelowFold>
+        <LazyBelowFold :min-height="320" class="p-3 mt-5 muted-bg">
             <MobileWhatWePay />
-                </div>
-        <MobilePromoModal v-if="showPromo" @close="showPromo = false" />
+        </LazyBelowFold>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { defineAsyncComponent } from 'vue'
+import LazyBelowFold from '@/components/LazyBelowFold.vue'
 import MobileSophisticatedForm from '@/components/MobileSophisticatedForm.vue'
-import AsSeenIn from '@/components/AsSeenIn.vue'
-import TestimonialsSection from '@/components/TestimonialsSection.vue'
-import MobileBbbSection from '@/components/MobileBbbSection.vue'
-import MobileSellReasons from '@/components/MobileSellReasons.vue'
-import MobileWhatWePay from '@/components/MobileWhatWePay.vue'
-import MobilePromoModal from '@/components/modals/MobilePromoModal.vue'
 
-const showPromo = ref(false)
-let promoTimerId = null
+const AsSeenIn = defineAsyncComponent(() => import('@/components/AsSeenIn.vue'))
+const MobileBbbSection = defineAsyncComponent(() => import('@/components/MobileBbbSection.vue'))
+const MobileSellReasons = defineAsyncComponent(() => import('@/components/MobileSellReasons.vue'))
+const TestimonialsSection = defineAsyncComponent(() => import('@/components/TestimonialsSection.vue'))
+const MobileWhatWePay = defineAsyncComponent(() => import('@/components/MobileWhatWePay.vue'))
 
-onMounted(() => {
-	promoTimerId = setTimeout(() => {
-		showPromo.value = true
-	}, 10000)
-})
-
-onBeforeUnmount(() => {
-	if (promoTimerId) {
-		clearTimeout(promoTimerId)
-		promoTimerId = null
-	}
-})
+function scrollToTop() {
+	window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>
 
 <style scoped>

@@ -36,4 +36,108 @@ export const formatDate = (date, format = 'YYYY-MM-DD') => {
 	return `${year}-${month}-${day}`
 }
 
+/** ISO Y-m-d → US MM/DD/YYYY for form display */
+export const formatIsoDateToUS = (iso) => {
+	if (!iso) return ''
+
+	const raw = String(iso).trim()
+	const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+	if (isoMatch) {
+		return `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`
+	}
+
+	if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+		return raw
+	}
+
+	return formatDate(raw, 'MM/DD/YYYY')
+}
+
+/** US MM/DD/YYYY (or ISO) → ISO Y-m-d for API */
+export const parseUSDateToIso = (us) => {
+	if (!us) return null
+
+	const raw = String(us).trim()
+	const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+	if (isoMatch) {
+		return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`
+	}
+
+	const match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+	if (!match) return null
+
+	const month = Number(match[1])
+	const day = Number(match[2])
+	const year = Number(match[3])
+
+	if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) {
+		return null
+	}
+
+	const date = new Date(year, month - 1, day)
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day
+	) {
+		return null
+	}
+
+	return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+/** Type digits into MM/DD/YYYY without a date-picker mask */
+export const formatBirthDateInput = (raw) => {
+	const digits = String(raw || '').replace(/\D/g, '').substring(0, 8)
+	if (digits.length > 4) {
+		return `${digits.substring(0, 2)}/${digits.substring(2, 4)}/${digits.substring(4)}`
+	}
+	if (digits.length > 2) {
+		return `${digits.substring(0, 2)}/${digits.substring(2)}`
+	}
+	return digits
+}
+
+/**
+ * US short date MM-DD-YY (e.g. 08-03-26).
+ * Parses Laravel naive `Y-m-d H:i:s` (app timezone) without JS timezone shifting,
+ * so Aug 1 00:30 LA does not become Jul 31 in the browser.
+ */
+export const formatDateMMDDYY = (dateTime) => {
+	if (!dateTime) return ''
+
+	const raw = String(dateTime).trim()
+	const mysql = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?/)
+	if (mysql) {
+		return `${mysql[2]}-${mysql[3]}-${mysql[1].slice(-2)}`
+	}
+
+	const dateObj = new Date(dateTime)
+	if (isNaN(dateObj.getTime())) {
+		return raw
+	}
+
+	const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+	const day = String(dateObj.getDate()).padStart(2, '0')
+	const yy = String(dateObj.getFullYear()).slice(-2)
+
+	return `${month}-${day}-${yy}`
+}
+
+/** Local time HH:mm:ss */
+export const formatTimeOnly = (dateTime) => {
+	if (!dateTime) return ''
+
+	const dateObj = new Date(dateTime)
+	if (isNaN(dateObj.getTime())) {
+		return ''
+	}
+
+	const hours = String(dateObj.getHours()).padStart(2, '0')
+	const minutes = String(dateObj.getMinutes()).padStart(2, '0')
+	const seconds = String(dateObj.getSeconds()).padStart(2, '0')
+
+	return `${hours}:${minutes}:${seconds}`
+}
+
 

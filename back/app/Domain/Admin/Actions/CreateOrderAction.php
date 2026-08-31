@@ -5,6 +5,7 @@ namespace App\Domain\Admin\Actions;
 use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Enums\OrderType;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
+use App\Domain\Orders\Support\OfflineOrderPdfData;
 use App\Domain\Users\Enums\UserRole;
 use App\Domain\Users\Models\User;
 use App\Domain\Users\Repositories\UserRepositoryInterface;
@@ -63,18 +64,27 @@ class CreateOrderAction
                 ]);
             }
 
+            if ($orderType === OrderType::OFFLINE->value) {
+                $this->syncOfflineUserProfile($user, $data);
+            }
+
             $hasExistingOrders = $this->orderRepository->userHasOtherOrders($userId, 0);
 
             $status = ($orderType === OrderType::OFFLINE->value)
                 ? OrderStatus::PAID->value
                 : OrderStatus::KIT_REQUESTED->value;
 
+            $notes = $data['notes'] ?? null;
+            if (! empty($data['items_description']) && is_array($data['items_description'])) {
+                $notes = OfflineOrderPdfData::encodeItems($data['items_description']);
+            }
+
             $orderData = [
                 'user_id' => $userId,
                 'status' => $status,
                 'order_type' => $orderType,
                 'branch_id' => $branchId,
-                'notes' => $data['notes'] ?? null,
+                'notes' => $notes,
                 'welcome' => true,
                 'send_label' => false,
             ];
@@ -139,6 +149,9 @@ class CreateOrderAction
             'state' => $userData['state'] ?? '',
             'zip' => $userData['zip'] ?? '',
             'country' => $userData['country'] ?? 'USA',
+            'date_of_birth' => $userData['date_of_birth'] ?? null,
+            'government_id' => $userData['government_id'] ?? 'state',
+            'government_id_params' => $this->encodeGovernmentIdParams($userData),
             'password' => Hash::make($userPassPlain),
         ]);
 
@@ -179,6 +192,68 @@ class CreateOrderAction
         }
 
         return null;
+    }
+
+    private function syncOfflineUserProfile(User $user, array $data): void
+    {
+        $updates = [];
+
+        $userData = $data['user_data'] ?? [];
+        $fieldMap = [
+            'name' => 'name',
+            'email' => 'email',
+            'phone' => 'phone',
+            'address' => 'address',
+            'address2' => 'address2',
+            'city' => 'city',
+            'state' => 'state',
+            'zip' => 'zip',
+            'country' => 'country',
+        ];
+
+        foreach ($fieldMap as $inputKey => $column) {
+            $value = $userData[$inputKey] ?? $data[$inputKey] ?? null;
+            if ($value !== null && $value !== '') {
+                $updates[$column] = $value;
+            }
+        }
+
+        $dob = $data['date_of_birth'] ?? $userData['date_of_birth'] ?? null;
+        if ($dob) {
+            $updates['date_of_birth'] = $dob;
+        }
+
+        $govNumber = $data['government_id_number'] ?? $userData['government_id_number'] ?? null;
+        $stateIssued = $data['state_issued'] ?? $userData['state_issued'] ?? null;
+        if ($govNumber || $stateIssued) {
+            $updates['government_id'] = $user->government_id ?: 'state';
+            $updates['government_id_params'] = json_encode([
+                'idNumber' => $govNumber ?: (json_decode((string) $user->government_id_params, true)['idNumber'] ?? ''),
+                'issuer' => $stateIssued ?: (json_decode((string) $user->government_id_params, true)['issuer'] ?? ''),
+            ]);
+        }
+
+        if ($updates !== []) {
+            $this->userRepository->update($user, $updates);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $userData
+     */
+    private function encodeGovernmentIdParams(array $userData): ?string
+    {
+        $idNumber = $userData['government_id_number'] ?? null;
+        $issuer = $userData['state_issued'] ?? null;
+
+        if (! $idNumber && ! $issuer) {
+            return null;
+        }
+
+        return json_encode([
+            'idNumber' => $idNumber ?? '',
+            'issuer' => $issuer ?? '',
+        ]);
     }
 
 }

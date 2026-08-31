@@ -18,6 +18,7 @@ class ListExpensesAction
         int $page,
         ?string $orderBy = null,
         string $orderDir = 'desc',
+        ?string $search = null,
     ): LengthAwarePaginator {
         $adminUser = Auth::guard('admin')->user();
         
@@ -30,7 +31,8 @@ class ListExpensesAction
             page: $page,
             excludeUserId: $adminUser->id,
             orderBy: $orderBy,
-            orderDir: $orderDir
+            orderDir: $orderDir,
+            search: $search,
         );
     }
 }

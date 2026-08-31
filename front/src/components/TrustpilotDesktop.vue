@@ -1,5 +1,5 @@
 <template>
-    <section class="d-none d-md-block section-trustpilot">
+    <section :class="['section-trustpilot', { 'd-none d-md-block': !showMobile }]">
         <div class="section-trustpilot-container">
             <Swiper
                 class="trustpilot-swiper"
@@ -64,26 +64,24 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import { trustpilotTestimonials as testimonials } from '@/constants/trustpilotTestimonials'
+
+defineProps({
+	/** When true, show below md (e.g. What Sets Apart). Home keeps desktop-only default. */
+	showMobile: { type: Boolean, default: false },
+})
 
 const modules = [Navigation, Pagination, Autoplay]
 
 const navigation = {
-    prevEl: '.swiper-prev-btn',
-    nextEl: '.swiper-next-btn'
+    prevEl: '.section-trustpilot .swiper-prev-btn',
+    nextEl: '.section-trustpilot .swiper-next-btn'
 }
 
 const pagination = {
-    el: '.trustpilot-swiper-pagination',
+    el: '.section-trustpilot .trustpilot-swiper-pagination',
     clickable: true
 }
-
-const testimonials = [
-    { title: 'Very easy to work with...', review: 'Great customer service. Sale was quick and I received th...', author: 'Amanda K' },
-    { title: 'I was looking online...', review: 'unlike a lot of other places like this.', author: 'Dan L' },
-    { title: 'I had a very good experience...', review: 'I had a very good experience selling my jewelry to Gold t...', author: 'Edward J' },
-    { title: 'Gold to Cash is the Best!...', review: 'but I didn\'t want to just give it away. So I sent in my ...', author: 'Lawson' },
-    { title: 'I recommend Gold to Cash...', review: 'I recommend Gold to Cash for selling jewelry. Good reputa...', author: 'Michael L' }
-]
 </script>
 
 

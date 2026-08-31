@@ -1,0 +1,13 @@
+# Customer.io kit-request + Twilio welcome SMS
+back/app/Domain/CustomerIo/CustomerIoOrderSync.php
+back/app/Domain/CustomerIo/CustomerIoApi.php
+back/app/Domain/CustomerIo/CustomerIoService.php
+back/app/Console/Commands/DiagnoseCustomerIoCommand.php
+back/app/Console/Commands/ReplayCustomerIoKitEventsCommand.php
+back/app/Domain/Sms/Services/KitWelcomeSmsService.php
+back/app/Domain/Orders/Actions/CreateKitRequestAction.php
+back/app/Domain/Orders/Repositories/EloquentOrderRepository.php
+back/app/Domain/Orders/Services/KitRegistrationService.php
+back/app/Domain/Orders/Services/OrderStatusUpdateService.php
+back/app/Jobs/SendKitRequestEmailJob.php
+back/app/Console/Kernel.php

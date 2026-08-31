@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'api' => \App\Http\Middleware\ApiMiddleware::class,
         ]);
+
+        // Public contact form (legacy action="/sendmail", no SPA CSRF token)
+        $middleware->validateCsrfTokens(except: [
+            'sendmail',
+        ]);
     })
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
         // Use old-style schedule definitions from app/Console/Kernel.php

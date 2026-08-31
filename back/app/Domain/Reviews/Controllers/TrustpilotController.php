@@ -13,12 +13,13 @@ class TrustpilotController
 
     public function getReviews(): JsonResponse
     {
-        $reviews = $this->trustpilotService->getFormattedReviewsForFrontend();
+        $payload = $this->trustpilotService->getReviewsApiPayload();
 
         return response()->json([
             'data' => [
-                'reviews' => $reviews
-            ]
+                'reviews' => $payload['reviews'],
+                'total_count' => $payload['total_count'],
+            ],
         ]);
     }
 }

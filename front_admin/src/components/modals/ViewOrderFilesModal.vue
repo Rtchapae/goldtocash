@@ -33,7 +33,10 @@
 											:key="file.id || file.type"
 											class="m-2 text-center file-card d-flex flex-column align-items-center"
 										>
-											<i class="far fa-file-image fa-3x"></i>
+											<i
+												:class="isPdf(file) ? 'far fa-file-pdf fa-3x' : 'far fa-file-image fa-3x'"
+											></i>
+											<div class="file-title mt-2 mb-2">{{ file.title || file.filename }}</div>
 											<button
 												v-if="file.apiPath"
 												type="button"
@@ -97,19 +100,17 @@ const close = () => {
 	emit('close')
 }
 
+const isPdf = (file) => {
+	const name = `${file?.filename || ''} ${file?.title || ''} ${file?.type || ''}`.toLowerCase()
+	return name.includes('.pdf') || name.includes('pdf') || name.includes('information card')
+}
+
 const openFile = async (file) => {
 	try {
 		const blob = await downloadOrderFile(file.apiPath)
 		const url = window.URL.createObjectURL(blob)
-		const link = document.createElement('a')
-		link.href = url
-		link.target = '_blank'
-		link.rel = 'noopener'
-		link.style.display = 'none'
-		document.body.appendChild(link)
-		link.click()
-		document.body.removeChild(link)
-		window.URL.revokeObjectURL(url)
+		window.open(url, '_blank', 'noopener')
+		setTimeout(() => window.URL.revokeObjectURL(url), 60_000)
 	} catch (error) {
 		console.error('Failed to open file:', error)
 		toast.error('Failed to open file')
@@ -134,6 +135,10 @@ const hasFiles = computed(() => Array.isArray(props.files) && props.files.length
 .modal.show {
 	display: block;
 }
+
+.file-title {
+	max-width: 160px;
+	font-size: 12px;
+	line-height: 1.3;
+}
 </style>
-
-

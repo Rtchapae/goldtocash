@@ -2,7 +2,12 @@
 	<div>
 		<NavbarHeader />
 		<div class="dashboard-main-body">
-			<PageHeader :title="isEditMode ? 'Edit post' : 'Create new post'" :loading="isSubmitting || isLoading" />
+			<PageHeader
+				:title="isEditMode ? 'Edit post' : 'Create new post'"
+				:loading="isSubmitting || isLoading"
+				back-to="/posts"
+				back-label="Back to posts"
+			/>
 
 			<div class="row">
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
@@ -54,7 +59,8 @@ const form = ref({
 	seo_description: '',
 	path_prefix: '',
 	body: '',
-	active: true
+	active: true,
+	image: null
 })
 
 const loadPost = async () => {
@@ -74,7 +80,8 @@ const loadPost = async () => {
 			seo_description: postData.seo_description || '',
 			path_prefix: postData.path_prefix || '',
 			body: postData.body || '',
-			active: postData.active ?? true
+			active: postData.active ?? true,
+			image: postData.image || null
 		}
 	} catch (error) {
 		const errorMessage = error.status === 404
@@ -91,7 +98,7 @@ const loadPost = async () => {
 	}
 }
 
-const handleSubmit = async ({ form: formData, imageFile }) => {
+const handleSubmit = async ({ form: formData, imageFile, removeFeaturedImage }) => {
 	const title = (formData.title || '').trim()
 	const body = (formData.body || '').trim()
 	
@@ -115,15 +122,19 @@ const handleSubmit = async ({ form: formData, imageFile }) => {
 			submitFormData.append('image', imageFile)
 		}
 
+		if (isEditMode.value && postId.value && removeFeaturedImage) {
+			submitFormData.append('remove_featured_image', '1')
+		}
+
 		if (isEditMode.value && postId.value) {
 			await updatePost(postId.value, submitFormData)
 			toast.success('Post updated successfully')
+			router.push('/posts')
 		} else {
 			await createPost(submitFormData)
 			toast.success('Post created successfully')
+			router.push('/posts')
 		}
-		
-		router.push('/posts')
 	} catch (error) {
 		let errorMessage = error.message || (isEditMode.value ? 'Failed to update post' : 'Failed to create post')
 		
@@ -149,7 +160,8 @@ watch(() => route.params.id, async (newId, oldId) => {
 			seo_description: '',
 			path_prefix: '',
 			body: '',
-			active: true
+			active: true,
+			image: null
 		}
 		await nextTick()
 		if (newId) {

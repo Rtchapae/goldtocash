@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { registerKit } from '@/api/kitRegistration'
+import { registerKit, buildKitPayload } from '@/api/kitRegistration'
 import { useToast } from '@/composables/useToast'
 
 export function useKitForm() {
@@ -14,7 +14,7 @@ export function useKitForm() {
 		error.value = null
 
 		try {
-			const response = await registerKit(formData)
+			const response = await registerKit(buildKitPayload(formData))
 
 			if (response.requires_verification) {
 				return response

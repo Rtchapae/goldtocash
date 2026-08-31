@@ -8,14 +8,14 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body orders-card-body">
-							<div class="d-flex justify-content-between mb-3">
-								<div class="name-search-wrapper">
+							<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+								<div class="name-search-wrapper flex-grow-1" style="min-width: 200px; max-width: 520px;">
 									<form @submit.prevent="handleNameSearch" class="d-flex">
 										<input
 											v-model="nameQuery"
 											type="text"
 											class="form-control flex-grow-1"
-											placeholder="Enter name..."
+											placeholder="Search by name, email, or phone..."
 											@input="debouncedNameSearch"
 										/>
 										<button v-if="nameQuery" type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearNameSearch">
@@ -23,6 +23,15 @@
 										</button>
 									</form>
 								</div>
+								<PeriodFilter
+									toolbar
+									v-model="currentPeriod"
+									:from="fromDate"
+									:to="toDate"
+									@update:from="fromDate = $event"
+									@update:to="toDate = $event"
+									@change="handlePeriodChange"
+								/>
 							</div>
 							<hr />
 
@@ -67,15 +76,6 @@
 											</option>
 										</select>
 									</div>
-
-									<PeriodFilter
-										v-model="currentPeriod"
-										:from="fromDate"
-										:to="toDate"
-										@update:from="fromDate = $event"
-										@update:to="toDate = $event"
-										@change="handlePeriodChange"
-									/>
 								</div>
 							</div>
 
@@ -127,18 +127,11 @@
 								</template>
 
 								<template #cell-url="{ row }">
-									{{ row.url || '' }}
+									<OrderUrlTruncated :url="row.url" />
 								</template>
 
 								<template #cell-source="{ row }">
-									<span
-										v-for="badge in (row.source_badges || [])"
-										:key="badge.key + String(badge.value)"
-										class="badge bg-secondary text-white text-monospace px-2 py-1 fw-normal me-1"
-										:title="badge.key"
-									>
-										{{ badge.value }}
-									</span>
+									<OrderSourceBadgesCollapse :badges="row.source_badges || []" />
 								</template>
 
 								<template #cell-email="{ row }">
@@ -151,18 +144,6 @@
 									<a :href="`tel:${normalizePhone(row.phone)}`">
 										{{ formatPhone(row.phone) }}
 									</a>
-									<iconify-icon
-										v-if="row.phone_verified"
-										icon="solar:check-circle-bold"
-										class="text-success ms-1 icon-size-base"
-										title="Verified"
-									></iconify-icon>
-									<iconify-icon
-										v-else
-										icon="solar:close-circle-bold"
-										class="text-danger ms-1 icon-size-base"
-										title="Unverified"
-									></iconify-icon>
 								</template>
 
 								<template #cell-order_number="{ row }">
@@ -241,6 +222,7 @@
 	<ViewOrderHistoryModal
 		:show="showHistoryModal"
 		:history="orderHistory"
+		:order-created-at="selectedOrder ? (selectedOrder.created_at || selectedOrder.date_created || '') : ''"
 		@close="closeHistoryModal"
 	/>
 	<EditOrderDetailsModal
@@ -275,6 +257,8 @@ import ViewOrderHistoryModal from '@/components/modals/ViewOrderHistoryModal.vue
 import EditOrderDetailsModal from '@/components/modals/EditOrderDetailsModal.vue'
 import EditOrderShippingDetailsModal from '@/components/modals/EditOrderShippingDetailsModal.vue'
 import ViewOrderFilesModal from '@/components/modals/ViewOrderFilesModal.vue'
+import OrderUrlTruncated from '@/components/orders/OrderUrlTruncated.vue'
+import OrderSourceBadgesCollapse from '@/components/orders/OrderSourceBadgesCollapse.vue'
 import { fetchPendingOffers, getOrderDetails, getOrderHistory, getOrderFiles, updateOrder, updateOrderShipping } from '@/api/adminOrders'
 import {
 	DEFAULT_PER_PAGE,
@@ -336,16 +320,22 @@ const debouncedNameSearch = () => {
 		clearTimeout(nameSearchTimer)
 	}
 	nameSearchTimer = setTimeout(() => {
+		currentPage.value = 1
 		loadOrders()
 	}, SEARCH_DEBOUNCE_DELAY)
 }
 
 const clearNameSearch = () => {
 	nameQuery.value = ''
+	currentPage.value = 1
 	loadOrders()
 }
 
 const handleNameSearch = () => {
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	currentPage.value = 1
 	loadOrders()
 }
 

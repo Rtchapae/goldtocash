@@ -164,7 +164,10 @@ h1 small,h2 small {
         max-width: 115px
     }
 
-    .navbar.navbar--with-banner-offset {
+    /* Must beat .navbar.navbar--with-banner-offset.navbar-dark-always { top: 48px !important } */
+    .navbar.navbar--with-banner-offset,
+    .navbar.navbar--with-banner-offset.navbar-dark,
+    .navbar.navbar--with-banner-offset.navbar-dark-always {
         top: 0 !important;
     }
 

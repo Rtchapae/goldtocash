@@ -7,7 +7,10 @@ import './styles/main.scss'
 
 const app = createApp(App);
 app.use(createPinia());
-app.use(VueApexCharts)
+app.use(VueApexCharts);
 app.use(router);
-app.mount('#app');
+
+router.isReady().then(() => {
+	app.mount('#app');
+});
 

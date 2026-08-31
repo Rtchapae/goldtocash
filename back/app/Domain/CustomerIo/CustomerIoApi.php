@@ -48,6 +48,7 @@ class CustomerIoApi
             'signature' => self::class,
             'path' => $path,
             'status' => $response ? $response->getStatusCode() : null,
+            'body' => $response ? (string) $response->getBody() : null,
             'durationInSeconds' => round(microtime(true) - $start, 1),
         ]);
 

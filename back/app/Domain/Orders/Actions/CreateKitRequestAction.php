@@ -6,6 +6,7 @@ use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Enums\OrderType;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Orders\Services\FedexService;
+use App\Domain\Orders\Services\KitAttributionService;
 use App\Domain\Users\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,10 +19,14 @@ class CreateKitRequestAction
     public function __construct(
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly FedexService $fedexService,
+        private readonly KitAttributionService $kitAttributionService,
     ) {
     }
 
-    public function execute(): array
+    /**
+     * @param array<string, mixed> $attribution
+     */
+    public function execute(array $attribution = []): array
     {
         /** @var User|null $user */
         $user = Auth::guard('front')->user();
@@ -53,14 +58,25 @@ class CreateKitRequestAction
             $label = $labelData['label'];
             $fedexOrder = $labelData['fedex_order'];
 
-            $order = $this->orderRepository->create([
+            $base = [
                 'user_id' => $user->id,
                 'status' => OrderStatus::KIT_REQUESTED->value,
                 'order_type' => OrderType::ONLINE->value,
                 'welcome' => true,
                 'send_label' => false,
                 'description' => json_encode($fedexOrder),
-            ]);
+            ];
+            $submissionUrl = $this->kitAttributionService->extractSubmissionUrl($attribution);
+            if ($submissionUrl !== null) {
+                $base['submission_url'] = $submissionUrl;
+            }
+
+            $order = $this->orderRepository->create($base);
+
+            $this->kitAttributionService->recordMarketingTrace($user, $attribution);
+
+            // CIO + welcome SMS must run before PDF/label work so a downstream failure cannot skip them.
+            $this->orderRepository->sendKitRequestEmail($user, $order);
 
             $this->saveShippingLabel($order, $label);
 
@@ -79,8 +95,6 @@ class CreateKitRequestAction
                 ->setPaper('letter', 'portrait');
 
             file_put_contents($path . "/letter.pdf", $pdf->output());
-
-            $this->orderRepository->sendKitRequestEmail($user, $order);
 
             return [
                 'status' => true,

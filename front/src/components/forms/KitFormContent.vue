@@ -52,160 +52,75 @@
 				:data-validation-required-message="isMobile ? 'Please enter your phone number.' : ''">
 			<label :for="fieldId('phone')" :class="{ hasValue: phoneValue }">Phone</label>
 		</div>
-		<div class="control-group form-group">
-			<input 
-				type="text" 
-				class="form-control pac-target-input" 
-				:id="fieldId('address')" 
-				name="address"
-				v-model="address"
+		<div class="control-group form-group address-input-wrap">
+			<input
+				ref="addressInputRef"
+				type="text"
+				class="form-control pac-target-input"
+				:id="fieldId('address')"
+				v-model="fullAddress"
 				required
 				:data-validation-required-message="isMobile ? 'Please enter your address.' : ''"
-				placeholder="" 
-				autocomplete="off">
-			<label :for="fieldId('address')" :class="{ hasValue: address }">Address</label>
+				placeholder=""
+				autocomplete="off"
+			/>
+			<label :for="fieldId('address')" :class="{ hasValue: fullAddress }">Address</label>
 		</div>
 		<div class="control-group form-group">
-			<input 
-				type="text" 
-				class="form-control" 
-				:id="fieldId('address2')" 
+			<input
+				type="text"
+				class="form-control"
+				:id="fieldId('address2')"
 				name="address2"
-				v-model="address2">
-			<label :for="fieldId('address2')" :class="{ hasValue: address2 }">Apartment, Suite</label>
+				v-model="address2"
+				autocomplete="address-line2"
+				placeholder=""
+			/>
+			<label :for="fieldId('address2')" :class="{ hasValue: address2 }">Apt / Unit</label>
 		</div>
-		<div class="control-group form-group">
-			<select 
-				v-model="selectedState" 
-				name="state" 
-				:id="fieldId('state')" 
-				class="form-control"
-				required
-				@change="onStateChange">
-				<option value="" disabled hidden></option>
-				<option v-for="s in states" :key="s.value" :value="s.value">{{ s.label }}</option>
-			</select>
-			<label :for="fieldId('state')" :class="{ hasValue: selectedState }">State</label>
-		</div>
-		<div class="control-group form-group">
-			<select 
-				v-if="selectedState && cities.length > 0"
-				v-model="selectedCity"
-				name="city" 
-				:id="fieldId('city')" 
-				class="form-control"
-				required>
-				<option value="">Select city</option>
-				<option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
-				<option value="__other__">Other (enter manually)</option>
-			</select>
-			<input 
-				v-else
-				type="text" 
-				class="form-control" 
-				:id="fieldId('city')" 
-				name="city" 
-				v-model="selectedCity"
-				required
-				:data-validation-required-message="isMobile ? 'Please enter your city.' : ''">
-			<input
-				v-if="selectedCity === '__other__'"
-				v-model="cityOther"
-				type="text"
-				class="form-control mt-2"
-				name="city_other"
-				placeholder="Enter city name"
-				required>
-			<label :for="fieldId('city')" :class="{ hasValue: selectedCity && selectedCity !== '__other__' }">City</label>
-		</div>
-		<div class="control-group form-group">
-			<select 
-				v-model="selectedCountry" 
-				name="country" 
-				:id="fieldId('country')" 
-				class="form-control"
-				@change="onCountryChange">
-				<option value="">Select country</option>
-				<option v-for="country in countries" :key="country.code" :value="country.code">{{ country.name }}</option>
-				<option value="__other__">Other (enter manually)</option>
-			</select>
-			<input
-				v-if="selectedCountry === '__other__'"
-				v-model="countryOther"
-				type="text"
-				class="form-control mt-2"
-				name="country_other"
-				placeholder="Enter country name"
-				maxlength="100">
-			<label :for="fieldId('country')" :class="{ hasValue: selectedCountry && selectedCountry !== '__other__' }">Country</label>
-		</div>
-		<div class="row">
-			<div class="col-6">
-				<div class="control-group form-group">
-					<input 
-						type="text" 
-						:id="fieldId('zip-code')" 
-						pattern="[0-9]{5}" 
-						class="form-control" 
-						name="zip" 
-						v-model="zip"
-						required
-						:data-validation-required-message="isMobile ? 'Please enter your zip code.' : ''">
-					<label :for="fieldId('zip-code')" :class="{ hasValue: zip }">Zip Code</label>
-				</div>
+		<!-- Hidden: street line for API (Google Places or typed address) -->
+		<input type="hidden" name="address" :value="address || fullAddress" />
+		<input type="hidden" name="state" :value="state" />
+		<input type="hidden" name="city" :value="city" />
+		<template v-if="!isMobile">
+			<div class="control-group form-group">
+				<select 
+					v-model="selectedCountry" 
+					name="country" 
+					:id="fieldId('country')" 
+					class="form-control"
+					@change="onCountryChange">
+					<option value="">Select country</option>
+					<option v-for="country in countries" :key="country.code" :value="country.code">{{ country.name }}</option>
+					<option value="__other__">Other (enter manually)</option>
+				</select>
+				<input
+					v-if="selectedCountry === '__other__'"
+					v-model="countryOther"
+					type="text"
+					class="form-control mt-2"
+					name="country_other"
+					placeholder="Enter country name"
+					maxlength="100">
+				<label :for="fieldId('country')" :class="{ hasValue: selectedCountry && selectedCountry !== '__other__' }">Country</label>
 			</div>
-		</div>
+		</template>
+		<input v-else type="hidden" name="country" :value="KIT_FORM_TEXTS.DEFAULT_COUNTRY">
+		<input type="hidden" name="zip" :value="zip" />
 		<div id="phone-verify" v-if="showVerification">
 			<div class="form-group">
 				<label :for="fieldId('verification-code')" class="verification-label">Verification Code from SMS</label>
 				<div :id="fieldId('verification-code-container')" class="verification-code-container">
-					<input 
-						type="text" 
-						name="code1" 
-						class="form-control verification-code-input" 
-						maxlength="1" 
+					<input
+						type="text"
+						name="verification_code"
+						class="form-control verification-code-input verification-code-single"
+						maxlength="4"
 						autocomplete="off"
 						inputmode="numeric"
-						pattern="[0-9]"
-						:ref="el => setCodeInputRef(el, 0)"
-						@input="onCodeInput($event, 0)"
-						@keydown.backspace="onCodeBackspace($event, 0)"
-					>
-					<input 
-						type="text" 
-						name="code2" 
-						class="form-control verification-code-input" 
-						maxlength="1" 
-						autocomplete="off"
-						inputmode="numeric"
-						pattern="[0-9]"
-						:ref="el => setCodeInputRef(el, 1)"
-						@input="onCodeInput($event, 1)"
-						@keydown.backspace="onCodeBackspace($event, 1)"
-					>
-					<input 
-						type="text" 
-						name="code3" 
-						class="form-control verification-code-input" 
-						maxlength="1" 
-						autocomplete="off"
-						inputmode="numeric"
-						pattern="[0-9]"
-						:ref="el => setCodeInputRef(el, 2)"
-						@input="onCodeInput($event, 2)"
-						@keydown.backspace="onCodeBackspace($event, 2)"
-					>
-					<input 
-						type="text" 
-						name="code4" 
-						class="form-control verification-code-input" 
-						maxlength="1" 
-						autocomplete="off"
-						inputmode="numeric"
-						pattern="[0-9]"
-						:ref="el => setCodeInputRef(el, 3)"
-						@input="onCodeInput($event, 3)"
-						@keydown.backspace="onCodeBackspace($event, 3)"
+						pattern="[0-9]{4}"
+						placeholder="0000"
+						v-model="verificationCode"
 					>
 					<button
 						:id="fieldId('resendCodeButton')"
@@ -243,10 +158,12 @@
 <script setup>
 import { ref, onMounted, watch, nextTick, computed } from 'vue'
 import { US_STATES } from '@/constants/states'
+import { KIT_FORM_TEXTS } from '@/constants/kitForm'
 import { getStatesAndCities, getCitiesByState } from '@/api/statesCities'
 import { getCountries } from '@/api/countries'
 import { usePhoneMask } from '@/composables/usePhoneMask'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useGooglePlacesAddress } from '@/composables/useGooglePlacesAddress'
 
 const props = defineProps({
 	isMobile: {
@@ -278,46 +195,39 @@ const fieldId = (name) => {
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const fullAddress = ref('')
 const address = ref('')
 const address2 = ref('')
+const city = ref('')
+const state = ref('')
 const zip = ref('')
 
+watch(fullAddress, (val) => {
+	if (!zip.value && val) {
+		const m = val.match(/\b(\d{5})(?:-\d{4})?/)
+		if (m) zip.value = m[1]
+	}
+})
+
 const { phoneValue, phoneInputRef, setupMask } = usePhoneMask()
+const addressInputRef = ref(null)
+
+useGooglePlacesAddress({
+	inputRef: addressInputRef,
+	inputId: props.isMobile ? 'address' : 'address-inline',
+	onPlaceSelect: (place, addr) => {
+		fullAddress.value = addr.fullAddress || addr.street || ''
+		address.value = addr.street || addr.fullAddress || ''
+		address2.value = addr.address2 || ''
+		city.value = addr.city || ''
+		state.value = addr.state || ''
+		zip.value = addr.zip || addr.fullAddress?.match(/\b(\d{5})(?:-\d{4})?/)?.[1] || ''
+	}
+})
 const isResendDisabled = computed(() => props.resendCountdown > 0)
 const resendCountdown = computed(() => props.resendCountdown)
 
-const codeInputs = ref([])
-
-const setCodeInputRef = (el, index) => {
-	if (el) {
-		codeInputs.value[index] = el
-	}
-}
-
-const onCodeInput = (event, index) => {
-	const input = event.target
-	const value = input.value.replace(/\D/g, '')
-	input.value = value.slice(0, 1)
-
-	if (value && index < codeInputs.value.length - 1) {
-		const next = codeInputs.value[index + 1]
-		if (next) {
-			next.focus()
-			next.select()
-		}
-	}
-}
-
-const onCodeBackspace = (event, index) => {
-	const input = event.target
-	if (event.key === 'Backspace' && !input.value && index > 0) {
-		const prev = codeInputs.value[index - 1]
-		if (prev) {
-			prev.focus()
-			prev.select()
-		}
-	}
-}
+const verificationCode = ref('')
 
 const states = ref(US_STATES)
 const cities = ref([])
@@ -413,6 +323,7 @@ watch([selectedCity, cityOther], () => {
 })
 
 watch([selectedCountry, countryOther], () => {
+	if (props.isMobile) return
 	const countryInput = document.getElementById(fieldId('country'))
 	if (countryInput) {
 		if (selectedCountry.value === '__other__') {
@@ -497,6 +408,11 @@ watch(phoneValue, () => {
 	flex-wrap: wrap;
 	margin-top: 8px;
 	margin-bottom: 8px;
+}
+
+.verification-code-single {
+	width: 120px;
+	min-width: 120px;
 }
 
 .verification-code-input {

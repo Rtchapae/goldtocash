@@ -21,6 +21,7 @@
 						<div class="post-content">
 							<img
 								v-if="post.image"
+								:key="`${post.id}-${post.image}`"
 								class="blog-image float-right ml-16 show-for-large"
 								:src="post.image"
 								:alt="post.title"
@@ -108,6 +109,7 @@ const loadPost = async () => {
 			const title = post.value.seo_title || post.value.title
 			const description = post.value.seo_description || getExcerpt(post.value.body)
 			seoService.setMeta({ title, description })
+			seoService.sendGaPageView(route)
 			await mountKitForms()
 		}
 	} catch (err) {

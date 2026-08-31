@@ -8,6 +8,29 @@
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
 						<div class="card-body">
+							<div class="d-flex justify-content-between mb-3">
+								<div class="name-search-wrapper flex-grow-1" style="max-width: 480px;">
+									<form class="d-flex" @submit.prevent="handleSearchSubmit">
+										<input
+											v-model="searchQuery"
+											type="text"
+											class="form-control flex-grow-1"
+											placeholder="Search by name, email, or phone..."
+											@input="debouncedSearch"
+										/>
+										<button
+											v-if="searchQuery"
+											type="button"
+											class="btn btn-sm btn-outline-secondary ms-2"
+											@click="clearSearch"
+										>
+											Clear
+										</button>
+									</form>
+								</div>
+							</div>
+							<hr />
+
 							<UITable
 								:show-title="false"
 								:show-index="false"
@@ -167,6 +190,7 @@ import UserNotesModal from '../components/modals/UserNotesModal.vue'
 import { fetchAdminUsers, getAdminUserById } from '../api/adminUsers'
 import { getUserNotes, saveUserNote } from '../api/adminUserNotes'
 import { formatName, formatPhone, normalizePhone } from '@/utils/format'
+import { SEARCH_DEBOUNCE_DELAY } from '@/config/orders'
 
 const users = ref([])
 const searchQuery = ref('')
@@ -185,6 +209,32 @@ const selectedUser = ref(null)
 const selectedUserFiles = ref([])
 const selectedUserHistory = ref([])
 const selectedUserNotes = ref([])
+
+let searchDebounceTimer = null
+
+const debouncedSearch = () => {
+	if (searchDebounceTimer) {
+		clearTimeout(searchDebounceTimer)
+	}
+	searchDebounceTimer = setTimeout(() => {
+		currentPage.value = 1
+		loadUsers(1)
+	}, SEARCH_DEBOUNCE_DELAY)
+}
+
+const clearSearch = () => {
+	searchQuery.value = ''
+	currentPage.value = 1
+	loadUsers(1)
+}
+
+const handleSearchSubmit = () => {
+	if (searchDebounceTimer) {
+		clearTimeout(searchDebounceTimer)
+	}
+	currentPage.value = 1
+	loadUsers(1)
+}
 
 const userColumns = [
 	{ key: 'id', label: '#', sortable: true },

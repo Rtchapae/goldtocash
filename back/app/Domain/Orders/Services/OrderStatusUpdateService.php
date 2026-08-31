@@ -3,6 +3,7 @@
 namespace App\Domain\Orders\Services;
 
 use App\Domain\Admin\Models\ModelHistory;
+use App\Domain\CustomerIo\CustomerIoOrderSync;
 use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
@@ -13,6 +14,7 @@ class OrderStatusUpdateService
 {
     public function __construct(
         private readonly OrderRepositoryInterface $orderRepository,
+        private readonly CustomerIoOrderSync $customerIoOrderSync,
     ) {
     }
 
@@ -58,6 +60,11 @@ class OrderStatusUpdateService
                     'order_id' => $order->id,
                     'error' => $e->getMessage(),
                 ]);
+            }
+
+            $order->loadMissing('user');
+            if ($order->user) {
+                $this->customerIoOrderSync->syncStatusChange($order->user, $order, $newStatus);
             }
         }
 

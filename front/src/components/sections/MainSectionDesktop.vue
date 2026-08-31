@@ -1,7 +1,9 @@
 <template>
 	<HeroHeader />
-	<TrustpilotDesktop />
-	<TestimonialsSection />
+	<div class="home-reviews-black-band">
+		<TrustpilotDesktop />
+		<TestimonialsSection />
+	</div>
 	<AsSeenIn />
 	<CompaniesStrip />
 	<VideoThumbnail />
@@ -10,8 +12,7 @@
 	<GoldToCashDifference />
 	<HowItWorksDesktop />
 	<WhatWeBuySection />
-	<WhatWePaySection />
-	<GoldCalculator />
+	<WhatWePaySection embedded />
 	<WhySellReasons />
 	<FastSafeSecureSection />
 	<MobileBuyerTrust />
@@ -31,7 +32,6 @@ import GoldToCashDifference from '@/components/GoldToCashDifference.vue'
 import HowItWorksDesktop from '@/components/HowItWorksDesktop.vue'
 import WhatWeBuySection from '@/components/WhatWeBuySection.vue'
 import WhatWePaySection from '@/components/WhatWePaySection.vue'
-import GoldCalculator from '@/components/GoldCalculator.vue'
 import WhySellReasons from '@/components/WhySellReasons.vue'
 import FastSafeSecureSection from '@/components/FastSafeSecureSection.vue'
 import MobileBuyerTrust from '@/components/MobileBuyerTrust.vue'

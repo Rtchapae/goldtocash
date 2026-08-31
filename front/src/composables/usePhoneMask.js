@@ -14,8 +14,9 @@ export function usePhoneMask(initialValue = '') {
 			maskInstance = null
 		}
 
+		// Accept +1 (000) 000-0000 so leading 1 doesn't eat the last digit
 		maskInstance = IMask(element, {
-			mask: '(000) 000-0000',
+			mask: '+1 (000) 000-0000',
 			lazy: true,
 			placeholderChar: '',
 			overwrite: true,

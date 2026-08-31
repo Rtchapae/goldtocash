@@ -7,9 +7,10 @@ use App\Domain\Orders\Enums\OrderStatus;
 use App\Domain\Orders\Repositories\OrderRepositoryInterface;
 use App\Domain\Users\Repositories\BranchRepositoryInterface;
 use App\Domain\Users\Repositories\TraceRepositoryInterface;
+use App\Support\AdminPeriodQuery;
+use App\Support\AdminUserSearch;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class ListPendingOffersAction
 {
@@ -43,18 +44,11 @@ class ListPendingOffersAction
         $query = $this->orderRepository->getQueryBuilder()
             ->where('orders.status', OrderStatus::OFFER_SENT->value);
 
-        $this->applyTimeFilter($query, $period, $from, $to, $nameQuery);
+        $this->applyTimeFilter($query, $period, $from, $to);
 
         $this->applyTraceFilters($query, $sourceFilter, $utmCampaignFilter, $utmMediumFilter);
 
-        if ($nameQuery) {
-            $query->where(function ($q) use ($nameQuery) {
-                $q->where('users.name', 'LIKE', '%' . $nameQuery . '%')
-                    ->orWhere('users.first_name', 'LIKE', '%' . $nameQuery . '%')
-                    ->orWhere('users.last_name', 'LIKE', '%' . $nameQuery . '%')
-                    ->orWhere('users.email', 'LIKE', '%' . $nameQuery . '%');
-            });
-        }
+        AdminUserSearch::apply($query, $nameQuery);
 
         $this->applySorting($query, $orderBy, $orderDir);
 
@@ -79,42 +73,8 @@ class ListPendingOffersAction
         string $period,
         ?string $from,
         ?string $to,
-        ?string $nameQuery
     ): void {
-        if ($nameQuery) {
-            return;
-        }
-
-        $now = Carbon::now();
-
-        switch ($period) {
-            case 'today':
-                $query->whereDate('orders.created_at', $now->toDateString());
-                break;
-            case 'yesterday':
-                $query->whereDate('orders.created_at', $now->copy()->subDay()->toDateString());
-                break;
-            case 'currentmonth':
-                $query->whereYear('orders.created_at', $now->year)
-                    ->whereMonth('orders.created_at', $now->month);
-                break;
-            case 'lastmonth':
-                $lastMonth = $now->copy()->subMonth();
-                $query->whereYear('orders.created_at', $lastMonth->year)
-                    ->whereMonth('orders.created_at', $lastMonth->month);
-                break;
-            case 'custom':
-                if ($from) {
-                    $query->whereDate('orders.created_at', '>=', Carbon::parse($from)->toDateString());
-                }
-                if ($to) {
-                    $query->whereDate('orders.created_at', '<=', Carbon::parse($to)->toDateString());
-                }
-                break;
-            case 'all':
-            default:
-                break;
-        }
+        AdminPeriodQuery::apply($query, $period, $from, $to);
     }
 
     private function applyTraceFilters(

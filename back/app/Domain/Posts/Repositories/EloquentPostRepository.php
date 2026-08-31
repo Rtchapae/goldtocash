@@ -13,15 +13,21 @@ class EloquentPostRepository implements AdminPostRepositoryInterface, FrontPostR
     {
         $query = Post::query();
 
-        if (!empty($filters['period'])) {
+        if (! empty($filters['period'])) {
             $this->applyPeriodFilter($query, $filters['period'], $filters['from'] ?? null, $filters['to'] ?? null);
         }
 
-        if (!empty($filters['order-by'])) {
-            $orderDir = $filters['order-dir'] ?? 'asc';
+        if (! empty($filters['search'])) {
+            $term = $filters['search'];
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $term);
+            $query->where('title', 'like', '%'.$escaped.'%');
+        }
+
+        if (! empty($filters['order-by'])) {
+            $orderDir = $filters['order-dir'] ?? 'desc';
             $query->orderBy($filters['order-by'], $orderDir);
         } else {
-            $query->orderBy('id', 'desc');
+            $query->orderBy('created_at', 'desc');
         }
 
         $perPage = $filters['per_page'] ?? 15;

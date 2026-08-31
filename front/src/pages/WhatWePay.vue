@@ -1,9 +1,29 @@
 <template>
-	<WhatWePaySection />
-	<RecentPayouts />
+	<div class="what-we-pay-page">
+		<WhatWePayHero />
+		<WhatWePayFactors />
+		<WhatWePayCalculator />
+		<WhatWePayOfferSteps />
+		<WhatWePayBlog />
+		<GoldCalculatorFaq variant="what-we-pay" />
+	</div>
 </template>
 
 <script setup>
-import WhatWePaySection from '@/components/WhatWePaySection.vue'
-import RecentPayouts from '@/components/whatwepay/RecentPayouts.vue'
+import { onMounted } from 'vue'
+import WhatWePayHero from '@/components/whatwepay/WhatWePayHero.vue'
+import WhatWePayFactors from '@/components/whatwepay/WhatWePayFactors.vue'
+import WhatWePayCalculator from '@/components/whatwepay/WhatWePayCalculator.vue'
+import WhatWePayOfferSteps from '@/components/whatwepay/WhatWePayOfferSteps.vue'
+import WhatWePayBlog from '@/components/whatwepay/WhatWePayBlog.vue'
+import GoldCalculatorFaq from '@/components/GoldCalculatorFaq.vue'
+import seoService from '@/services/seoService.js'
+
+onMounted(() => {
+	seoService.setMeta({
+		title: 'What We Pay for Gold & Silver | Guaranteed Best Pricing | Gold To Cash',
+		description:
+			'See how Gold to Cash prices gold and silver: current market spot pricing, weight, and purity. Use our free gold calculator and get a fair offer with free insured shipping.',
+	})
+})
 </script>

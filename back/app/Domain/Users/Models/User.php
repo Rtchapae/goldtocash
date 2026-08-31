@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\QueryException;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
@@ -32,6 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'zip',
         'state',
         'address',
+        'address2',
         'city',
         'phone',
         'country',
@@ -71,6 +73,13 @@ class User extends Authenticatable implements JWTSubject
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function latestOfflineOrder(): HasOne
+    {
+        return $this->hasOne(Order::class)
+            ->where('order_type', 'offline')
+            ->latestOfMany();
     }
 
     public function traces(): HasMany

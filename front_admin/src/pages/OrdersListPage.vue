@@ -1,21 +1,21 @@
 <template>
-	<div>
+	<div class="orders-list-page">
 		<NavbarHeader />
 		<div class="dashboard-main-body">
 			<PageHeader title="Active Orders" :loading="isLoading" />
 
-			<div class="row">
+			<div class="row orders-list-row">
 				<div id="admin-main-tables" class="col-lg-12 grid-margin stretch-card">
 					<div class="card">
-						<div class="card-body orders-card-body">
-							<div class="d-flex justify-content-between mb-3">
-								<div class="name-search-wrapper">
+						<div class="card-body orders-card-body orders-card-body--infinite-table">
+							<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+								<div class="name-search-wrapper flex-grow-1" style="min-width: 200px; max-width: 520px;">
 									<form @submit.prevent="handleNameSearch" class="d-flex">
 										<input
 											v-model="nameQuery"
 											type="text"
 											class="form-control flex-grow-1"
-											placeholder="Enter name..."
+											placeholder="Search by name, email, or phone..."
 											@input="debouncedNameSearch"
 										/>
 										<button v-if="nameQuery" type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearNameSearch">
@@ -23,6 +23,15 @@
 										</button>
 									</form>
 								</div>
+								<PeriodFilter
+									toolbar
+									v-model="currentPeriod"
+									:from="fromDate"
+									:to="toDate"
+									@update:from="fromDate = $event"
+									@update:to="toDate = $event"
+									@change="handlePeriodChange"
+								/>
 							</div>
 							<hr />
 
@@ -86,24 +95,15 @@
 											</option>
 										</select>
 									</div>
-
-									<PeriodFilter
-										v-model="currentPeriod"
-										:from="fromDate"
-										:to="toDate"
-										@update:from="fromDate = $event"
-										@update:to="toDate = $event"
-										@change="handlePeriodChange"
-									/>
 								</div>
 							</div>
 
 							<UITable
 								:show-title="false"
 								:show-index="false"
-								:show-length-control="true"
+								:show-length-control="false"
 								:show-search-control="false"
-								:show-pagination="true"
+								:show-pagination="false"
 								:show-info="true"
 								table-class="table table-striped table-hover orders-table"
 								:rows="orders"
@@ -113,11 +113,14 @@
 								:total-items="totalItems"
 								:per-page="perPage"
 								:last-page="lastPage"
-								:page-size-options="PAGE_SIZE_OPTIONS"
 								:sortable="false"
 								:loading="isLoading"
-								@page-change="handlePageChange"
-								@per-page-change="handlePerPageChange"
+								:infinite-scroll="true"
+								:has-more="hasMore"
+								:loading-more="isLoadingMore"
+								:load-more-offset="10"
+								scroll-max-height="calc(100vh - 300px)"
+								@load-more="loadMoreOrders"
 							>
 								<template v-for="col in orderColumns" :key="`header-${col.key}`" #[`header-${col.key}`]="{ column }">
 									<span v-if="column.sortable" class="d-flex align-items-center sortable-header" @click="handleSort(column.key)">
@@ -146,18 +149,11 @@
 								</template>
 
 								<template #cell-url="{ row }">
-									{{ row.url || '' }}
+									<OrderUrlTruncated :url="row.url" />
 								</template>
 
 								<template #cell-source="{ row }">
-									<span
-										v-for="badge in (row.source_badges || [])"
-										:key="badge.key + String(badge.value)"
-										class="badge bg-secondary text-white text-monospace px-2 py-1 fw-normal me-1"
-										:title="badge.key"
-									>
-										{{ badge.value }}
-									</span>
+									<OrderSourceBadgesCollapse :badges="row.source_badges || []" />
 								</template>
 
 								<template #cell-email="{ row }">
@@ -170,18 +166,6 @@
 									<a :href="`tel:${normalizePhone(row.phone)}`">
 										{{ formatPhone(row.phone) }}
 									</a>
-									<iconify-icon
-										v-if="row.phone_verified"
-										icon="solar:check-circle-bold"
-										class="text-success ms-1 icon-size-base"
-										title="Verified"
-									></iconify-icon>
-									<iconify-icon
-										v-else
-										icon="solar:close-circle-bold"
-										class="text-danger ms-1 icon-size-base"
-										title="Unverified"
-									></iconify-icon>
 								</template>
 
 								<template #cell-order_number="{ row }">
@@ -189,7 +173,7 @@
 								</template>
 
 								<template #cell-date_created="{ row }">
-									{{ row.created_at }}
+									{{ formatDateMMDDYY(orderRowTimestamp(row)) }}
 								</template>
 
 								<template #cell-amount="{ row }">
@@ -197,9 +181,10 @@
 								</template>
 
 								<template #cell-status="{ row }">
-									<label :class="['badge', getStatusBadgeClass(row.status)]">
-										{{ row.status || 'Unknown' }}
-									</label>
+									<span v-if="isOrderStatusHidden(row.status)" class="text-muted">—</span>
+									<span v-else :class="getStatusBadgeClass(row.status)">
+										{{ formatOrderStatusLabel(row.status) }}
+									</span>
 								</template>
 
 								<template #cell-order_type="{ row }">
@@ -218,10 +203,10 @@
 								</template>
 
 								<template #cell-actions="{ row }">
-									<div class="d-flex align-items-center action-buttons">
+									<div class="d-flex align-items-center action-buttons action-buttons--orders">
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-primary"
+											class="btn btn-action-plain"
 											title="View"
 											@click="openViewModal(row)"
 										>
@@ -229,15 +214,15 @@
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-warning"
+											class="btn btn-action-plain"
 											title="Edit"
 											@click="openEditModal(row)"
 										>
-											<iconify-icon icon="solar:settings-outline" class="icon" />
+											<iconify-icon icon="solar:pen-outline" class="icon" />
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-info"
+											class="btn btn-action-plain"
 											title="Files"
 											@click="openFilesModal(row)"
 										>
@@ -245,7 +230,7 @@
 										</button>
 										<button
 											type="button"
-											class="btn btn-sm btn-soft-success"
+											class="btn btn-action-plain"
 											title="History"
 											@click="openHistoryModal(row)"
 										>
@@ -281,6 +266,7 @@
 	<ViewOrderHistoryModal
 		:show="showHistoryModal"
 		:history="orderHistory"
+		:order-created-at="selectedOrder ? orderRowTimestamp(selectedOrder) : ''"
 		@close="closeHistoryModal"
 	/>
 	<EditOrderDetailsModal
@@ -306,6 +292,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import NavbarHeader from '@/components/NavbarHeader.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import UITable from '@/components/ui/UITable.vue'
@@ -315,30 +302,40 @@ import ViewOrderHistoryModal from '@/components/modals/ViewOrderHistoryModal.vue
 import EditOrderDetailsModal from '@/components/modals/EditOrderDetailsModal.vue'
 import EditOrderShippingDetailsModal from '@/components/modals/EditOrderShippingDetailsModal.vue'
 import ViewOrderFilesModal from '@/components/modals/ViewOrderFilesModal.vue'
+import OrderUrlTruncated from '@/components/orders/OrderUrlTruncated.vue'
+import OrderSourceBadgesCollapse from '@/components/orders/OrderSourceBadgesCollapse.vue'
 import { fetchAdminOrders, getOrderDetails, getOrderHistory, getOrderFiles, updateOrder, updateOrderShipping } from '@/api/adminOrders'
 import {
-	DEFAULT_PER_PAGE,
+	ORDERS_INFINITE_SCROLL_PER_PAGE,
 	DEFAULT_PAGE,
 	DEFAULT_PERIOD,
 	DEFAULT_FILTER_VALUE,
 	DEFAULT_SORT_DIR,
 	SEARCH_DEBOUNCE_DELAY,
-	PAGE_SIZE_OPTIONS,
 	ORDER_COLUMNS,
 } from '@/config/orders'
-import { getStatusBadgeClass } from '@/utils/orderStatus'
+import { getStatusBadgeClass, formatOrderStatusLabel, isOrderStatusHidden } from '@/utils/orderStatus'
 import { formatName, formatPhone, normalizePhone } from '@/utils/format'
+import { formatDateMMDDYY, formatTimeOnly } from '@/utils/date'
 import { useToast } from '@/composables/useToast'
+
+const orderRowTimestamp = (row) => row?.created_at || row?.date_created || ''
+
+const route = useRoute()
 
 const orders = ref([])
 const isLoading = ref(false)
+const isLoadingMore = ref(false)
 const isExporting = ref(false)
 
-// Server-side pagination state
+// Server-side pagination state (infinite scroll: append pages)
 const currentPage = ref(DEFAULT_PAGE)
-const perPage = ref(DEFAULT_PER_PAGE)
+const perPage = ref(ORDERS_INFINITE_SCROLL_PER_PAGE)
 const totalItems = ref(0)
 const lastPage = ref(1)
+let loadRequestId = 0
+
+const hasMore = computed(() => currentPage.value < lastPage.value)
 
 // Filters
 const nameQuery = ref('')
@@ -380,43 +377,41 @@ const debouncedNameSearch = () => {
 		clearTimeout(nameSearchTimer)
 	}
 	nameSearchTimer = setTimeout(() => {
-		loadOrders()
+		resetAndLoadOrders()
 	}, SEARCH_DEBOUNCE_DELAY)
 }
 
 const clearNameSearch = () => {
 	nameQuery.value = ''
-	loadOrders()
+	resetAndLoadOrders()
 }
 
 const handleNameSearch = () => {
-	loadOrders()
+	if (nameSearchTimer) {
+		clearTimeout(nameSearchTimer)
+	}
+	resetAndLoadOrders()
 }
 
 const handlePeriodChange = ({ period, from, to }) => {
 	currentPeriod.value = period
 	fromDate.value = from
 	toDate.value = to
-	currentPage.value = 1
-	loadOrders()
+	resetAndLoadOrders()
 }
 
 const applyFilters = () => {
-	currentPage.value = 1
-	loadOrders()
+	resetAndLoadOrders()
 }
 
 const handleSort = (columnKey) => {
 	if (orderBy.value === columnKey) {
-		// Toggle direction
 		orderDir.value = orderDir.value === 'asc' ? 'desc' : 'asc'
 	} else {
-		// New column, default to desc
 		orderBy.value = columnKey
 		orderDir.value = DEFAULT_SORT_DIR
 	}
-	currentPage.value = 1
-	loadOrders()
+	resetAndLoadOrders()
 }
 
 const exportToCsv = async () => {
@@ -493,9 +488,11 @@ const convertToCsv = (data) => {
 				case 'amount':
 					value = value ? `$${parseFloat(value).toFixed(2)}` : ''
 					break
-				case 'date_created':
-					value = value || ''
+				case 'date_created': {
+					const ts = row.created_at || row.date_created || value
+					value = ts ? `${formatDateMMDDYY(ts)} ${formatTimeOnly(ts)}`.trim() : ''
 					break
+				}
 				case 'branch':
 					value = (value === 'online') ? '' : (row.branch_name || 'N/A')
 					break
@@ -531,77 +528,106 @@ const downloadCsv = (csvData, filename) => {
 	}
 }
 
-const loadOrders = async () => {
-	isLoading.value = true
-	try {
-		const params = {
-			page: currentPage.value,
-			per_page: perPage.value,
-			period: currentPeriod.value,
-		}
+const buildOrdersParams = (page) => {
+	const params = {
+		page,
+		per_page: perPage.value,
+		period: currentPeriod.value,
+	}
 
-		if (currentPeriod.value === 'custom' && fromDate.value && toDate.value) {
-			params.from = fromDate.value
-			params.to = toDate.value
-		}
+	if (currentPeriod.value === 'custom' && fromDate.value && toDate.value) {
+		params.from = fromDate.value
+		params.to = toDate.value
+	}
 
-		if (nameQuery.value) {
-			params.nameQuery = nameQuery.value
-		}
-		if (sourceFilter.value && sourceFilter.value !== DEFAULT_FILTER_VALUE) {
-			params.source = sourceFilter.value
-		}
-		if (utmCampaignFilter.value && utmCampaignFilter.value !== DEFAULT_FILTER_VALUE) {
-			params.utm_campaign = utmCampaignFilter.value
-		}
-		if (utmMediumFilter.value && utmMediumFilter.value !== DEFAULT_FILTER_VALUE) {
-			params.utm_medium = utmMediumFilter.value
-		}
-		if (orderTypeFilter.value && orderTypeFilter.value !== DEFAULT_FILTER_VALUE) {
-			params.order_type = orderTypeFilter.value
-		}
-		if (branchFilter.value && branchFilter.value !== DEFAULT_FILTER_VALUE) {
-			params.branch_id = branchFilter.value
-		}
-		if (orderBy.value) {
-			params['order-by'] = orderBy.value
-			params['order-dir'] = orderDir.value
-		}
+	if (nameQuery.value) {
+		params.nameQuery = nameQuery.value
+	}
+	if (sourceFilter.value && sourceFilter.value !== DEFAULT_FILTER_VALUE) {
+		params.source = sourceFilter.value
+	}
+	if (utmCampaignFilter.value && utmCampaignFilter.value !== DEFAULT_FILTER_VALUE) {
+		params.utm_campaign = utmCampaignFilter.value
+	}
+	if (utmMediumFilter.value && utmMediumFilter.value !== DEFAULT_FILTER_VALUE) {
+		params.utm_medium = utmMediumFilter.value
+	}
+	if (orderTypeFilter.value && orderTypeFilter.value !== DEFAULT_FILTER_VALUE) {
+		params.order_type = orderTypeFilter.value
+	}
+	if (branchFilter.value && branchFilter.value !== DEFAULT_FILTER_VALUE) {
+		params.branch_id = branchFilter.value
+	}
+	if (orderBy.value) {
+		params['order-by'] = orderBy.value
+		params['order-dir'] = orderDir.value
+	}
 
-		const response = await fetchAdminOrders(params)
+	return params
+}
 
-		if (response.data) {
-			orders.value = response.data
-		}
+const applyOrdersResponse = (response, { append }) => {
+	if (response.data) {
+		const rows = Array.isArray(response.data) ? response.data : []
+		orders.value = append ? [...orders.value, ...rows] : rows
+	}
 
-		if (response.meta) {
-			currentPage.value = response.meta.current_page
-			totalItems.value = response.meta.total
-			lastPage.value = response.meta.last_page
-			perPage.value = response.meta.per_page
-		}
+	if (response.meta) {
+		currentPage.value = response.meta.current_page
+		totalItems.value = response.meta.total
+		lastPage.value = response.meta.last_page
+		perPage.value = response.meta.per_page
+	}
 
-		if (response.filters) {
-			availableSources.value = response.filters.sources || []
-			availableUtmCampaigns.value = response.filters.utm_campaigns || []
-			availableUtmMediums.value = response.filters.utm_mediums || []
-			availableBranches.value = response.filters.branches || []
-		}
-	} catch (error) {
-		console.error('Failed to load orders:', error)
-	} finally {
-		isLoading.value = false
+	if (response.filters) {
+		availableSources.value = response.filters.sources || []
+		availableUtmCampaigns.value = response.filters.utm_campaigns || []
+		availableUtmMediums.value = response.filters.utm_mediums || []
+		availableBranches.value = response.filters.branches || []
 	}
 }
 
-const handlePageChange = (page) => {
-	currentPage.value = page
-	loadOrders()
+const loadOrders = async ({ append = false } = {}) => {
+	const requestId = ++loadRequestId
+
+	if (append) {
+		if (isLoading.value || isLoadingMore.value || !hasMore.value) {
+			return
+		}
+		isLoadingMore.value = true
+	} else {
+		isLoading.value = true
+	}
+
+	try {
+		const page = append ? currentPage.value + 1 : DEFAULT_PAGE
+		const response = await fetchAdminOrders(buildOrdersParams(page))
+
+		if (requestId !== loadRequestId) {
+			return
+		}
+
+		applyOrdersResponse(response, { append })
+	} catch (error) {
+		if (requestId === loadRequestId) {
+			console.error('Failed to load orders:', error)
+		}
+	} finally {
+		if (requestId === loadRequestId) {
+			isLoading.value = false
+			isLoadingMore.value = false
+		}
+	}
 }
 
-const handlePerPageChange = (newPerPage) => {
-	perPage.value = newPerPage
-	currentPage.value = 1
+const loadMoreOrders = () => {
+	loadOrders({ append: true })
+}
+
+const resetAndLoadOrders = () => {
+	currentPage.value = DEFAULT_PAGE
+	lastPage.value = 1
+	orders.value = []
 	loadOrders()
 }
 
@@ -758,6 +784,10 @@ const handleSaveShipping = async (formData) => {
 }
 
 onMounted(() => {
+	const searchFromRoute = route.query.search || route.query.nameQuery
+	if (typeof searchFromRoute === 'string' && searchFromRoute.trim()) {
+		nameQuery.value = searchFromRoute.trim()
+	}
 	loadOrders()
 })
 </script>

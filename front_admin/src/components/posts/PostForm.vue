@@ -32,6 +32,7 @@
 						type="text"
 						id="seo_description"
 						class="form-control"
+						maxlength="160"
 					/>
 				</div>
 			</div>
@@ -69,22 +70,50 @@
 		<div class="form-group mb-4">
 			<label for="body" class="form-label fw-semibold mb-2">Post body</label>
 			<Editor
+				id="post-body-editor"
 				v-model="form.body"
 				:init="editorInit"
-				:api-key="tinymceApiKey"
+				:tinymce-script-src="TINYMCE_SCRIPT_SRC"
 			/>
 		</div>
 
 		<div class="form-group mb-4">
-			<label for="image" class="form-label fw-semibold mb-2">Image</label>
-			<input
-				ref="imageInput"
-				type="file"
-				name="image"
-				id="image"
-				class="form-control"
-				accept="image/*"
-			/>
+			<label for="image" class="form-label fw-semibold mb-2">Featured image</label>
+			<div v-if="featuredPreviewUrl" class="mb-2">
+				<img
+					:src="featuredPreviewUrl"
+					alt=""
+					class="img-thumbnail post-featured-preview"
+					style="max-height: 220px; max-width: 100%; object-fit: contain;"
+				/>
+			</div>
+			<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+				<input
+					ref="imageInput"
+					type="file"
+					name="image"
+					id="image"
+					class="form-control flex-grow-1"
+					style="min-width: 200px;"
+					accept="image/*"
+					@click="onFeaturedImageClick"
+					@change="onFeaturedImageChange"
+				/>
+				<button
+					v-if="canRemoveFeatured"
+					type="button"
+					class="btn btn-outline-danger btn-sm"
+					@click="markRemoveFeatured"
+				>
+					Remove image
+				</button>
+			</div>
+			<p v-if="pendingRemoveFeatured" class="text-warning small mb-1">
+				On Save, the featured image will be removed (default image on the public site).
+			</p>
+			<p class="form-text text-muted small mb-0">
+				JPEG, PNG, WebP or GIF, up to 5&nbsp;MB.
+			</p>
 		</div>
 
 		<div class="form-group mb-4">
@@ -108,8 +137,14 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
+import { API_BASE_URL } from '@/api/client'
+import { resolveAdminAssetUrl } from '@/utils/apiAssetUrl'
+
+const TINYMCE_LICENSE_KEY = 'gpl'
+const TINYMCE_SCRIPT_SRC = '/tinymce/tinymce.min.js'
+const TINYMCE_BASE_URL = '/tinymce'
 
 const props = defineProps({
 	modelValue: {
@@ -127,17 +162,99 @@ const emit = defineEmits(['update:modelValue', 'submit'])
 const form = ref({ ...props.modelValue })
 const imageInput = ref(null)
 const isUpdatingFromProps = ref(false)
+/** Local object URL for a newly chosen file (not persisted until Save). */
+const localPreviewObjectUrl = ref(null)
+/**
+ * Selected featured file held separately from the file input: the input can be cleared when
+ * the parent v-model updates (e.g. TinyMCE body sync), which would otherwise drop the file before Save.
+ */
+const pendingFeaturedFile = ref(null)
+/** User chose to drop featured image on next save (server uses default on public site). */
+const pendingRemoveFeatured = ref(false)
+
+const featuredPreviewUrl = computed(() => {
+	if (pendingRemoveFeatured.value) {
+		return null
+	}
+	if (localPreviewObjectUrl.value) {
+		return localPreviewObjectUrl.value
+	}
+	const u = form.value?.image
+	if (typeof u !== 'string' || !u.trim()) {
+		return null
+	}
+	return resolveAdminAssetUrl(u.trim())
+})
+
+const canRemoveFeatured = computed(() => {
+	if (pendingRemoveFeatured.value) {
+		return false
+	}
+	return !!(
+		pendingFeaturedFile.value
+		|| localPreviewObjectUrl.value
+		|| (typeof form.value?.image === 'string' && form.value.image.trim())
+	)
+})
+
+const markRemoveFeatured = () => {
+	pendingFeaturedFile.value = null
+	revokeLocalPreview()
+	pendingRemoveFeatured.value = true
+	if (imageInput.value) {
+		imageInput.value.value = ''
+	}
+}
+
+const revokeLocalPreview = () => {
+	if (localPreviewObjectUrl.value) {
+		URL.revokeObjectURL(localPreviewObjectUrl.value)
+		localPreviewObjectUrl.value = null
+	}
+}
+
+const onFeaturedImageClick = (e) => {
+	// Allow choosing the same file again (change event would not fire otherwise).
+	const input = e.target
+	if (input && 'value' in input) {
+		input.value = ''
+	}
+}
+
+const onFeaturedImageChange = (e) => {
+	revokeLocalPreview()
+	pendingRemoveFeatured.value = false
+	const file = e.target?.files?.[0]
+	if (!file) {
+		pendingFeaturedFile.value = null
+		return
+	}
+	pendingFeaturedFile.value = file
+	localPreviewObjectUrl.value = URL.createObjectURL(file)
+}
 
 const pathPrefixOptions = [
 	{ value: '', label: '/gold-info' },
 	{ value: '/sell-gold', label: '/sell-gold' }
 ]
 
-const tinymceApiKey = computed(() => {
-	return import.meta.env.VITE_TINYMCE_API_KEY
-})
+/** TinyMCE resolves img src against the admin page origin; prepend API origin when they differ (Vite dev). */
+function tinymceImagePrependUrl() {
+	const resolved = resolveAdminAssetUrl('/storage/')
+	if (!resolved || !/^https?:\/\//i.test(resolved)) {
+		return ''
+	}
+	try {
+		return new URL(resolved).origin
+	} catch {
+		return ''
+	}
+}
 
 const editorInit = {
+	license_key: TINYMCE_LICENSE_KEY,
+	base_url: TINYMCE_BASE_URL,
+	suffix: '.min',
 	height: 800,
 	menubar: false,
 	plugins: 'code table lists image',
@@ -157,7 +274,7 @@ const editorInit = {
 	image_list: false,
 	image_title: true,
 	image_description: true,
-	image_prepend_url: '',
+	image_prepend_url: tinymceImagePrependUrl(),
 	convert_urls: false,
 	relative_urls: false,
 	remove_script_host: false,
@@ -176,7 +293,6 @@ const editorInit = {
 					return
 				}
 				
-				const API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/api/v1'
 				const uploadUrl = `${API_BASE_URL}/admin/posts/upload-image`
 				
 				const response = await fetch(uploadUrl, {
@@ -200,9 +316,7 @@ const editorInit = {
 					reject('Invalid response: ' + JSON.stringify(json))
 					return
 				}
-				
-				console.log('Image uploaded successfully, URL:', json.location)
-				
+
 				resolve(json.location)
 			} catch (error) {
 				reject('Image upload failed: ' + error.message)
@@ -233,7 +347,19 @@ watch(() => props.modelValue, (newValue, oldValue) => {
 	if (JSON.stringify(newValue) === JSON.stringify(oldValue)) {
 		return
 	}
-	
+
+	const prevImg = oldValue && typeof oldValue.image === 'string' ? oldValue.image : null
+	const nextImg = newValue && typeof newValue.image === 'string' ? newValue.image : null
+	const sameImageRef = (prevImg || '') === (nextImg || '')
+	// Only drop a local file choice when the server-backed image URL actually changed (reload / other tab).
+	if (!sameImageRef) {
+		pendingFeaturedFile.value = null
+		revokeLocalPreview()
+		if (imageInput.value) {
+			imageInput.value.value = ''
+		}
+	}
+
 	isUpdatingFromProps.value = true
 	form.value = { ...newValue }
 	setTimeout(() => {
@@ -250,9 +376,15 @@ watch(() => form.value, (newValue) => {
 const handleSubmit = () => {
 	emit('submit', {
 		form: { ...form.value },
-		imageFile: imageInput.value?.files?.[0] || null
+		imageFile: pendingFeaturedFile.value || imageInput.value?.files?.[0] || null,
+		removeFeaturedImage: pendingRemoveFeatured.value
 	})
 }
+
+onBeforeUnmount(() => {
+	pendingFeaturedFile.value = null
+	revokeLocalPreview()
+})
 
 defineExpose({
 	imageInput

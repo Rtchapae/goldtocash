@@ -6,6 +6,7 @@ use App\Domain\Users\Models\User;
 use App\Domain\Users\Models\Role;
 use App\Domain\Users\Enums\UserRole;
 use App\Jobs\SendPasswordEmailJob;
+use App\Support\LikeSearch;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class EloquentUserRepository implements UserRepositoryInterface
@@ -26,10 +27,16 @@ class EloquentUserRepository implements UserRepositoryInterface
         }
 
         if ($search !== null && $search !== '') {
-            $query->where(function ($q) use ($search): void {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%');
+            $pattern = LikeSearch::wrap($search);
+            $query->where(function ($q) use ($pattern): void {
+                $q->where('name', 'like', $pattern)
+                    ->orWhere('first_name', 'like', $pattern)
+                    ->orWhere('last_name', 'like', $pattern)
+                    ->orWhere('email', 'like', $pattern)
+                    ->orWhere('phone', 'like', $pattern);
             });
+
+            $query->with('latestOfflineOrder');
         }
 
         return $query->paginate($perPage);
@@ -118,11 +125,13 @@ class EloquentUserRepository implements UserRepositoryInterface
         }
 
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%');
+            $pattern = LikeSearch::wrap($search);
+            $query->where(function ($q) use ($pattern) {
+                $q->where('name', 'like', $pattern)
+                    ->orWhere('email', 'like', $pattern)
+                    ->orWhere('first_name', 'like', $pattern)
+                    ->orWhere('last_name', 'like', $pattern)
+                    ->orWhere('phone', 'like', $pattern);
             });
         }
 

@@ -2,16 +2,18 @@
 	<div class="App">
 		<Sidebar />
 		<main class="dashboard-main" :class="{ active: isDesktopCollapsed }">
-			<slot />
+			<router-view :key="route?.fullPath ?? ''" />
 		</main>
 	</div>
 </template>
 
 <script setup>
 import { onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from '@/components/Sidebar.vue'
 import { useSidebarToggle } from '@/composables/useSidebarToggle'
 
+const route = useRoute()
 const { isDesktopCollapsed } = useSidebarToggle()
 
 const loadScript = (src) => {

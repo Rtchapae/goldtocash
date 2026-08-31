@@ -39,16 +39,32 @@
 							<tr>
 								<td>Phone</td>
 								<td class="user-phone">
-									<a :href="`tel:${normalizePhone(order.phone)}`">
-										{{ formatPhone(order.phone) }}
-									</a>
+									<span class="user-phone-inline">
+										<a :href="`tel:${normalizePhone(order.phone)}`">
+											{{ formatPhone(order.phone) }}
+										</a>
+										<iconify-icon
+											v-if="order.phone_verified"
+											icon="solar:check-circle-bold"
+											class="user-phone-verify-icon text-success"
+											title="Verified"
+										/>
+										<iconify-icon
+											v-else
+											icon="solar:close-circle-bold"
+											class="user-phone-verify-icon text-danger"
+											title="Unverified"
+										/>
+									</span>
 								</td>
 							</tr>
 							<tr>
 								<td>Address</td>
 								<td class="order-address">
-									<template v-if="order.address || order.city || order.state || order.zip">
-										{{ order.address }}<br v-if="order.address">
+									<template v-if="order.address || order.address2 || order.city || order.state || order.zip">
+										<template v-if="formatStreetAddress(order.address, order.address2)">
+											{{ formatStreetAddress(order.address, order.address2) }}<br>
+										</template>
 										<template v-if="order.city || order.state || order.zip">
 											{{ order.city }}<template v-if="order.city && order.state">, </template>{{ order.state }} {{ order.zip }}
 										</template>
@@ -109,7 +125,7 @@
 
 <script setup>
 import { formatDateTime } from '@/utils/date'
-import { formatName, formatPhone, normalizePhone, formatAmount } from '@/utils/format'
+import { formatName, formatPhone, normalizePhone, formatAmount, formatStreetAddress } from '@/utils/format'
 import { getStatusBadgeClass } from '@/utils/orderStatus'
 
 const props = defineProps({
@@ -130,4 +146,20 @@ const close = () => {
 }
 </script>
 
+<style scoped>
+.user-phone-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-wrap: nowrap;
+	max-width: 100%;
+}
 
+.user-phone-inline :deep(.user-phone-verify-icon) {
+	display: inline-block;
+	width: 1.125rem;
+	height: 1.125rem;
+	flex: 0 0 1.125rem;
+	vertical-align: middle;
+}
+</style>

@@ -21,6 +21,7 @@ class ListPostsRequest extends FormRequest
             'to' => ['nullable', 'date'],
             'order-by' => ['nullable', 'string', 'in:id,title,created_at,active'],
             'order-dir' => ['nullable', 'string', 'in:asc,desc'],
+            'search' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -57,6 +58,17 @@ class ListPostsRequest extends FormRequest
     public function orderDir(): ?string
     {
         return $this->input('order-dir', 'desc');
+    }
+
+    public function search(): ?string
+    {
+        $v = $this->input('search');
+        if (! is_string($v)) {
+            return null;
+        }
+        $t = trim($v);
+
+        return $t === '' ? null : $t;
     }
 }
 

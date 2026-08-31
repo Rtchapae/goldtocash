@@ -1,4 +1,7 @@
 import { getCurrentRouteSeoData } from '@/api/seo.js'
+import { BLOG_POST_ROUTE_NAMES } from '@/constants/blogPostRoutes.js'
+
+const GA_MEASUREMENT_ID = 'G-YCPB4K7QYZ'
 
 class SeoService {
     constructor() {
@@ -55,22 +58,34 @@ class SeoService {
         return route?.path || '/';
     }
 
+	sendGaPageView(route) {
+		if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
+		const path = route?.fullPath || route?.path || window.location.pathname
+		window.gtag('config', GA_MEASUREMENT_ID, {
+			page_path: path,
+			page_title: document.title,
+		})
+	}
+
 	async loadSeoForRoute(route) {
+		if (route?.name && BLOG_POST_ROUTE_NAMES.includes(route.name)) {
+			return
+		}
 		try {
-			const seoData = await getCurrentRouteSeoData(route);
+			const seoData = await getCurrentRouteSeoData(route)
 			if (seoData) {
 				this.setMeta({
 					title: seoData.title,
 					description: seoData.description,
-					keywords: seoData.keywords
-				});
-				return;
+					keywords: seoData.keywords,
+				})
+			} else {
+				this.resetMeta()
 			}
 		} catch (error) {
-			console.warn('Failed to load SEO data:', error);
+			console.warn('Failed to load SEO data:', error)
 		}
-
-		this.resetMeta();
+		this.sendGaPageView(route)
 	}
 }
 

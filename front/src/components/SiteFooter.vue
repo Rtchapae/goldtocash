@@ -7,7 +7,7 @@
 					<h2>
 						Have a Question?
 						<br>
-						We're Always Happy to Help!
+						<span class="footer-heading-accent">We're Always Happy to Help!</span>
 					</h2>
 				</div>
 				<div class="col-12 col-md-auto">
@@ -31,27 +31,14 @@
 					</p>
 				</div>
 				<div class="col-12 d-none d-md-block">
-					<ul>
-						<li class="nav-item">
-							<a href="/">Home</a>
+					<ul class="footer-nav">
+						<li v-for="link in footerMainLinks" :key="link.href" class="nav-item-footer">
+							<a :href="link.href">{{ link.label }}</a>
 						</li>
-						<li class="nav-item-footer">
-							<a href="/how-it-works">How It Works</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/what-we-pay">What We Pay</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/what-we-buy">What We Buy</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/why-us">Why Us</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/faq">FAQ's</a>
-						</li>
-						<li class="nav-item-footer">
-							<a href="/contact-us">Contact Us</a>
+					</ul>
+					<ul class="footer-nav footer-nav--resources">
+						<li v-for="link in footerResourceLinks" :key="link.href" class="nav-item-footer">
+							<a :href="link.href">{{ link.label }}</a>
 						</li>
 					</ul>
 					<ul class="legal">
@@ -107,7 +94,7 @@
 						Dealer.
 					</p>
 					<p class="my-3 consent-text">
-						Copyright © 2020-2025
+						Copyright © 2020-{{ currentYear }}
 						<a href="/">Gold to Cash</a>
 						All Rights Reserved
 					</p>
@@ -124,8 +111,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { fetchPosts } from '@/api/posts'
+import { footerMainLinks, footerResourceLinks } from '@/constants/whatWeBuyNav'
 
 const sellArticles = ref([])
+const currentYear = new Date().getFullYear()
 
 onMounted(async () => {
 	try {
@@ -136,3 +125,41 @@ onMounted(async () => {
 	}
 })
 </script>
+
+<style scoped>
+.footer-heading-accent {
+	color: #fff;
+	text-align: center;
+	font-family: Montserrat, sans-serif;
+	font-size: 18px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 24px;
+}
+
+.footer-nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 12px 36px;
+	max-width: 920px;
+	margin: 0 auto 20px;
+	padding: 0;
+	text-align: center;
+}
+
+.footer-nav li {
+	display: inline-block;
+}
+
+.footer-nav li a {
+	margin: 0;
+	white-space: nowrap;
+}
+
+.footer-nav--resources {
+	max-width: 980px;
+	gap: 10px 28px;
+	margin-bottom: 8px;
+}
+</style>

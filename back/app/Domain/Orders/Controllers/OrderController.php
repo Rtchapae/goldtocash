@@ -232,10 +232,20 @@ class OrderController extends Controller
         }
     }
 
-    public function createKitRequest(): JsonResponse
+    public function createKitRequest(Request $request): JsonResponse
     {
         try {
-            $result = $this->createKitRequestAction->execute();
+            $attribution = $request->validate([
+                'submission_url' => ['nullable', 'string', 'max:2048'],
+                'referrer' => ['nullable', 'string', 'max:2048'],
+                'utm_source' => ['nullable', 'string', 'max:255'],
+                'utm_medium' => ['nullable', 'string', 'max:255'],
+                'utm_campaign' => ['nullable', 'string', 'max:255'],
+                'utm_term' => ['nullable', 'string', 'max:255'],
+                'utm_content' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            $result = $this->createKitRequestAction->execute($attribution);
 
             return response()->json($result);
         } catch (\Exception $e) {

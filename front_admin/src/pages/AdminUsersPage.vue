@@ -32,7 +32,7 @@
 											v-model="searchQuery"
 											type="text"
 											class="form-control"
-											placeholder="Search by name or email..."
+											placeholder="Search by name, email, or phone..."
 											@input="debouncedSearch"
 										/>
 									</div>

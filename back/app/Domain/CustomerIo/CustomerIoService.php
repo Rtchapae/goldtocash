@@ -25,7 +25,7 @@ class CustomerIoService
         return $siteId !== '' && $apiKey !== '';
     }
 
-    public function identify(string $email): bool
+    public function identify(string $email, array $attributes = []): bool
     {
         if (! $this->serviceIsEnabled()) {
             return false;
@@ -34,9 +34,8 @@ class CustomerIoService
             'json' => [
                 'type' => 'person',
                 'identifiers' => ['email' => $email],
-                'action' => 'event',
-                'name' => 'identify',
-                'timestamp' => now()->toISOString(),
+                'action' => 'identify',
+                'attributes' => array_merge(['email' => $email], $attributes),
             ],
         ]);
         if ($response && $response->getStatusCode() === 200) {
@@ -72,7 +71,7 @@ class CustomerIoService
                 'identifiers' => ['email' => $email],
                 'action' => 'event',
                 'name' => $eventName,
-                'timestamp' => now()->toISOString(),
+                'timestamp' => now()->getTimestamp(),
             ],
         ]);
         if ($response && $response->getStatusCode() === 200) {

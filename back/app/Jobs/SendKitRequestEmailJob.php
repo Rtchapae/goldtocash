@@ -31,7 +31,7 @@ class SendKitRequestEmailJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            Mail::send('emails.new_appraisal_kit_requested', [
+            Mail::send('emails.new_order', [
                 'user' => $this->user,
                 'order' => $this->order,
             ], function ($message) {

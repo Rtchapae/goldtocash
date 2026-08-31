@@ -66,6 +66,18 @@
 											v-model="form.address"
 											type="text"
 											class="form-control"
+											placeholder="Street address"
+										>
+									</td>
+								</tr>
+								<tr>
+									<td>Apt / Unit</td>
+									<td class="order-address2">
+										<input
+											v-model="form.address2"
+											type="text"
+											class="form-control"
+											placeholder="Suite / apt number"
 										>
 									</td>
 								</tr>
@@ -192,7 +204,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
-import { formatName } from '@/utils/format'
+import { formatName, splitStreetAddress } from '@/utils/format'
 import { US_STATES_CODE_NAME } from '@/constants/states'
 import { ORDER_STATUSES } from '@/constants/orderStatuses'
 
@@ -216,6 +228,7 @@ const emit = defineEmits(['close', 'save'])
 const form = reactive({
 	id: null,
 	address: '',
+	address2: '',
 	city: '',
 	state: '',
 	zip: '',
@@ -239,8 +252,10 @@ watch(
 	() => props.order,
 	(order) => {
 		if (!order) return
+		const street = splitStreetAddress(order.address, order.address2)
 		form.id = order.id ?? null
-		form.address = order.address ?? ''
+		form.address = street.address
+		form.address2 = street.address2
 		form.city = order.city ?? ''
 		form.state = order.state ?? ''
 		form.zip = order.zip ?? ''

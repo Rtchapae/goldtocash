@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "vite build && vite build --ssr src/entry-server.js --outDir dist/server",
-    "preview": "cross-env NODE_ENV=production node server.js"
+    "build": "vite build && vite build --ssr src/entry-server.js --outDir dist/server && node scripts/generate-static-sitemap-paths.mjs",
+    "preview": "cross-env NODE_ENV=production node server.js",
+    "images:compress": "node scripts/compress-large-public-images.mjs",
+    "images:check": "node scripts/assert-max-public-image-size.mjs"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",

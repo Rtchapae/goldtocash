@@ -43,12 +43,13 @@ class UpdateOrderAction
 
         $user = $order->user;
         if ($user) {
-            $userData = array_filter([
-                'address' => $data['address'] ?? null,
-                'city' => $data['city'] ?? null,
-                'state' => $data['state'] ?? null,
-                'zip' => $data['zip'] ?? null,
-            ], static fn ($value) => $value !== null);
+            $userFields = ['address', 'address2', 'city', 'state', 'zip'];
+            $userData = [];
+            foreach ($userFields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $userData[$field] = $data[$field];
+                }
+            }
 
             if (!empty($userData)) {
                 $this->userRepository->update($user, $userData);

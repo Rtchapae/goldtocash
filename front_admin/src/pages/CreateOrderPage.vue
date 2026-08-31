@@ -301,37 +301,44 @@ const createOnlineOrder = async () => {
 const createOfflineOrder = async (formData) => {
 	isSubmitting.value = true
 	try {
+		const cleanedItems = (formData.items_description || [])
+			.map(item => item.trim())
+			.filter(item => item !== '')
+
 		let orderData = {
 			order_type: ORDER_TYPE_OFFLINE,
 			branch_id: formData.branch_id,
 			amount: formData.amount,
 			payment_method: formData.payment_method,
-			notes: formData.notes || null
+			items_description: cleanedItems.length > 0 ? cleanedItems : undefined,
+			date_of_birth: formData.date_of_birth || null,
+			government_id_number: formData.government_id_number || null,
+			state_issued: formData.state_issued || null,
+		}
+
+		const profilePayload = {
+			name: formData.name,
+			email: formData.email || null,
+			phone: formData.phone,
+			address: formData.address || '',
+			city: formData.city || '',
+			state: formData.state || '',
+			zip: formData.postal_code || '',
+			country: formData.country || COUNTRY_CODE_USA,
+			date_of_birth: formData.date_of_birth || null,
+			government_id_number: formData.government_id_number || null,
+			state_issued: formData.state_issued || null,
 		}
 
 		if (!formData.user_id) {
-			const countryValue = formData.country === COUNTRY_OTHER_VALUE
-				? formData.country_other
-				: formData.country
-
-			const cityValue = formData.city === '__other__'
-				? formData.city_other
-				: formData.city
-
 			orderData.user_data = {
 				first_name: formData.name?.split(' ')[0] || formData.name,
 				last_name: formData.name?.split(' ').slice(1).join(' ') || '',
-				name: formData.name,
-				email: formData.email,
-				phone: formData.phone,
-				address: formData.address || '',
-				city: cityValue || '',
-				state: formData.state || '',
-				zip: formData.postal_code || '',
-				country: countryValue || COUNTRY_CODE_USA
+				...profilePayload,
 			}
 		} else {
 			orderData.user_id = formData.user_id
+			orderData.user_data = profilePayload
 		}
 
 		const response = await createOrder(orderData)

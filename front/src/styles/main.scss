@@ -70,4 +70,42 @@ button {
 	cursor: pointer;
 }
 
+/* Global input/select focus: black bottom line per Figma (node 2704-1252) */
+.form-control:focus,
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+	outline: none;
+	box-shadow: none;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+	border-bottom: 2px solid #000;
+}
+
+/* Google Places Autocomplete: выпадающий список поверх всего и кликабельный */
+.pac-container {
+	z-index: 12000 !important; /* above modal 11000 */
+	font-family: inherit;
+	border-radius: 4px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	pointer-events: auto !important;
+}
+/* Убрать возможный оверлей Google, который блокирует клики */
+.pac-container::after {
+	display: none !important;
+}
+.pac-item {
+	cursor: pointer;
+	padding: 10px 12px;
+	font-size: 14px;
+	pointer-events: auto !important;
+}
+.pac-item:hover,
+.pac-item-selected {
+	background: rgba(0, 0, 0, 0.05);
+}
+.pac-item-query {
+	font-size: 14px;
+}
 

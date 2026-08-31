@@ -3,6 +3,8 @@
 namespace App\Domain\Users\Controllers;
 
 use App\Domain\Sms\Services\Providers\TwilioProvider;
+use App\Domain\Sms\Services\SmsUtils;
+use App\Domain\Users\Models\User;
 use App\Domain\Users\Models\VerificationCode;
 use App\Domain\Users\Requests\SendVerificationCodeRequest;
 use App\Domain\Users\Requests\VerifyCodeRequest;
@@ -86,6 +88,29 @@ class PhoneVerificationController extends Controller
 
             $verificationCode->active = 0;
             $verificationCode->save();
+
+            $digits10 = SmsUtils::digits10($normalizedPhone);
+            if ($digits10 !== '') {
+                $candidates = array_values(array_unique(array_filter([
+                    $normalizedPhone,
+                    $phone,
+                    '+1' . $digits10,
+                    '1' . $digits10,
+                    $digits10,
+                ])));
+                $user = User::query()->whereIn('phone', $candidates)->first();
+                if ($user === null) {
+                    $user = User::query()
+                        ->whereNotNull('phone')
+                        ->where('phone', '!=', '')
+                        ->get()
+                        ->first(static fn (User $u) => SmsUtils::digits10((string) $u->phone) === $digits10);
+                }
+                if ($user !== null) {
+                    $user->verify = 1;
+                    $user->save();
+                }
+            }
 
             return response()->json([
                 'status' => true,

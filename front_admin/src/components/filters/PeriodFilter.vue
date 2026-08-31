@@ -1,5 +1,5 @@
 <template>
-	<div class="col-lg-4 ms-auto period-filter-wrapper">
+	<div :class="wrapperClass">
 		<div class="btn-group period-btn-group" role="group">
 			<button
 				v-for="period in periods"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { PERIODS } from '@/config/orders'
 
 const props = defineProps({
@@ -51,7 +51,19 @@ const props = defineProps({
 	to: {
 		type: String,
 		default: null
+	},
+	/** When true, omit Bootstrap column classes — use beside search / toolbar rows. */
+	toolbar: {
+		type: Boolean,
+		default: false
 	}
+})
+
+const wrapperClass = computed(() => {
+	if (props.toolbar) {
+		return 'period-filter-wrapper period-filter-toolbar'
+	}
+	return 'col-lg-4 ms-auto period-filter-wrapper'
 })
 
 const emit = defineEmits(['update:modelValue', 'update:from', 'update:to', 'change'])
@@ -123,6 +135,17 @@ const handleCustomSubmit = () => {
 .custom-search .btn {
 	flex-shrink: 0;
 	height: calc(1.5em + 0.75rem + 2px);
+}
+
+.period-filter-toolbar {
+	flex: 0 1 auto;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.period-filter-toolbar .period-btn-group {
+	flex-wrap: wrap;
+	justify-content: flex-end;
 }
 </style>
 

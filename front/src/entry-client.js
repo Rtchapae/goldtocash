@@ -1,37 +1,32 @@
 import { createApp } from './app'
 import { createWebHistory } from 'vue-router'
 
-// Import Bootstrap JS
-import * as bootstrap from 'bootstrap'
-
-// Make Bootstrap available globally for components that need it
-window.bootstrap = bootstrap
+const ssrIsMobile = typeof window !== 'undefined' && window.__SSR_MOBILE__ === true
 
 const { app, router, pinia } = createApp(createWebHistory())
+app.provide('ssrIsMobile', ssrIsMobile)
 
 if (window.__PINIA__) {
 	pinia.state.value = window.__PINIA__
 }
 
-// Wait for router to be ready and add 100ms delay to prevent image flickering
 router.isReady().then(() => {
 	app.mount('#app', true)
-	
-	// Initialize Bootstrap tooltips and popovers after mount
-	// Bootstrap 5 doesn't auto-initialize, so we need to do it manually
-	if (typeof window !== 'undefined') {
-		// Initialize tooltips
+
+	const initBootstrapWidgets = async () => {
+		const bootstrap = await import('bootstrap')
+		window.bootstrap = bootstrap
+
 		const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-		tooltipTriggerList.map(function (tooltipTriggerEl) {
-			return new bootstrap.Tooltip(tooltipTriggerEl)
+		tooltipTriggerList.forEach((el) => {
+			new bootstrap.Tooltip(el)
 		})
-		
-		// Initialize popovers
 		const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-		popoverTriggerList.map(function (popoverTriggerEl) {
-			return new bootstrap.Popover(popoverTriggerEl)
+		popoverTriggerList.forEach((el) => {
+			new bootstrap.Popover(el)
 		})
 	}
+
+	const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200))
+	idle(() => { initBootstrapWidgets() })
 })
-
-

@@ -30,4 +30,22 @@ class TrustpilotService
             })
             ->toArray();
     }
+
+    /**
+     * @return array{reviews: array, total_count: int}
+     */
+    public function getReviewsApiPayload(): array
+    {
+        return [
+            'reviews' => $this->getFormattedReviewsForFrontend(),
+            'total_count' => $this->getPublicTotalReviewCount(),
+        ];
+    }
+
+    public function getPublicTotalReviewCount(): int
+    {
+        $stored = max(0, $this->trustpilotRepository->countStoredReviews());
+
+        return $stored > 0 ? $stored : 1;
+    }
 }

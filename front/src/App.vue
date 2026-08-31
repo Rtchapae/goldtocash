@@ -7,22 +7,23 @@
 	</template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, markRaw, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import SeoHeadManager from '@/components/SeoHeadManager.vue'
-import RecentPayoutToast from '@/components/RecentPayoutToast.vue'
+
+const RecentPayoutToast = defineAsyncComponent(() => import('@/components/RecentPayoutToast.vue'))
 import './styles/main.scss'
 
 const route = useRoute()
-const layouts = { MainLayout, AuthLayout }
+const layouts = {
+	MainLayout: markRaw(MainLayout),
+	AuthLayout: markRaw(AuthLayout),
+}
 const currentLayout = computed(() => {
-	if (!route || !route.meta) {
-		return MainLayout
-	}
-	const name = route.meta.layout || 'MainLayout'
-	return layouts[name] || MainLayout
+	const name = route?.meta?.layout || 'MainLayout'
+	return layouts[name] || layouts.MainLayout
 })
 </script>
 
